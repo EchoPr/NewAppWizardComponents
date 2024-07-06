@@ -1,0 +1,45 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="CustomColors.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <FontFamily x:Key="RobotoRegular">ms-appx:///Assets/Fonts/Roboto-Regular.ttf#Roboto</FontFamily>
+  <FontFamily x:Key="RobotoBold">ms-appx:///Assets/Fonts/Roboto-Bold.ttf#Roboto</FontFamily>
+  <FontFamily x:Key="RobotoBlack">ms-appx:///Assets/Fonts/Roboto-Black.ttf#Roboto</FontFamily>
+  <FontFamily x:Key="RobotoMedium">ms-appx:///Assets/Fonts/Roboto-Medium.ttf#Roboto</FontFamily>
+  <FontFamily x:Key="RobotoMonoRegular">ms-appx:///Assets/Fonts/RobotoMono-Regular.ttf#RobotoMono</FontFamily>
+
+  <Style TargetType="TextBlock" x:Name="TextDefault">
+    <Setter Property="FontFamily" Value="{StaticResource RobotoRegular}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="Foreground" Value="{StaticResource SolidDarkGray}"/>
+  </Style>
+
+  <Style TargetType="TextBlock" x:Name="TextHeader" BasedOn="{StaticResource TextDefault}">
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="FontFamily" Value="{StaticResource RobotoBold}"/>
+  </Style>
+
+  <Style TargetType="TextBlock" x:Name="TableItemText" BasedOn="{StaticResource TextDefault}">
+    <Setter Property="VerticalAlignment" Value="Center"/>
+    <Setter Property="HorizontalAlignment" Value="Left"/>
+  </Style>
+
+  <Style TargetType="TextBlock" x:Name="TableArgName" BasedOn="{StaticResource TableItemText}">
+    <Setter Property="FontFamily" Value="{StaticResource RobotoMonoRegular}"/>
+  </Style>
+
+  <Style TargetType="TextBlock" x:Name="TableTypeName" BasedOn="{StaticResource TableItemText}">
+    <Setter Property="FontFamily" Value="{StaticResource RobotoBold}"/>
+  </Style>
+
+  <Style TargetType="TextBlock" x:Name="TableHeaderText" BasedOn="{StaticResource TableItemText}">
+    <Setter Property="Foreground" Value="{StaticResource ForegroundWhite}"/> 
+  </Style>
+
+
+
+</ResourceDictionary>

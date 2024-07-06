@@ -1,0 +1,10 @@
+{
+	"profiles": {
+		"NewAppWizardComponents.Windows (Unpackaged)": {
+			"commandName": "Project"
+		},
+		"NewAppWizardComponents.Windows (Package)": {
+			"commandName": "MsixPackage"
+		}
+	}
+}
