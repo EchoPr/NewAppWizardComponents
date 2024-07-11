@@ -3,9 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:NewAppWizardComponents"
       xmlns:um="using:Uno.Material"
-      Background="#FAFAFA">
+      Background="#F0F0F0">
 
-  
   <Page.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
@@ -25,12 +24,12 @@
       <ColumnDefinition Width="3*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="*"/>
+      <RowDefinition Height="5*"/>
+      <RowDefinition Height="55*"/>
+      <RowDefinition Height="40*"/>
     </Grid.RowDefinitions>
 
-    <!--List of API methods-->
-    <ListView Grid.Column="0" Grid.RowSpan="2"
+    <ListView Grid.Column="0" Grid.RowSpan="3"
                   x:Name="MethodsList"
                   ItemsSource="{Binding Methods}"
                   SelectedItem="{Binding SelectedMethod, Mode=TwoWay}"
@@ -41,16 +40,29 @@
         </DataTemplate>
       </ListView.ItemTemplate>
     </ListView>
-    <!---->
+
+    <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
+      <Button MinHeight="100" Command="{Binding ClearCodeBlocksCommand}">Clear</Button>
+    </StackPanel>
+    
+    <!-- Code view -->
+    <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+      <StackPanel x:Name="CodeBlocks">
+      </StackPanel>
+    </ScrollViewer>
+
+
 
     <!--Documentation-->
-    <ScrollViewer Grid.Column="1" Grid.Row="1" x:Name="DocumentationView"
+    <!--<ScrollViewer Grid.Column="1" Grid.Row="1" x:Name="DocumentationView"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Visibility="{Binding DocViewVisibility}"
                 Style="{StaticResource ScrollViewerBlock}">
       <StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 0 10 0"/>
-          <Border Height="25" Padding="4" Background="{StaticResource APILevel1}" Margin="0 -3 0 0">
+          <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 20 10 0"/>
+          <Border Height="24" Padding="3" Background="{StaticResource APILevel1}" Margin="0 17 0 0">
             <TextBlock Text="Уровень API: доступ к исходным данным" Style="{StaticResource TextDefault}"
                Foreground="{StaticResource ForegroundWhite}" FontFamily="{StaticResource RobotoMedium}"/>
           </Border>
@@ -94,7 +106,6 @@
           </ItemsControl>
         </Grid>
 
-
         <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15" Visibility="{Binding OutputVisibility}"/>
         <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
               x:Name="MethodOutputs" Visibility="{Binding OutputVisibility}">
@@ -132,9 +143,7 @@
           </ItemsControl>
         </Grid>
       </StackPanel>
-    </ScrollViewer>
-
-    
+    </ScrollViewer>-->
     <!---->
 
   </Grid>

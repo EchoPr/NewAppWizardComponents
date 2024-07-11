@@ -10,12 +10,18 @@
   <FontFamily x:Key="RobotoBold">ms-appx:///Assets/Fonts/Roboto-Bold.ttf#Roboto</FontFamily>
   <FontFamily x:Key="RobotoBlack">ms-appx:///Assets/Fonts/Roboto-Black.ttf#Roboto</FontFamily>
   <FontFamily x:Key="RobotoMedium">ms-appx:///Assets/Fonts/Roboto-Medium.ttf#Roboto</FontFamily>
-  <FontFamily x:Key="RobotoMonoRegular">ms-appx:///Assets/Fonts/RobotoMono-Regular.ttf#RobotoMono</FontFamily>
+  <FontFamily x:Key="RobotoMonoRegular">ms-appx:///Assets/Fonts/RobotoMono-Regular.ttf#Roboto Mono</FontFamily>
+
+  <FontFamily x:Key="JBM-Regular">ms-appx:///Assets/Fonts/JetBrainsMono-Regular.ttf#JetBrains Mono</FontFamily>
+  <FontFamily x:Key="JBM-Bold">ms-appx:///Assets/Fonts/JetBrainsMono-Bold.ttf#JetBrains Mono</FontFamily>
+  <FontFamily x:Key="JBM-Medium">ms-appx:///Assets/Fonts/JetBrainsMono-Medium.ttf#JetBrains Mono</FontFamily>
+  <FontFamily x:Key="JBM-Italic">ms-appx:///Assets/Fonts/JetBrainsMono-Italic.ttf#JetBrains Mono</FontFamily>
 
   <Style TargetType="TextBlock" x:Name="TextDefault">
     <Setter Property="FontFamily" Value="{StaticResource RobotoRegular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="Foreground" Value="{StaticResource SolidDarkGray}"/>
+    <Setter Property="IsTextSelectionEnabled" Value="True"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TextHeader" BasedOn="{StaticResource TextDefault}">
@@ -40,6 +46,9 @@
     <Setter Property="Foreground" Value="{StaticResource ForegroundWhite}"/> 
   </Style>
 
+  <Style TargetType="TextBlock" x:Name="CodeBlock" BasedOn="{StaticResource TextDefault}">
+    <Setter Property="FontFamily" Value="{StaticResource JBM-Regular}"/>
+  </Style>
 
 
 </ResourceDictionary>

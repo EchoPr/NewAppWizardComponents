@@ -19,20 +19,17 @@
     <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Assets\Fonts\Roboto-Black.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Bold.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Italic.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Light.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Medium.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Regular.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Thin.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Bold.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Italic.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Light.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Medium.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-SemiBold.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Thin.ttf" />
+    <Content Remove="Assets\Fonts\Roboto-Black.ttf" />
+    <Content Remove="Assets\Fonts\Roboto-Bold.ttf" />
+    <Content Remove="Assets\Fonts\Roboto-Medium.ttf" />
+    <Content Remove="Assets\Fonts\Roboto-Regular.ttf" />
+    <Content Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
+    <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
+    <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
+    <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
     <None Remove="Resources\CustomBorders.xaml" />
@@ -71,6 +68,21 @@
 
   <ItemGroup>
     <UpToDateCheckInput Remove="Resources\Controls\BlockScrollViewer.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Resources\Controls\BlockScrollViewer.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Page>
+    <Page Update="Resources\CustomBorders.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Page>
+    <Page Update="Resources\CustomColors.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Page>
+    <Page Update="Resources\TextStyling.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Page>
   </ItemGroup>
 
 </Project>
