@@ -16,5 +16,5 @@
   <Style TargetType="Border" x:Name="TableHeaderBorder" BasedOn="{StaticResource TableItemBorder}">
     <Setter Property="Background" Value="{StaticResource SolidDarkGray}"/>
   </Style>
-  
+
 </ResourceDictionary>

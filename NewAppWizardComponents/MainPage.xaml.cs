@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Diagnostics;
+using System.Drawing;
 using System.Reflection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Input;
 using Windows.UI;
 
 namespace NewAppWizardComponents;
@@ -17,6 +19,10 @@ public sealed partial class MainPage : Page
     SolidColorBrush? codeBracketsBrush;
     SolidColorBrush? codeValueBrush;
     SolidColorBrush? codeMethodBrush;
+
+    private Border _lastSelectedBlock = null;
+    private readonly Brush _defaultBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
+    private readonly Brush _selectedBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(50, 0, 120, 210));
 
     public MainPage()
     {
@@ -44,8 +50,7 @@ public sealed partial class MainPage : Page
     public void AddNewCodeBlock(object sender, EventArgs e) {
         if (!mainPageVM.CodeBlocks.Last().menu_only)
         {
-            var tb = BuldViewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count);
-            CodeBlocks.Children.Add(tb);
+            CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count);
         }
         else
         {
@@ -53,16 +58,16 @@ public sealed partial class MainPage : Page
         }
     }
 
-    public TextBlock BuldViewCodeBlock(ApiEntry entry, int num)
+    public void CreateViewCodeBlock(StackPanel codeContainer, ApiEntry entry, int num)
     {
-        var result = new TextBlock();
+        var newCodeLines = new TextBlock();
 
         if (entry.arg_type != null)
         {
-            result.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]} ", Foreground = codeTypeBrush });
-            result.Inlines.Add(new Run { Text = $"arg{num} ", Foreground = codeDefaultBrush });
-            result.Inlines.Add(new Run { Text = "= new", Foreground = codeKeywordBrush });
-            result.Inlines.Add(new Run { Text = "() {\n", Foreground = codeBracketsBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"arg{num} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "= new", Foreground = codeKeywordBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "() {\n", Foreground = codeBracketsBrush });
 
             var instance = Activator.CreateInstance(entry.arg_type);
             PropertyInfo[] properties = entry.arg_type.GetProperties();
@@ -73,41 +78,69 @@ public sealed partial class MainPage : Page
 
                 var value = property.GetValue(instance);
 
-                result.Inlines.Add(new Run { Text = $"\t{property.Name} ", Foreground = codeDefaultBrush });
-                result.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
-                result.Inlines.Add(new Run { Text = $"{value} ", Foreground = codeValueBrush });
-                result.Inlines.Add(new Run { Text = $",\n", Foreground = codeDefaultBrush });
+                newCodeLines.Inlines.Add(new Run { Text = $"\t{property.Name} ", Foreground = codeDefaultBrush });
+                newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+                newCodeLines.Inlines.Add(new Run { Text = $"{value} ", Foreground = codeValueBrush });
+                newCodeLines.Inlines.Add(new Run { Text = $",\n", Foreground = codeDefaultBrush });
             }
 
-            result.Inlines.Add(new Run { Text = "}", Foreground = codeBracketsBrush });
-            result.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "}", Foreground = codeBracketsBrush });
+            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
 
         }
 
         if (entry.ret_type != null)
         {
-            result.Inlines.Add(new Run { Text = $"{entry.ret_type.Name[1..]} ", Foreground = codeTypeBrush });
-            result.Inlines.Add(new Run { Text = $"ret{num} ", Foreground = codeDefaultBrush });
-            result.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.ret_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"ret{num} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
         }
 
-        result.Inlines.Add(new Run { Text = "qform.", Foreground = codeDefaultBrush });
-        result.Inlines.Add(new Run { Text = $"{entry.Name}", Foreground = codeMethodBrush });
-        result.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
+        newCodeLines.Inlines.Add(new Run { Text = "qform.", Foreground = codeDefaultBrush });
+        newCodeLines.Inlines.Add(new Run { Text = $"{entry.Name}", Foreground = codeMethodBrush });
+        newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
 
-        if (entry.arg_type != null) { result.Inlines.Add(new Run { Text = $"arg{num}", Foreground = codeDefaultBrush }); }
+        if (entry.arg_type != null) { newCodeLines.Inlines.Add(new Run { Text = $"arg{num}", Foreground = codeDefaultBrush }); }
 
-        result.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
-        result.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+        newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
+        newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
 
+        newCodeLines.Style = (Style)Resources["CodeBlock"];
+        newCodeLines.AllowFocusOnInteraction = true;
+        newCodeLines.GotFocus += CodeBlockGotFocus;
 
-        result.Style = (Style)Resources["CodeBlock"];
+        var newBlock = new Border();
 
-        return result;
+        newBlock.Child = newCodeLines;
+
+        codeContainer.Children.Add(newBlock);
     }
 
     public void ClearCodeBlocks(object sender, EventArgs e)
     {
         CodeBlocks.Children.Clear();
     }
+
+    private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
+    {
+        if (_lastSelectedBlock != null)
+        {
+            _lastSelectedBlock.Background = _defaultBackground;
+        }
+
+        var selectedBlock = (Border)VisualTreeHelper.GetParent((TextBlock)sender);
+        if (selectedBlock != null)
+        {
+            selectedBlock.Background = _selectedBackground;
+            _lastSelectedBlock = selectedBlock;
+        }
+
+    }
+
+    public void OnItemClick(object sender, ItemClickEventArgs e)
+    {
+        var clickedItem = e.ClickedItem as ApiEntry;
+        mainPageVM.AddToCodeBlocks(clickedItem);
+    }
+
 }

@@ -29,10 +29,11 @@
       <RowDefinition Height="40*"/>
     </Grid.RowDefinitions>
 
+    
     <ListView Grid.Column="0" Grid.RowSpan="3"
                   x:Name="MethodsList"
                   ItemsSource="{Binding Methods}"
-                  SelectedItem="{Binding SelectedMethod, Mode=TwoWay}"
+                  IsItemClickEnabled="True" ItemClick="OnItemClick"
                   BorderBrush="LightGray" BorderThickness="2">
       <ListView.ItemTemplate>
         <DataTemplate>
@@ -43,15 +44,27 @@
 
     <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
-      <Button MinHeight="100" Command="{Binding ClearCodeBlocksCommand}">Clear</Button>
+      <ComboBox x:Name="LanguageComboBox" 
+                  MinWidth="100"
+                  MinHeight="100"
+                  Margin="0 0 20 0">
+        <ComboBoxItem Content="С#"/>
+        <ComboBoxItem Content="Python"/>
+        <ComboBoxItem Content="VB.Net"/>
+        <ComboBoxItem Content="VBA"/>
+        <ComboBoxItem Content="MATLAB"/>
+        <ComboBoxItem Content="S-expr"/>
+        <ComboBoxItem Content="XML"/>
+      </ComboBox>
+
+      <Button Command="{Binding ClearCodeBlocksCommand}" 
+                  MinHeight="100">Clear</Button>
     </StackPanel>
     
     <!-- Code view -->
     <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-      <StackPanel x:Name="CodeBlocks">
-      </StackPanel>
+      <StackPanel x:Name="CodeBlocks"/>
     </ScrollViewer>
-
 
 
     <!--Documentation-->

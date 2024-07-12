@@ -17,11 +17,14 @@
   <FontFamily x:Key="JBM-Medium">ms-appx:///Assets/Fonts/JetBrainsMono-Medium.ttf#JetBrains Mono</FontFamily>
   <FontFamily x:Key="JBM-Italic">ms-appx:///Assets/Fonts/JetBrainsMono-Italic.ttf#JetBrains Mono</FontFamily>
 
+  <FontFamily x:Key="SourceCodePro-Regular">ms-appx:///Assets/Fonts/SourceCodePro/SourceCodePro-Regular.ttf#Source Code Pro</FontFamily>
+
   <Style TargetType="TextBlock" x:Name="TextDefault">
     <Setter Property="FontFamily" Value="{StaticResource RobotoRegular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="Foreground" Value="{StaticResource SolidDarkGray}"/>
     <Setter Property="IsTextSelectionEnabled" Value="True"/>
+    <Setter Property="SelectionHighlightColor" Value="#0078D7"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TextHeader" BasedOn="{StaticResource TextDefault}">
@@ -47,7 +50,7 @@
   </Style>
 
   <Style TargetType="TextBlock" x:Name="CodeBlock" BasedOn="{StaticResource TextDefault}">
-    <Setter Property="FontFamily" Value="{StaticResource JBM-Regular}"/>
+    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
   </Style>
 
 

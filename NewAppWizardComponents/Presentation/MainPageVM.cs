@@ -22,20 +22,20 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    private ApiEntry _selectedMethod;
-    public ApiEntry SelectedMethod
-    {
-        get => _selectedMethod;
-        set
-        {
-            if (_selectedMethod != value)
-            {
-                _selectedMethod = value;
-                OnPropertyChanged();
-                AddToCodeBlocks(_selectedMethod);
-            }
-        }
-    }
+    //private ApiEntry _selectedMethod;
+    //public ApiEntry SelectedMethod
+    //{
+    //    get => _selectedMethod;
+    //    set
+    //    {
+    //        if (_selectedMethod != value)
+    //        {
+    //            _selectedMethod = value;
+    //            OnPropertyChanged();
+    //            AddToCodeBlocks(_selectedMethod);
+    //        }
+    //    }
+    //}
 
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler AddedNewCodeBlock;
@@ -45,9 +45,18 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         CodeBlocks = new ObservableCollection<ApiEntry>();
         ReadAllMethodParameters();
+
+    }
+    public void AddToCodeBlocks(ApiEntry method)
+    {
+        if (method != null)
+        {
+            _codeBlocks.Add(method);
+            AddedNewCodeBlock?.Invoke(this, EventArgs.Empty);
+        }
     }
 
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    public void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
@@ -58,16 +67,12 @@ public partial class MainPageVM : INotifyPropertyChanged
         QForm.api_get(Methods);
     }
 
-    private void AddToCodeBlocks(ApiEntry method)
-    {
-        _codeBlocks.Add(method);
-        AddedNewCodeBlock?.Invoke(this, EventArgs.Empty);
-    }
-
     [RelayCommand]
     private void ClearCodeBlocks()
     {
         _codeBlocks?.Clear();
         ClearedCodeBlocks?.Invoke(this, EventArgs.Empty);
     }
+
+    
 }
