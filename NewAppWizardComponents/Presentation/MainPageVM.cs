@@ -22,16 +22,16 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    private ObservableCollection<UIElement> _inputParameters;
-    public ObservableCollection<UIElement> InputParameters
-    {
-        get => _inputParameters;
-        set
-        {
-            _inputParameters = value;
-            OnPropertyChanged();
-        }
-    }
+    //private ObservableCollection<UIElement> _inputParameters;
+    //public ObservableCollection<UIElement> InputParameters
+    //{
+    //    get => _inputParameters;
+    //    set
+    //    {
+    //        _inputParameters = value;
+    //        OnPropertyChanged();
+    //    }
+    //}
 
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler AddedNewCodeBlock;

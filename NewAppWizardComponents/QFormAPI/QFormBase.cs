@@ -85,6 +85,10 @@ public class ApiEntry : IComparable<ApiEntry>
     public bool instruction = false;
     public string signature;
     public System.Reflection.MethodInfo code_func = null;
+
+    public object arg_value;
+    public object ret_value;
+
     public ApiEntry(int svc_cmd, string EntryName, Type a, Type r, bool mnu, LStr[] G) { service_cmd = svc_cmd; menu_only = mnu; _name = EntryName; arg_type = a; ret_type = r; groups = G; }
     public ApiEntry(int svc_cmd, string EntryName, LStr G) { service_cmd = svc_cmd; menu_only = false; _name = EntryName; arg_type = null; ret_type = null; groups = new[] { G }; }
 

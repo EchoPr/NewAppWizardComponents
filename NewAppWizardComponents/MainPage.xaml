@@ -93,7 +93,7 @@
           <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
         </Border>
 
-        <Grid x:Name="InputParametersGrid"/>
+        <Grid x:Name="InputParametersGrid" ColumnDefinitions="*, *"/>
       </StackPanel>
 
       <StackPanel Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
@@ -101,6 +101,8 @@
         <Border Background="{StaticResource BlockHeader}">
           <TextBlock Style="{StaticResource ContentBlockHeader}" >Results</TextBlock>
         </Border>
+
+        <Grid x:Name="OutputParametersGrid" ColumnDefinitions="*, *"/>
       </StackPanel>
     </Grid>
     <!--Documentation-->
