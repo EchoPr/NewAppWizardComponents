@@ -48,14 +48,9 @@ public sealed partial class MainPage : Page
     }
 
     public void AddNewCodeBlock(object sender, EventArgs e) {
-        if (!mainPageVM.CodeBlocks.Last().menu_only)
-        {
-            CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count);
-        }
-        else
-        {
-            mainPageVM.CodeBlocks.RemoveAt(mainPageVM.CodeBlocks.Count - 1);
-        }
+        CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count);
+        //ShowInputParameters();
+        //ShowOutputParameters();
     }
 
     public void CreateViewCodeBlock(StackPanel codeContainer, ApiEntry entry, int num)
@@ -80,7 +75,7 @@ public sealed partial class MainPage : Page
 
                 newCodeLines.Inlines.Add(new Run { Text = $"\t{property.Name} ", Foreground = codeDefaultBrush });
                 newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
-                newCodeLines.Inlines.Add(new Run { Text = $"{value} ", Foreground = codeValueBrush });
+                newCodeLines.Inlines.Add(new Run { Text = $"{value}", Foreground = codeValueBrush });
                 newCodeLines.Inlines.Add(new Run { Text = $",\n", Foreground = codeDefaultBrush });
             }
 
@@ -103,7 +98,7 @@ public sealed partial class MainPage : Page
         if (entry.arg_type != null) { newCodeLines.Inlines.Add(new Run { Text = $"arg{num}", Foreground = codeDefaultBrush }); }
 
         newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
-        newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+        newCodeLines.Inlines.Add(new Run { Text = ";", Foreground = codeDefaultBrush });
 
         newCodeLines.Style = (Style)Resources["CodeBlock"];
         newCodeLines.AllowFocusOnInteraction = true;
@@ -112,6 +107,8 @@ public sealed partial class MainPage : Page
         var newBlock = new Border();
 
         newBlock.Child = newCodeLines;
+        newBlock.Style = (Style)Resources["CodeBlockBorder"];
+        if (num == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
         codeContainer.Children.Add(newBlock);
     }
@@ -120,6 +117,17 @@ public sealed partial class MainPage : Page
     {
         CodeBlocks.Children.Clear();
     }
+
+    private void ShowInputParameters()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void ShowOutputParameters()
+    {
+        throw new NotImplementedException();
+    }
+
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
     {
@@ -140,7 +148,25 @@ public sealed partial class MainPage : Page
     public void OnItemClick(object sender, ItemClickEventArgs e)
     {
         var clickedItem = e.ClickedItem as ApiEntry;
-        mainPageVM.AddToCodeBlocks(clickedItem);
+
+        if (!clickedItem.menu_only)
+        {
+            mainPageVM.AddToCodeBlocks(clickedItem);
+
+            //InputParametersGrid.RowDefinitions.Add(new RowDefinition());
+            //TextBlock textBlock = new TextBlock { Text = "Some" };
+            //Grid.SetRow(textBlock, 0);
+            //Grid.SetColumn(textBlock, 1);
+
+            //InputParametersGrid.Children.Add(textBlock);
+
+
+        }
+        else
+        {
+
+        }
+
     }
 
 }

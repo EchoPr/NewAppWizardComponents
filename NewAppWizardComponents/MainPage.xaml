@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:NewAppWizardComponents"
       xmlns:um="using:Uno.Material"
-      Background="#F0F0F0">
+      Background="#F3F3F3">
 
   <Page.Resources>
     <ResourceDictionary>
@@ -25,16 +25,32 @@
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="5*"/>
-      <RowDefinition Height="55*"/>
+      <RowDefinition Height="10*"/>
+      <RowDefinition Height="45*"/>
       <RowDefinition Height="40*"/>
     </Grid.RowDefinitions>
 
-    
-    <ListView Grid.Column="0" Grid.RowSpan="3"
+    <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
+      <MenuBarItem Title="File" FontSize="8" Foreground="{StaticResource SolidDarkGray}" Background="Black" Height="20">
+        <MenuFlyoutItem Text="New" Icon="OpenFile"/>
+        <MenuFlyoutItem Text="Open..."/>
+        <MenuFlyoutItem Text="Save"/>
+        <MenuFlyoutItem Text="Exit"/>
+      </MenuBarItem>
+
+      <MenuBarItem Title="Edit">
+        <MenuFlyoutItem Text="Undo"/>
+        <MenuFlyoutItem Text="Cut"/>
+        <MenuFlyoutItem Text="Copy"/>
+        <MenuFlyoutItem Text="Paste"/>
+      </MenuBarItem>
+    </MenuBar>
+
+    <ListView Grid.Column="0" Grid.Row="1" Grid.RowSpan="3"
                   x:Name="MethodsList"
                   ItemsSource="{Binding Methods}"
                   IsItemClickEnabled="True" ItemClick="OnItemClick"
-                  BorderBrush="LightGray" BorderThickness="2">
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16" Padding="8">
       <ListView.ItemTemplate>
         <DataTemplate>
           <TextBlock Text="{Binding Name}" />
@@ -42,7 +58,8 @@
       </ListView.ItemTemplate>
     </ListView>
 
-    <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+    <!-- Toolbar -->
+    <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
       <ComboBox x:Name="LanguageComboBox" 
                   MinWidth="100"
@@ -62,11 +79,30 @@
     </StackPanel>
     
     <!-- Code view -->
-    <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-      <StackPanel x:Name="CodeBlocks"/>
+    <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="0 16" Padding="8">
+      <StackPanel x:Name="CodeBlocks" Padding="10"/>
     </ScrollViewer>
 
+    <!-- Method parameters -->
+    <Grid Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" RowDefinitions ="*, *"
+          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+      <StackPanel Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+            Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16 16 16 0">
+        <Border Background="{StaticResource BlockHeader}">
+          <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
+        </Border>
 
+        <Grid x:Name="InputParametersGrid"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+      Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16">
+        <Border Background="{StaticResource BlockHeader}">
+          <TextBlock Style="{StaticResource ContentBlockHeader}" >Results</TextBlock>
+        </Border>
+      </StackPanel>
+    </Grid>
     <!--Documentation-->
     <!--<ScrollViewer Grid.Column="1" Grid.Row="1" x:Name="DocumentationView"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

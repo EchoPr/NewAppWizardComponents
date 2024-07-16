@@ -17,4 +17,8 @@
     <Setter Property="Background" Value="{StaticResource SolidDarkGray}"/>
   </Style>
 
+  <Style TargetType="Border" x:Name="CodeBlockBorder">
+    <Setter Property="Margin" Value="0 20 0 0"></Setter>
+  </Style>
+
 </ResourceDictionary>

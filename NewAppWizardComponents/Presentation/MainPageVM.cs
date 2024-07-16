@@ -22,20 +22,16 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    //private ApiEntry _selectedMethod;
-    //public ApiEntry SelectedMethod
-    //{
-    //    get => _selectedMethod;
-    //    set
-    //    {
-    //        if (_selectedMethod != value)
-    //        {
-    //            _selectedMethod = value;
-    //            OnPropertyChanged();
-    //            AddToCodeBlocks(_selectedMethod);
-    //        }
-    //    }
-    //}
+    private ObservableCollection<UIElement> _inputParameters;
+    public ObservableCollection<UIElement> InputParameters
+    {
+        get => _inputParameters;
+        set
+        {
+            _inputParameters = value;
+            OnPropertyChanged();
+        }
+    }
 
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler AddedNewCodeBlock;

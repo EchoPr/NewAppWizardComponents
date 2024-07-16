@@ -13,6 +13,8 @@
   <SolidColorBrush x:Key="APILevel1" Color="#5DA251"/>
   <!--<SolidColorBrush x:Key="A"-->
 
+  <SolidColorBrush x:Key="BlockHeader" Color="#899ABD"/>
+
   <SolidColorBrush x:Key="CodeDefault" Color="#565869"/>
   <SolidColorBrush x:Key="CodeValue" Color="#FF5C57"/>
   <SolidColorBrush x:Key="CodeKeyword" Color="#163FE4"/>
