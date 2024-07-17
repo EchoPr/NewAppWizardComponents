@@ -135,15 +135,29 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void ShowInputParameters(ApiEntry entry)
+    private void ShowParameters(ApiEntry entry, ParameterTypes type)
     {
-        if (entry.arg_type != null)
+        Type parameters;
+        Grid dest;
+
+        if (type == ParameterTypes.Input)
         {
-            PropertyInfo[] properties = entry.arg_type.GetProperties();
+            parameters = entry.arg_type;
+            dest = InputParametersGrid;
+        }
+        else
+        {
+            parameters = entry.ret_type;
+            dest = OutputParametersGrid;
+        }
+
+        if (parameters != null)
+        {
+            PropertyInfo[] properties = parameters.GetProperties();
 
             for (int i = 0; i < properties.Length; i++)
             {
-                InputParametersGrid.RowDefinitions.Add(new RowDefinition());
+                dest.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                 var property = properties[i];
                 var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
@@ -153,11 +167,11 @@ public sealed partial class MainPage : Page
 
                 Grid.SetRow(propertyNameVisual, i);
                 Grid.SetColumn(propertyNameVisual, 0);
-                InputParametersGrid.Children.Add(propertyNameVisual);
+                dest.Children.Add(propertyNameVisual);
 
                 Grid.SetRow(propertyValueControl, i);
                 Grid.SetColumn(propertyValueControl, 1);
-                InputParametersGrid.Children.Add(propertyValueControl);
+                dest.Children.Add(propertyValueControl);
             }
         }
     }
@@ -169,34 +183,6 @@ public sealed partial class MainPage : Page
 
         OutputParametersGrid.Children.Clear();
         OutputParametersGrid.RowDefinitions.Clear();
-    }
-
-    private void ShowOutputParameters(ApiEntry entry)
-    {
-        if (entry.ret_type != null)
-        {
-            entry.ret_value = Activator.CreateInstance(entry.ret_type);
-            PropertyInfo[] properties = entry.ret_type.GetProperties();
-
-            for (int i = 0; i < properties.Length; i++)
-            {
-                OutputParametersGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto});
-
-                var property = properties[i];
-                var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
-                var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
-                propertyNameVisual.Child = propertyNameTextBlock;
-                var propertyValueControl = CreateControlForProperty(property, property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null);
-
-                Grid.SetRow(propertyNameVisual, i);
-                Grid.SetColumn(propertyNameVisual, 0);
-                OutputParametersGrid.Children.Add(propertyNameVisual);
-
-                Grid.SetRow(propertyValueControl, i);
-                Grid.SetColumn(propertyValueControl, 1);
-                OutputParametersGrid.Children.Add(propertyValueControl);
-            }
-        }
     }
 
     private FrameworkElement CreateControlForProperty(PropertyInfo property, object value)
@@ -257,8 +243,8 @@ public sealed partial class MainPage : Page
 
             ClearShownParameters();
 
-            if (entry.arg_type != null) ShowInputParameters(entry);
-            if (entry.ret_type != null) ShowOutputParameters(entry);
+            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
+            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
         }
 
     }
@@ -279,4 +265,10 @@ public sealed partial class MainPage : Page
 
     }
 
+}
+
+public enum ParameterTypes
+{
+    Input = 0,
+    Output = 1,
 }

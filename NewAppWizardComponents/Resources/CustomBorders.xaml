@@ -26,4 +26,11 @@
     <Setter Property="BorderThickness" Value="0 0 0 1"/>
   </Style>
 
+  <Style TargetType="Border" x:Name="ParametersBlockHeader">
+    <Setter Property="Background" Value="{StaticResource BlockHeader}"/>
+    <Setter Property="CornerRadius" Value="10 10 0 0"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+
 </ResourceDictionary>
