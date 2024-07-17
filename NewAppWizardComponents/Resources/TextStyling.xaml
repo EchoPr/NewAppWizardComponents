@@ -90,6 +90,10 @@
     <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
+
+    <Setter Property="FocusVisualSecondaryBrush" Value="Transparent"/>
+    <Setter Property="FocusVisualPrimaryBrush" Value="Transparent"/>
+    <Setter Property="IsTabStop" Value="True"/>
   </Style>
 
 </ResourceDictionary>

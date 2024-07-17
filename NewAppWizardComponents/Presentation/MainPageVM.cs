@@ -22,16 +22,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    //private ObservableCollection<UIElement> _inputParameters;
-    //public ObservableCollection<UIElement> InputParameters
-    //{
-    //    get => _inputParameters;
-    //    set
-    //    {
-    //        _inputParameters = value;
-    //        OnPropertyChanged();
-    //    }
-    //}
+    public int lastSelectedBlock { get; set; }
 
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler AddedNewCodeBlock;
@@ -47,7 +38,7 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         if (method != null)
         {
-            _codeBlocks.Add(method);
+            _codeBlocks.Add(method.Clone());
             AddedNewCodeBlock?.Invoke(this, EventArgs.Empty);
         }
     }

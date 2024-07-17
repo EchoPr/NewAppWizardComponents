@@ -9,6 +9,7 @@
   <SolidColorBrush x:Key="BackgroundSecondary" Color="#F1F1F1"/>
   <SolidColorBrush x:Key="SolidDarkGray" Color="#414141"/>
   <SolidColorBrush x:Key="BorderSolid" Color="#A1A1A1"/>
+  <SolidColorBrush x:Key="Transparent" Color="#0000"/>
 
   <SolidColorBrush x:Key="APILevel1" Color="#5DA251"/>
   <!--<SolidColorBrush x:Key="A"-->
@@ -21,6 +22,8 @@
   <SolidColorBrush x:Key="CodeType" Color="#216F85"/>
   <SolidColorBrush x:Key="CodeBrackets" Color="#ADB1C2"/>
   <SolidColorBrush x:Key="CodeMethod" Color="#163FE4"/>
+
+  <SolidColorBrush x:Key="FailStatus" Color="#ff99a4"/>
 
   <!--<SolidColorBrush x:Key="CodeDefault" Color="#383A42"/>
   <SolidColorBrush x:Key="CodeValue" Color="#28a745"/>

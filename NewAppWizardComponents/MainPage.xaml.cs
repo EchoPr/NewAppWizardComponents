@@ -1,14 +1,11 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Input;
-using Windows.ApplicationModel.Activation;
 using Windows.UI;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NewAppWizardComponents;
 
@@ -51,12 +48,10 @@ public sealed partial class MainPage : Page
     }
 
     public void AddNewCodeBlock(object sender, EventArgs e) {
-        CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count);
-        //ShowInputParameters();
-        //ShowOutputParameters();
+        CodeBlocks.Children.Add(CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count)); 
     }
 
-    public void CreateViewCodeBlock(StackPanel codeContainer, ApiEntry entry, int num)
+    public Border CreateViewCodeBlock(StackPanel codeContainer, ApiEntry entry, int num)
     {
         var newCodeLines = new TextBlock();
 
@@ -67,15 +62,13 @@ public sealed partial class MainPage : Page
             newCodeLines.Inlines.Add(new Run { Text = "= new", Foreground = codeKeywordBrush });
             newCodeLines.Inlines.Add(new Run { Text = "() {\n", Foreground = codeBracketsBrush });
 
-            var instance = Activator.CreateInstance(entry.arg_type);
             PropertyInfo[] properties = entry.arg_type.GetProperties();
-            entry.arg_value = instance;
 
             foreach (PropertyInfo property in properties)
             {
                 if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) continue;
 
-                var value = property.GetValue(instance);
+                var value = property.GetValue(entry.arg_value);
 
                 newCodeLines.Inlines.Add(new Run { Text = $"\t{property.Name} ", Foreground = codeDefaultBrush });
                 newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
@@ -116,26 +109,16 @@ public sealed partial class MainPage : Page
 
         newBlock.Tag = new IndexedEntry(entry, num);
 
-        codeContainer.Children.Add(newBlock);
+        return newBlock;
     }
 
     public void ClearCodeBlocks(object sender, EventArgs e)
     {
         CodeBlocks.Children.Clear();
+        ClearShownParameters();
     }
 
-    public void RefreshCodeBlocks()
-    {
-        // Only visual blocks
-        CodeBlocks.Children.Clear();
-
-        for(int i = 0; i < mainPageVM.CodeBlocks.Count; i++)
-        {
-            CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks[i], i);
-        }
-    }
-
-    private void ShowParameters(ApiEntry entry, ParameterTypes type)
+    private void ShowParameters(ApiEntry entry, ParameterTypes type, Border container)
     {
         Type parameters;
         Grid dest;
@@ -155,15 +138,27 @@ public sealed partial class MainPage : Page
         {
             PropertyInfo[] properties = parameters.GetProperties();
 
-            for (int i = 0; i < properties.Length; i++)
+            var rows = dest.RowDefinitions.Count;
+            for (int i = 0; i < properties.Length - rows; i++)
             {
                 dest.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            }
+
+            for (int i = 0; i < properties.Length; i++)
+            { 
 
                 var property = properties[i];
                 var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
                 var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
                 propertyNameVisual.Child = propertyNameTextBlock;
-                var propertyValueControl = CreateControlForProperty(property, property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null);
+
+                var propertyValueControl = CreateControlForProperty(
+                    property, 
+                    property.GetValue(type == ParameterTypes.Input ? entry.arg_value : entry.ret_value), 
+                    entry, 
+                    type == ParameterTypes.Output,
+                    container
+                );
 
                 Grid.SetRow(propertyNameVisual, i);
                 Grid.SetColumn(propertyNameVisual, 0);
@@ -179,21 +174,27 @@ public sealed partial class MainPage : Page
     private void ClearShownParameters()
     {
         InputParametersGrid.Children.Clear();
-        InputParametersGrid.RowDefinitions.Clear();
-
         OutputParametersGrid.Children.Clear();
-        OutputParametersGrid.RowDefinitions.Clear();
     }
 
-    private FrameworkElement CreateControlForProperty(PropertyInfo property, object value)
+    private FrameworkElement CreateControlForProperty(PropertyInfo property, object value, ApiEntry entry, bool isResult, Border container)
     {
         if (property.PropertyType == typeof(bool))
         {
             var comboBox = new ComboBox();
-            comboBox.Items.Add("True");
+
             comboBox.Items.Add("False");
-            comboBox.SelectedIndex = 0;
+            comboBox.Items.Add("True");
+
+            comboBox.SelectedIndex = Convert.ToInt32(value);
             comboBox.Tag = property;
+
+            comboBox.SelectionChanged += (s, e) =>
+            {
+                property.SetValue(entry.arg_value, Convert.ToBoolean(comboBox.SelectedIndex));
+
+                EditCodeBlock(container);
+            };
 
             comboBox.Style = (Style)Resources["ParameterValueComboBox"];
 
@@ -206,8 +207,17 @@ public sealed partial class MainPage : Page
             {
                 comboBox.Items.Add(enumValue.ToString());
             }
-            comboBox.SelectedIndex = 0;
+            comboBox.SelectedItem = property.GetValue(entry.arg_value)?.ToString();
             comboBox.Tag = property;
+
+            comboBox.SelectionChanged += (s, e) =>
+            {
+                var selectedValue = comboBox.SelectedItem.ToString();
+                var enumValue = Enum.Parse(property.PropertyType, selectedValue);
+                property.SetValue(entry.arg_value, enumValue);
+
+                EditCodeBlock(container);
+            };
 
             comboBox.Style = (Style)Resources["ParameterValueComboBox"];
 
@@ -219,12 +229,59 @@ public sealed partial class MainPage : Page
             textBox.Text = value?.ToString();
             textBox.Tag = property;
 
+            if (isResult) 
+                textBox.IsReadOnly = true;
+            else 
+                textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, container);
+
             textBox.Style = (Style)Resources["ParameterValueTextBox"];
 
             return textBox;
         }
     }
 
+    private void OnValueChanged(System.Reflection.PropertyInfo property, string newValue, ApiEntry entry, Control visualBlock, Border container)
+    {
+        try
+        {
+            var targetType = property.PropertyType;
+
+            if (targetType == typeof(int))
+            {
+                property.SetValue(entry.arg_value, int.Parse(newValue));
+            }
+            else if (targetType == typeof(double))
+            {
+                property.SetValue(entry.arg_value, double.Parse(newValue));
+            }
+            else if (targetType == typeof(string))
+            {
+                property.SetValue(entry.arg_value, newValue);
+            }
+            else
+            {
+                Debug.WriteLine("A property of a non-built-in type was changed, but this could not have any consequences.");
+            }
+
+            EditCodeBlock(container);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Invalid value {newValue} for property {property.Name}");
+            visualBlock.Background = (SolidColorBrush)Resources["FailStatus"];
+        }
+    }
+
+    void EditCodeBlock(Border container)
+    {
+        var meta = container.Tag as IndexedEntry;
+        var editedBlock = CreateViewCodeBlock(CodeBlocks, meta.apiEntry, meta.index);
+
+        _lastSelectedBlock = editedBlock;
+        _lastSelectedBlock.Background = _selectedBackground;
+
+        CodeBlocks.Children[meta.index - 1] = editedBlock;
+    }
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
     {
@@ -243,8 +300,8 @@ public sealed partial class MainPage : Page
 
             ClearShownParameters();
 
-            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
-            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
+            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input, selectedBlock);
+            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output, selectedBlock);
         }
 
     }
@@ -260,7 +317,7 @@ public sealed partial class MainPage : Page
         }
         else
         {
-
+            // Imptlement flyout or smth idk
         }
 
     }
