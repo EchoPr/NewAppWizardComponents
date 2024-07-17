@@ -58,6 +58,8 @@
       </ListView.ItemTemplate>
     </ListView>
 
+    
+
     <!-- Toolbar -->
     <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
@@ -87,7 +89,7 @@
     <!-- Method parameters -->
     <Grid Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" RowDefinitions ="*, *"
           VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-      <StackPanel Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+      <StackPanel Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
             Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16 16 16 0">
         <Border Background="{StaticResource BlockHeader}">
           <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
@@ -96,7 +98,7 @@
         <Grid x:Name="InputParametersGrid" ColumnDefinitions="*, *"/>
       </StackPanel>
 
-      <StackPanel Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+      <StackPanel Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
       Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16">
         <Border Background="{StaticResource BlockHeader}">
           <TextBlock Style="{StaticResource ContentBlockHeader}" >Results</TextBlock>

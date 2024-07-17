@@ -21,4 +21,9 @@
     <Setter Property="Margin" Value="0 20 0 0"></Setter>
   </Style>
 
+  <Style TargetType="Border" x:Name="ParameterNameBorder">
+    <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}" />
+    <Setter Property="BorderThickness" Value="0 0 0 1"/>
+  </Style>
+
 </ResourceDictionary>

@@ -61,5 +61,35 @@
     <Setter Property="Padding" Value="10 0 0 2"/>
   </Style>
 
+  <Style TargetType="TextBlock" x:Name="ParameterName" BasedOn="{StaticResource TextDefault}">
+    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
+    <Setter Property="Padding" Value="7 7 0 7"/>
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="FontSize" Value="14"/>
+  </Style>
+
+  <Style TargetType="TextBox" x:Name="ParameterValueTextBox">
+    <Setter Property="Height" Value="32"/>
+    
+    <Setter Property="Padding" Value="7"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
+    <Setter Property="BorderThickness" Value="1 0 0 1"/>
+
+    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+
+  <Style TargetType="ComboBox" x:Name="ParameterValueComboBox">
+    <Setter Property="Height" Value="32"/>
+
+    <Setter Property="Padding" Value="7"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
+    <Setter Property="BorderThickness" Value="1 0 0 1"/>
+    
+    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
 
 </ResourceDictionary>

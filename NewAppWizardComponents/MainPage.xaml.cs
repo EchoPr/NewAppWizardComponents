@@ -137,9 +137,6 @@ public sealed partial class MainPage : Page
 
     private void ShowInputParameters(ApiEntry entry)
     {
-        InputParametersGrid.Children.Clear();
-        InputParametersGrid.RowDefinitions.Clear();
-
         if (entry.arg_type != null)
         {
             PropertyInfo[] properties = entry.arg_type.GetProperties();
@@ -149,16 +146,55 @@ public sealed partial class MainPage : Page
                 InputParametersGrid.RowDefinitions.Add(new RowDefinition());
 
                 var property = properties[i];
-                var propertyNameTextBlock = new TextBlock { Text = property.Name };
-                var propertyValueControl = CreateControlForProperty(property, property.GetValue(entry.arg_value));
+                var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
+                var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
+                propertyNameVisual.Child = propertyNameTextBlock;
+                var propertyValueControl = CreateControlForProperty(property, property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null);
 
-                Grid.SetRow(propertyNameTextBlock, i);
-                Grid.SetColumn(propertyNameTextBlock, 0);
-                InputParametersGrid.Children.Add(propertyNameTextBlock);
+                Grid.SetRow(propertyNameVisual, i);
+                Grid.SetColumn(propertyNameVisual, 0);
+                InputParametersGrid.Children.Add(propertyNameVisual);
 
                 Grid.SetRow(propertyValueControl, i);
                 Grid.SetColumn(propertyValueControl, 1);
                 InputParametersGrid.Children.Add(propertyValueControl);
+            }
+        }
+    }
+
+    private void ClearShownParameters()
+    {
+        InputParametersGrid.Children.Clear();
+        InputParametersGrid.RowDefinitions.Clear();
+
+        OutputParametersGrid.Children.Clear();
+        OutputParametersGrid.RowDefinitions.Clear();
+    }
+
+    private void ShowOutputParameters(ApiEntry entry)
+    {
+        if (entry.ret_type != null)
+        {
+            entry.ret_value = Activator.CreateInstance(entry.ret_type);
+            PropertyInfo[] properties = entry.ret_type.GetProperties();
+
+            for (int i = 0; i < properties.Length; i++)
+            {
+                OutputParametersGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto});
+
+                var property = properties[i];
+                var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
+                var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
+                propertyNameVisual.Child = propertyNameTextBlock;
+                var propertyValueControl = CreateControlForProperty(property, property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null);
+
+                Grid.SetRow(propertyNameVisual, i);
+                Grid.SetColumn(propertyNameVisual, 0);
+                OutputParametersGrid.Children.Add(propertyNameVisual);
+
+                Grid.SetRow(propertyValueControl, i);
+                Grid.SetColumn(propertyValueControl, 1);
+                OutputParametersGrid.Children.Add(propertyValueControl);
             }
         }
     }
@@ -172,6 +208,9 @@ public sealed partial class MainPage : Page
             comboBox.Items.Add("False");
             comboBox.SelectedIndex = 0;
             comboBox.Tag = property;
+
+            comboBox.Style = (Style)Resources["ParameterValueComboBox"];
+
             return comboBox;
         }
         else if (property.PropertyType.IsEnum)
@@ -183,6 +222,9 @@ public sealed partial class MainPage : Page
             }
             comboBox.SelectedIndex = 0;
             comboBox.Tag = property;
+
+            comboBox.Style = (Style)Resources["ParameterValueComboBox"];
+
             return comboBox;
         }
         else
@@ -190,36 +232,10 @@ public sealed partial class MainPage : Page
             var textBox = new TextBox();
             textBox.Text = value?.ToString();
             textBox.Tag = property;
+
+            textBox.Style = (Style)Resources["ParameterValueTextBox"];
+
             return textBox;
-        }
-    }
-
-    private void ShowOutputParameters(ApiEntry entry)
-    {
-        OutputParametersGrid.Children.Clear();
-        OutputParametersGrid.RowDefinitions.Clear();
-
-        if (entry.ret_type != null)
-        {
-            entry.ret_value = Activator.CreateInstance(entry.ret_type);
-            PropertyInfo[] properties = entry.ret_type.GetProperties();
-
-            for (int i = 0; i < properties.Length; i++)
-            {
-                OutputParametersGrid.RowDefinitions.Add(new RowDefinition());
-
-                var property = properties[i];
-                var propertyNameTextBlock = new TextBlock { Text = property.Name };
-                var propertyValueControl = CreateControlForProperty(property, property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null);
-
-                Grid.SetRow(propertyNameTextBlock, i);
-                Grid.SetColumn(propertyNameTextBlock, 0);
-                OutputParametersGrid.Children.Add(propertyNameTextBlock);
-
-                Grid.SetRow(propertyValueControl, i);
-                Grid.SetColumn(propertyValueControl, 1);
-                OutputParametersGrid.Children.Add(propertyValueControl);
-            }
         }
     }
 
@@ -238,6 +254,8 @@ public sealed partial class MainPage : Page
             _lastSelectedBlock = selectedBlock;
 
             var entry = (selectedBlock.Tag as IndexedEntry).apiEntry;
+
+            ClearShownParameters();
 
             if (entry.arg_type != null) ShowInputParameters(entry);
             if (entry.ret_type != null) ShowOutputParameters(entry);
