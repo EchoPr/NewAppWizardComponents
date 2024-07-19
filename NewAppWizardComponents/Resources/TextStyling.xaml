@@ -80,13 +80,26 @@
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
   </Style>
 
+  <Style TargetType="TextBlock" x:Name="CollectionElementTextBlock">
+    <Setter Property="Height" Value="32"/>
+
+    <Setter Property="AllowFocusOnInteraction" Value="True"/>
+    <Setter Property="IsTextSelectionEnabled" Value="True"/>
+
+    <Setter Property="Padding" Value="7"/>
+
+    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+
   <Style TargetType="ComboBox" x:Name="ParameterValueComboBox">
     <Setter Property="Height" Value="32"/>
 
     <Setter Property="Padding" Value="7"/>
     <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
     <Setter Property="BorderThickness" Value="1 0 0 1"/>
-    
+
     <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -94,6 +107,7 @@
     <Setter Property="FocusVisualSecondaryBrush" Value="Transparent"/>
     <Setter Property="FocusVisualPrimaryBrush" Value="Transparent"/>
     <Setter Property="IsTabStop" Value="True"/>
+
   </Style>
 
 </ResourceDictionary>

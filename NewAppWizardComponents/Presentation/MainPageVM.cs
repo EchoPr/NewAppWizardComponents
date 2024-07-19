@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.UI.Xaml.Controls;
+using Windows.Services.Maps;
 
 namespace NewAppWizardComponents;
 
@@ -61,5 +63,26 @@ public partial class MainPageVM : INotifyPropertyChanged
         ClearedCodeBlocks?.Invoke(this, EventArgs.Empty);
     }
 
-    
+    //public void OpenEditCollectionWindow(ApiEntry entry) {
+        
+
+    //    var dialog = new EditCollectionDialog();
+    //    dialog.XamlRoot = this.XamlRoot;
+    //    var result = await dialog.ShowAsync();
+
+    //    if (result == ContentDialogResult.Primary)
+    //    {
+    //        Debug.WriteLine("Pressed OK!");
+    //    }
+    //    else if (result == ContentDialogResult.Secondary)
+    //    {
+    //        Debug.WriteLine("Pressed Cancel!");
+    //    }
+    //}
+
+    public void OnModifingApiEntryChanged(ApiEntry entry)
+    {
+
+    }
+
 }

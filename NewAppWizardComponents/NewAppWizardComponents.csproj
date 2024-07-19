@@ -30,9 +30,11 @@
     <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
+    <None Remove="EditCollectionDialog.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
     <None Remove="Resources\CustomBorders.xaml" />
+    <None Remove="Resources\CustomButtons.xaml" />
     <None Remove="Resources\CustomColors.xaml" />
     <None Remove="Resources\TextStyling.xaml" />
   </ItemGroup>
@@ -83,6 +85,14 @@
     <Page Update="Resources\TextStyling.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Resources\CustomButtons.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="EditCollectionDialog.xaml" />
   </ItemGroup>
 
 </Project>

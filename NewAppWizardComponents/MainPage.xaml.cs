@@ -4,8 +4,12 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Hosting;
 using Windows.UI;
+using Windows.UI.WindowManagement;
+
 
 namespace NewAppWizardComponents;
 
@@ -179,6 +183,7 @@ public sealed partial class MainPage : Page
 
     private FrameworkElement CreateControlForProperty(PropertyInfo property, object value, ApiEntry entry, bool isResult, Border container)
     {
+        // ComboBox True/False
         if (property.PropertyType == typeof(bool))
         {
             var comboBox = new ComboBox();
@@ -189,6 +194,12 @@ public sealed partial class MainPage : Page
             comboBox.SelectedIndex = Convert.ToInt32(value);
             comboBox.Tag = property;
 
+            if (isResult) 
+            { 
+                comboBox.IsEnabled = false;
+                comboBox.Foreground = (Brush)Resources["BoxBorderPrimary"];
+            }
+            
             comboBox.SelectionChanged += (s, e) =>
             {
                 property.SetValue(entry.arg_value, Convert.ToBoolean(comboBox.SelectedIndex));
@@ -200,6 +211,7 @@ public sealed partial class MainPage : Page
 
             return comboBox;
         }
+        // ComboBox ObjectTypeEnum
         else if (property.PropertyType.IsEnum)
         {
             var comboBox = new ComboBox();
@@ -207,7 +219,13 @@ public sealed partial class MainPage : Page
             {
                 comboBox.Items.Add(enumValue.ToString());
             }
-            comboBox.SelectedItem = property.GetValue(entry.arg_value)?.ToString();
+            if (isResult)
+            {
+                comboBox.IsEnabled = false;
+                comboBox.Foreground = (Brush)Resources["BoxBorderPrimary"];
+            }
+            else
+                comboBox.SelectedItem = property.GetValue(entry.arg_value)?.ToString();
             comboBox.Tag = property;
 
             comboBox.SelectionChanged += (s, e) =>
@@ -223,6 +241,18 @@ public sealed partial class MainPage : Page
 
             return comboBox;
         }
+        //Button Collection
+        else if (property.PropertyType.GetInterfaces().Contains(typeof(IList)))
+        {
+            var button = new Button();
+            button.Content = "Edit collection";
+            button.Style = (Style)Resources["EditCollectionButton"];
+
+            button.Click += (s, e) => OnChangeCollection(entry, property);
+
+            return button;
+        }
+        //TextBox ChangebleProperty
         else
         {
             var textBox = new TextBox();
@@ -264,9 +294,11 @@ public sealed partial class MainPage : Page
             }
 
             EditCodeBlock(container);
+            visualBlock.Background = (SolidColorBrush)Resources["Transparent"];
         }
         catch (Exception ex)
         {
+            Debug.WriteLine(ex);
             Debug.WriteLine($"Invalid value {newValue} for property {property.Name}");
             visualBlock.Background = (SolidColorBrush)Resources["FailStatus"];
         }
@@ -281,6 +313,21 @@ public sealed partial class MainPage : Page
         _lastSelectedBlock.Background = _selectedBackground;
 
         CodeBlocks.Children[meta.index - 1] = editedBlock;
+    }
+
+    private async void OnChangeCollection(ApiEntry entry, PropertyInfo property)
+    {
+        var dialog = new EditCollectionDialog(entry, property);
+        dialog.XamlRoot = this.XamlRoot;
+        var result = await dialog.ShowAsync();
+
+        if (result == ContentDialogResult.Primary)
+        {
+        }
+        else if (result == ContentDialogResult.Secondary)
+        {
+            Debug.WriteLine("Pressed Cancel!");
+        }
     }
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)

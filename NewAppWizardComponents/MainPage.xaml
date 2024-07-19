@@ -11,8 +11,11 @@
         <ResourceDictionary Source="Resources/CustomColors.xaml"/>
         <ResourceDictionary Source="Resources/TextStyling.xaml"/>
         <ResourceDictionary Source="Resources/CustomBorders.xaml"/>
+        <ResourceDictionary Source="Resources/CustomButtons.xaml"/>
         <ResourceDictionary Source="Resources/Controls/BlockScrollViewer.xaml"/>
       </ResourceDictionary.MergedDictionaries>
+
+      
     </ResourceDictionary>
   </Page.Resources>
 
@@ -50,7 +53,7 @@
                   x:Name="MethodsList"
                   ItemsSource="{Binding Methods}"
                   IsItemClickEnabled="True" ItemClick="OnItemClick"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="16" Padding="8">
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="16" Padding="8">
       <ListView.ItemTemplate>
         <DataTemplate>
           <TextBlock Text="{Binding Name}" />
@@ -61,7 +64,7 @@
     
 
     <!-- Toolbar -->
-    <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+    <!--<StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
       <ComboBox x:Name="LanguageComboBox" 
                   MinWidth="100"
@@ -77,12 +80,19 @@
       </ComboBox>
 
       <Button Command="{Binding ClearCodeBlocksCommand}" 
-                  MinHeight="100">Clear</Button>
-    </StackPanel>
+                  MinHeight="100">
+        Clear</Button>
+
+      <Button Click="ButtonClick"
+              MinHeight="100">NEW!</Button>
+
+      <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>
+
+    </StackPanel>-->
     
     <!-- Code view -->
     <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="10" Margin="0 16" Padding="8">
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16" Padding="8">
       <StackPanel x:Name="CodeBlocks" Padding="10"/>
     </ScrollViewer>
 
@@ -94,7 +104,7 @@
       </Border>
 
       <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-              Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="0 0 10 10" Margin="16 0 16 0">
+              Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 0">
         <Grid  x:Name="InputParametersGrid" ColumnDefinitions="*, *" />
       </ScrollViewer>
 
@@ -103,7 +113,7 @@
         </Border>
 
       <ScrollViewer Grid.Row="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="0 0 10 10" Margin="16 0 16 16">
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 16">
         <Grid  x:Name="OutputParametersGrid" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
       </ScrollViewer>
 
