@@ -48,25 +48,12 @@
         <MenuFlyoutItem Text="Paste"/>
       </MenuBarItem>
     </MenuBar>
-
-    <ListView Grid.Column="0" Grid.Row="1" Grid.RowSpan="3"
-                  x:Name="MethodsList"
-                  ItemsSource="{Binding Methods}"
-                  IsItemClickEnabled="True" ItemClick="OnItemClick"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="16" Padding="8">
-      <ListView.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding Name}" />
-        </DataTemplate>
-      </ListView.ItemTemplate>
-    </ListView>
-
     
 
     <!-- Toolbar -->
-    <!--<StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
-      <ComboBox x:Name="LanguageComboBox" 
+      <!--<ComboBox x:Name="LanguageComboBox" 
                   MinWidth="100"
                   MinHeight="100"
                   Margin="0 0 20 0">
@@ -81,43 +68,69 @@
 
       <Button Command="{Binding ClearCodeBlocksCommand}" 
                   MinHeight="100">
-        Clear</Button>
-
-      <Button Click="ButtonClick"
-              MinHeight="100">NEW!</Button>
+        Clear</Button>-->
 
       <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>
 
-    </StackPanel>-->
+    </StackPanel>
+
+    
+    <!--Methods list-->
+    <ListView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"
+                  x:Name="MethodsList"
+                  ItemsSource="{Binding Methods}"
+                  IsItemClickEnabled="True" ItemClick="OnItemClick"
+                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="16" Padding="8">
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+
     
     <!-- Code view -->
     <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                   Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16" Padding="8">
       <StackPanel x:Name="CodeBlocks" Padding="10"/>
     </ScrollViewer>
+    
 
     <!-- Method parameters -->
-    <Grid Grid.Column="2" Grid.Row="1" Grid.RowSpan="3" RowDefinitions ="Auto, *, Auto, *"
-          VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-      <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 16 16 0">
-        <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
-      </Border>
+    <Grid Grid.Column="2" Grid.Row="2" Grid.RowSpan="3" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid">
 
-      <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-              Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 0">
-        <Grid  x:Name="InputParametersGrid" ColumnDefinitions="*, *" />
-      </ScrollViewer>
-
-      <Border Grid.Row="2" Style="{StaticResource ParametersBlockHeader}" Margin="16 16 16 0">
-        <TextBlock Style="{StaticResource ContentBlockHeader}">Results</TextBlock>
+      <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 16 16 0">
+          <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
         </Border>
 
-      <ScrollViewer Grid.Row="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 16">
-        <Grid  x:Name="OutputParametersGrid" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-      </ScrollViewer>
+        <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+           Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 0">
+          <Grid  x:Name="InputParametersGrid" ColumnDefinitions="*, *" />
+        </ScrollViewer>
+      </Grid>
 
+      <Border Grid.Row="1" Background="#F3F3F3" Height="16" VerticalAlignment="Stretch" ManipulationMode="All"
+          Tag="1"
+          PointerPressed="Separator_PointerPressed" 
+          PointerMoved="Separator_PointerMoved" 
+          PointerReleased="Separator_PointerReleased">
+
+        <FontIcon Glyph="&#xE76F;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
+      </Border>
+
+      <Grid Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 0 16 0">
+          <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 16">
+          <Grid  x:Name="OutputParametersGrid" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+        </ScrollViewer>
+      </Grid>
     </Grid>
+
     <!--Documentation-->
     <!--<ScrollViewer Grid.Column="1" Grid.Row="1" x:Name="DocumentationView"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

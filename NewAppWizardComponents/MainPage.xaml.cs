@@ -32,8 +32,8 @@ public sealed partial class MainPage : Page
 
     private bool _isResizing = false;
     private double _initialPosition;
-    private ColumnDefinition _firstMovedColumn;
-    private ColumnDefinition _secondMovedColumn;
+    private RowDefinition _firstMovedGrip;
+    private RowDefinition _secondMovedGrip;
 
     public MainPage()
     {
@@ -497,40 +497,43 @@ public sealed partial class MainPage : Page
         await dialog.ShowAsync();
     }
 
-    //private void Separator_PointerPressed(object sender, PointerRoutedEventArgs e)
-    //{
-    //    _isResizing = true;
-    //    _initialPosition = e.GetCurrentPoint(MainDialogGrid).Position.X;
-    //    var separator = sender as Border;
-    //    int columnIndex = int.Parse(separator.Tag.ToString());
-    //    _firstMovedColumn = MainDialogGrid.ColumnDefinitions[columnIndex - 1];
-    //    _secondMovedColumn = MainDialogGrid.ColumnDefinitions[columnIndex + 1];
-    //    separator.CapturePointer(e.Pointer);
-    //}
+    private void Separator_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        _isResizing = true;
+        _initialPosition = e.GetCurrentPoint(MethodParametersGrid).Position.Y;
+        var separator = sender as Border;
+        int columnIndex = int.Parse(separator.Tag.ToString());
+        _firstMovedGrip = MethodParametersGrid.RowDefinitions[columnIndex - 1];
+        _secondMovedGrip = MethodParametersGrid.RowDefinitions[columnIndex + 1];
+        separator.CapturePointer(e.Pointer);
+    }
 
-    //private void Separator_PointerMoved(object sender, PointerRoutedEventArgs e)
-    //{
-    //    if (!_isResizing)
-    //        return;
+    private void Separator_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!_isResizing)
+            return;
 
-    //    double currentPosition = e.GetCurrentPoint(MainDialogGrid).Position.X;
-    //    double delta = currentPosition - _initialPosition;
+        double currentPosition = e.GetCurrentPoint(MethodParametersGrid).Position.Y;
+        double delta = currentPosition - _initialPosition;
 
-    //    double newFirstWidth = _firstMovedColumn.ActualWidth + delta;
-    //    double newSecondWidth = _secondMovedColumn.ActualWidth - delta;
-    //    if (newFirstWidth > 0 && newFirstWidth < this.Width && newSecondWidth > 0 && newSecondWidth < this.Width)
-    //    {
-    //        _firstMovedColumn.Width = new GridLength(_firstMovedColumn.ActualWidth + delta);
-    //        _secondMovedColumn.Width = new GridLength(_secondMovedColumn.ActualWidth - delta);
-    //        _initialPosition = currentPosition;
-    //    }
-    //}
+        double newFirstHeight = _firstMovedGrip.ActualHeight + delta;
+        double newSecondHeight = _secondMovedGrip.ActualHeight - delta;
 
-    //private void Separator_PointerReleased(object sender, PointerRoutedEventArgs e)
-    //{
-    //    _isResizing = false;
-    //    (sender as UIElement).ReleasePointerCapture(e.Pointer);
-    //}
+        
+
+        if (newFirstHeight > 16  && newSecondHeight > 16 )
+        {
+            _firstMovedGrip.Height = new GridLength(newFirstHeight);
+            _secondMovedGrip.Height = new GridLength(newSecondHeight);
+            _initialPosition = currentPosition;
+        }
+    }
+
+    private void Separator_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        _isResizing = false;
+        (sender as UIElement).ReleasePointerCapture(e.Pointer);
+    }
 }
 
 public enum ParameterTypes
