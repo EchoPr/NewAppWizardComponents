@@ -1,11 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.UI.Xaml.Input;
-using Windows.UI;
-using System.Windows;
-using System.Linq;
+using Newtonsoft.Json;
 
 namespace NewAppWizardComponents;
 
@@ -22,9 +19,11 @@ public sealed partial class EditCollectionDialog : ContentDialog
     public Type elementType;
     public IList collection;
 
-    private Grid _lastSelectedBlock = null;
+    private Grid? _lastSelectedBlock = null;
     private readonly Brush _defaultBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
     private readonly Brush _selectedBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(50, 0, 120, 210));
+
+    private Stack<EditingCommand> _commandsStack = new Stack<EditingCommand>();
 
     public EditCollectionDialog(ApiEntry apiEntry_, PropertyInfo property_)
 	{
@@ -108,12 +107,36 @@ public sealed partial class EditCollectionDialog : ContentDialog
         selectedBlock.Background = _selectedBackground;
         _lastSelectedBlock = selectedBlock;
 
+        ElementValues.Children.Clear();
         ShowElementParameters(selectedBlock);
     }
 
     private void ShowElementParameters(Grid selectedBlock)
     {
+        bool isSingleVar = false;
         var parameters = (selectedBlock.Tag as Tuple<object, int>).Item1;
+
+        if (parameters is int intValue)
+        {
+            isSingleVar = true;
+            parameters = new ValueProperty<int>(intValue);
+        }
+        else if (parameters is bool boolValue)
+        {
+            isSingleVar = true;
+            parameters = new ValueProperty<bool>(boolValue);
+        }
+        else if (parameters is double doubleValue)
+        {
+            isSingleVar = true;
+            parameters = new ValueProperty<double>(doubleValue);
+        }
+        else if (parameters is string stringValue)
+        {
+            isSingleVar = true;
+            parameters = new ValueProperty<string>(stringValue);
+        }
+
         PropertyInfo[] properties = parameters.GetType().GetProperties();
 
         for (int i = 0; i < properties.Length; i++)
@@ -123,11 +146,12 @@ public sealed partial class EditCollectionDialog : ContentDialog
             var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
             propertyNameVisual.Child = propertyNameTextBlock;
 
-            var propertyValueControl = CreateControlForElementProperty(
+            var propertyValueControl = CreateControlCustomTypeElementProperty(
                     property,
-                    property.GetValue((selectedBlock.Tag as Tuple<object, int>).Item1),
+                    isSingleVar ? (selectedBlock.Tag as Tuple<object, int>).Item1 : property.GetValue((selectedBlock.Tag as Tuple<object, int>).Item1),
                     (selectedBlock.Tag as Tuple<object, int>).Item1,
-                    selectedBlock
+                    selectedBlock,
+                    isSingleVar
                 );
 
             Grid.SetRow(propertyNameVisual, i);
@@ -140,7 +164,7 @@ public sealed partial class EditCollectionDialog : ContentDialog
         }
     }
 
-    private FrameworkElement CreateControlForElementProperty(PropertyInfo property, object? value, object entry, Grid container)
+    private FrameworkElement CreateControlCustomTypeElementProperty(PropertyInfo property, object? value, object entry, Grid container, bool isSingleVar)
     {
         if (property.PropertyType == typeof(bool))
         {
@@ -155,6 +179,11 @@ public sealed partial class EditCollectionDialog : ContentDialog
             comboBox.SelectionChanged += (s, e) =>
             {
                 property.SetValue(entry, Convert.ToBoolean(comboBox.SelectedIndex));
+                if (isSingleVar)
+                {
+                    container.Tag = new Tuple<object, int>(Convert.ToBoolean(comboBox.SelectedIndex), (container.Tag as Tuple<object, int>).Item2);
+                    collection[(container.Tag as Tuple<object, int>).Item2] = Convert.ToBoolean(comboBox.SelectedIndex);
+                }
             };
 
             comboBox.Style = (Style)Resources["ParameterValueComboBox"];
@@ -191,7 +220,7 @@ public sealed partial class EditCollectionDialog : ContentDialog
             textBox.Text = value?.ToString();
             textBox.Tag = property;
 
-            textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, container);
+            textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, container, isSingleVar);
 
             textBox.Style = (Style)Resources["ParameterValueTextBox"];
 
@@ -199,7 +228,7 @@ public sealed partial class EditCollectionDialog : ContentDialog
         }
     }
 
-    private void OnValueChanged(PropertyInfo property, string newValue, object entry, TextBox visualBlock, Grid container)
+    private void OnValueChanged(PropertyInfo property, string newValue, object entry, TextBox visualBlock, Grid container, bool isSingleVar)
     {
         try
         {
@@ -207,15 +236,39 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
             if (targetType == typeof(int))
             {
-                property.SetValue(entry, int.Parse(newValue));
+                if (isSingleVar)
+                {
+                    container.Tag = new Tuple<object, int>(Convert.ToInt32(newValue), (container.Tag as Tuple<object, int>).Item2);
+                    collection[(container.Tag as Tuple<object, int>).Item2] = Convert.ToInt32(newValue);
+                }
+                else 
+                { 
+                    property.SetValue(entry, int.Parse(newValue));
+                }
             }
             else if (targetType == typeof(double))
             {
-                property.SetValue(entry, double.Parse(newValue));
+                if (isSingleVar)
+                {
+                    container.Tag = new Tuple<object, int>(Convert.ToDouble(newValue), (container.Tag as Tuple<object, int>).Item2);
+                    collection[(container.Tag as Tuple<object, int>).Item2] = Convert.ToDouble(newValue);
+                }
+                else
+                {
+                    property.SetValue(entry, double.Parse(newValue));
+                }
             }
             else if (targetType == typeof(string))
             {
-                property.SetValue(entry, newValue);
+                if (isSingleVar)
+                {
+                    container.Tag = new Tuple<object, int>(newValue, (container.Tag as Tuple<object, int>).Item2);
+                    collection[(container.Tag as Tuple<object, int>).Item2] = newValue;
+                }
+                else
+                {
+                    property.SetValue(entry, newValue);
+                }
             }
             else
             {
@@ -226,6 +279,7 @@ public sealed partial class EditCollectionDialog : ContentDialog
         }
         catch (Exception ex)
         {
+            Debug.WriteLine(ex.ToString());
             Debug.WriteLine($"Invalid value {newValue} for property {property.Name}");
             visualBlock.Background = (SolidColorBrush)Resources["FailStatus"];
         }
@@ -233,24 +287,71 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
     private void AddButtonClick(object sender, RoutedEventArgs e)
     {
-        collection.Add(Activator.CreateInstance(elementType));
+        object value = Activator.CreateInstance(elementType);
+        collection.Add(value);
+
+        _commandsStack.Push(new EditingCommand(CommandType.Add, value, collection.Count - 1));
 
         CreateVisualElement(collection[collection.Count - 1], collection.Count - 1);
+        CollectionElementGotFocus(CollectionElements.Children[collection.Count - 1] as Grid);
     }
     private void RemoveButtonClick(object sender, RoutedEventArgs e)
     {
+        if (_lastSelectedBlock == null) return;
 
+        int id = (_lastSelectedBlock.Tag as Tuple<object, int>).Item2;
+
+        for (int i = id; i < collection.Count; i++)
+        {
+            (((CollectionElements.Children[i] as Grid).Children[0] as Border).Child as TextBlock).Text = (i).ToString();
+            (CollectionElements.Children[i] as Grid).Tag = new Tuple<object, int>(
+                    ((CollectionElements.Children[i] as Grid).Tag as Tuple<object, int>).Item1,
+                    ((CollectionElements.Children[i] as Grid).Tag as Tuple<object, int>).Item2 - 1
+                );
+        }
+
+        CollectionElements.Children.RemoveAt(id);
+        _commandsStack.Push(new EditingCommand(CommandType.Remove, collection[id], id));
+        collection.RemoveAt(id);
+        _lastSelectedBlock = null;
     }
 
     private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-	{
+    {
+        ClearVisual();
+        _commandsStack.Clear();
 
-	}
+        foreach (var item in collection)
+        {
+            Debug.WriteLine(item.ToString() + " ");
+        }
+    }
 
 	private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
 	{
+        ClearVisual();
 
-	}
+        foreach(EditingCommand cmd in _commandsStack)
+        {
+            if (cmd.type == CommandType.Add)
+            {
+                collection.RemoveAt(cmd.index);
+            }
+            else 
+            {
+                collection.Add(cmd.value);
+            }
+        }
+
+        _commandsStack.Clear();
+    }
+
+    private void ClearVisual()
+    {
+        _lastSelectedBlock = null;
+        CollectionElements.Children.Clear();
+        ElementValues.Children.Clear();
+    }
 
     private void Separator_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
@@ -287,3 +388,25 @@ public sealed partial class EditCollectionDialog : ContentDialog
         (sender as UIElement).ReleasePointerCapture(e.Pointer);
     }
 }
+
+public class EditingCommand
+{
+    public CommandType type { get; set; }
+    public object value { get; set; }
+    public int index { get; set; }
+
+    public EditingCommand(CommandType type_, object value_, int index_)
+    {
+        this.type = type_;
+        this.value = value_;
+        this.index = index_;
+    }
+}
+
+public enum CommandType
+{
+    Add,
+    Remove
+}
+
+

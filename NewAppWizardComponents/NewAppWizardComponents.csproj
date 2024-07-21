@@ -31,6 +31,7 @@
     <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
     <None Remove="EditCollectionDialog.xaml" />
+    <None Remove="MessageBox.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
     <None Remove="Resources\CustomBorders.xaml" />
@@ -93,6 +94,10 @@
 
   <ItemGroup>
     <UpToDateCheckInput Remove="EditCollectionDialog.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="MessageBox.xaml" />
   </ItemGroup>
 
 </Project>

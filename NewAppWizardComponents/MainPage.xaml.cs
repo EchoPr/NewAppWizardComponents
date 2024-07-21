@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Data.Common;
@@ -9,6 +10,7 @@ using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Hosting;
 using Windows.UI;
 using Windows.UI.WindowManagement;
+using Microsoft.UI.Xaml.Input;
 
 
 namespace NewAppWizardComponents;
@@ -24,9 +26,14 @@ public sealed partial class MainPage : Page
     SolidColorBrush? codeValueBrush;
     SolidColorBrush? codeMethodBrush;
 
-    private Border _lastSelectedBlock = null;
+    private Border? _lastSelectedBlock = null;
     private readonly Brush _defaultBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(0, 0, 0, 0));
     private readonly Brush _selectedBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(50, 0, 120, 210));
+
+    private bool _isResizing = false;
+    private double _initialPosition;
+    private ColumnDefinition _firstMovedColumn;
+    private ColumnDefinition _secondMovedColumn;
 
     public MainPage()
     {
@@ -298,7 +305,6 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
             Debug.WriteLine($"Invalid value {newValue} for property {property.Name}");
             visualBlock.Background = (SolidColorBrush)Resources["FailStatus"];
         }
@@ -323,11 +329,127 @@ public sealed partial class MainPage : Page
 
         if (result == ContentDialogResult.Primary)
         {
+            ChangeBlockInitializationType();
         }
         else if (result == ContentDialogResult.Secondary)
         {
-            Debug.WriteLine("Pressed Cancel!");
         }
+    }
+
+    private void ChangeBlockInitializationType()
+    {
+        var newCodeLines = new TextBlock();
+
+        //Debug.WriteLine((_lastSelectedBlock.Child as TextBlock).Text);
+
+        var tag = _lastSelectedBlock.Tag as IndexedEntry;
+        ApiEntry entry = tag.apiEntry;
+        int id = tag.index;
+
+        if (entry.arg_type != null)
+        {
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"arg{id} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]}", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
+            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+
+            PropertyInfo[] properties = entry.arg_type.GetProperties();
+
+            foreach (PropertyInfo property in properties)
+            {
+                var value = property.GetValue(entry.arg_value);
+
+                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                {
+                    var val = value as IList;
+                    var elementType = property.PropertyType.GetGenericArguments()[0];
+                    Debug.WriteLine(elementType);
+
+                    if (elementType == typeof(int) || elementType == typeof(double) ||
+                        elementType == typeof(bool) || elementType == typeof(string)) 
+                    {
+                        Debug.WriteLine("!!!!!");
+                        foreach(var v in val)
+                        {
+                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.{property.Name}.", Foreground = codeDefaultBrush});
+                            newCodeLines.Inlines.Add(new Run { Text = "Add", Foreground = codeMethodBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"{v}", Foreground = codeValueBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < val.Count; i++)
+                        {
+                            string objectName = val[i].GetType().Name[1..];
+                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName} ", Foreground = codeTypeBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id + 1}_object{i + 1}", Foreground = codeDefaultBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName}", Foreground = codeTypeBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+
+                            PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
+                            foreach( PropertyInfo innerProperty in innerProperties)
+                            {
+                                newCodeLines.Inlines.Add(new Run { Text = $"{objectName}.", Foreground = codeDefaultBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.Name} ", Foreground = codeDefaultBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.GetValue(val[i])}", Foreground = codeValueBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.", Foreground = codeDefaultBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"{property.Name} ", Foreground = codeDefaultBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"{value}", Foreground = codeValueBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
+
+                }
+            }
+        }
+
+        if (entry.ret_type != null)
+        {
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.ret_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"ret{id} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+        }
+
+        newCodeLines.Inlines.Add(new Run { Text = "qform.", Foreground = codeDefaultBrush });
+        newCodeLines.Inlines.Add(new Run { Text = $"{entry.Name}", Foreground = codeMethodBrush });
+        newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
+
+        if (entry.arg_type != null) { newCodeLines.Inlines.Add(new Run { Text = $"arg{id}", Foreground = codeDefaultBrush }); }
+
+        newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
+        newCodeLines.Inlines.Add(new Run { Text = ";", Foreground = codeDefaultBrush });
+
+        newCodeLines.Style = (Style)Resources["CodeBlock"];
+        newCodeLines.AllowFocusOnInteraction = true;
+        newCodeLines.GotFocus += CodeBlockGotFocus;
+
+        var newBlock = new Border();
+
+        newBlock.Child = newCodeLines;
+        newBlock.Style = (Style)Resources["CodeBlockBorder"];
+        if (id == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
+
+        newBlock.Tag = new IndexedEntry(entry, id);
+
+        _lastSelectedBlock = newBlock;
+        _lastSelectedBlock.Background = _selectedBackground;
+
+        CodeBlocks.Children[id - 1] = newBlock;
     }
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
@@ -364,11 +486,51 @@ public sealed partial class MainPage : Page
         }
         else
         {
-            // Imptlement flyout or smth idk
+            ShowMessageBox("To add this method use the context menu in QForm");
         }
 
     }
+    private async void ShowMessageBox(string content) {
+        var dialog = new MessageBox(content);
+        dialog.XamlRoot = this.XamlRoot;
 
+        await dialog.ShowAsync();
+    }
+
+    //private void Separator_PointerPressed(object sender, PointerRoutedEventArgs e)
+    //{
+    //    _isResizing = true;
+    //    _initialPosition = e.GetCurrentPoint(MainDialogGrid).Position.X;
+    //    var separator = sender as Border;
+    //    int columnIndex = int.Parse(separator.Tag.ToString());
+    //    _firstMovedColumn = MainDialogGrid.ColumnDefinitions[columnIndex - 1];
+    //    _secondMovedColumn = MainDialogGrid.ColumnDefinitions[columnIndex + 1];
+    //    separator.CapturePointer(e.Pointer);
+    //}
+
+    //private void Separator_PointerMoved(object sender, PointerRoutedEventArgs e)
+    //{
+    //    if (!_isResizing)
+    //        return;
+
+    //    double currentPosition = e.GetCurrentPoint(MainDialogGrid).Position.X;
+    //    double delta = currentPosition - _initialPosition;
+
+    //    double newFirstWidth = _firstMovedColumn.ActualWidth + delta;
+    //    double newSecondWidth = _secondMovedColumn.ActualWidth - delta;
+    //    if (newFirstWidth > 0 && newFirstWidth < this.Width && newSecondWidth > 0 && newSecondWidth < this.Width)
+    //    {
+    //        _firstMovedColumn.Width = new GridLength(_firstMovedColumn.ActualWidth + delta);
+    //        _secondMovedColumn.Width = new GridLength(_secondMovedColumn.ActualWidth - delta);
+    //        _initialPosition = currentPosition;
+    //    }
+    //}
+
+    //private void Separator_PointerReleased(object sender, PointerRoutedEventArgs e)
+    //{
+    //    _isResizing = false;
+    //    (sender as UIElement).ReleasePointerCapture(e.Pointer);
+    //}
 }
 
 public enum ParameterTypes
