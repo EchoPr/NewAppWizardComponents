@@ -15,6 +15,7 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
     public ApiEntry apiEntry;
     public PropertyInfo property;
+    public bool isResult;
 
     public Type elementType;
     public IList collection;
@@ -25,15 +26,16 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
     private Stack<EditingCommand> _commandsStack = new Stack<EditingCommand>();
 
-    public EditCollectionDialog(ApiEntry apiEntry_, PropertyInfo property_)
+    public EditCollectionDialog(ApiEntry apiEntry_, PropertyInfo property_, bool isResult_)
 	{
 		this.InitializeComponent();
 
         apiEntry = apiEntry_;
         property = property_;
+        isResult = isResult_;
 
         elementType = property.PropertyType.GetGenericArguments()[0];
-        collection = property.GetValue(apiEntry.arg_value) as IList;
+        collection = (isResult ? property.GetValue(apiEntry.ret_value) : property.GetValue(apiEntry.arg_value)) as IList;
 
         LoadRowDefinitions();
         LoadElements();
@@ -230,6 +232,8 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
     private void OnValueChanged(PropertyInfo property, string newValue, object entry, TextBox visualBlock, Grid container, bool isSingleVar)
     {
+        if (isResult) return;
+
         try
         {
             var targetType = property.PropertyType;
@@ -287,6 +291,8 @@ public sealed partial class EditCollectionDialog : ContentDialog
 
     private void AddButtonClick(object sender, RoutedEventArgs e)
     {
+        if (isResult) return;
+
         object value = Activator.CreateInstance(elementType);
         collection.Add(value);
 
@@ -297,6 +303,8 @@ public sealed partial class EditCollectionDialog : ContentDialog
     }
     private void RemoveButtonClick(object sender, RoutedEventArgs e)
     {
+        if (isResult) return;
+
         if (_lastSelectedBlock == null) return;
 
         int id = (_lastSelectedBlock.Tag as Tuple<object, int>).Item2;

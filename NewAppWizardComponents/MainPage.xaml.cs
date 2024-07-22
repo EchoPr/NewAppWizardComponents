@@ -118,7 +118,7 @@ public sealed partial class MainPage : Page
         newBlock.Style = (Style)Resources["CodeBlockBorder"];
         if (num == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
-        newBlock.Tag = new IndexedEntry(entry, num);
+        newBlock.Tag = new ExpandedEntry(entry, num);
 
         return newBlock;
     }
@@ -129,7 +129,7 @@ public sealed partial class MainPage : Page
         ClearShownParameters();
     }
 
-    private void ShowParameters(ApiEntry entry, ParameterTypes type, Border container)
+    private void ShowParameters(ApiEntry entry, ParameterTypes type)
     {
         Type parameters;
         Grid dest;
@@ -167,8 +167,7 @@ public sealed partial class MainPage : Page
                     property, 
                     property.GetValue(type == ParameterTypes.Input ? entry.arg_value : entry.ret_value), 
                     entry, 
-                    type == ParameterTypes.Output,
-                    container
+                    type == ParameterTypes.Output
                 );
 
                 Grid.SetRow(propertyNameVisual, i);
@@ -188,7 +187,7 @@ public sealed partial class MainPage : Page
         OutputParametersGrid.Children.Clear();
     }
 
-    private FrameworkElement CreateControlForProperty(PropertyInfo property, object value, ApiEntry entry, bool isResult, Border container)
+    private FrameworkElement CreateControlForProperty(PropertyInfo property, object value, ApiEntry entry, bool isResult)
     {
         // ComboBox True/False
         if (property.PropertyType == typeof(bool))
@@ -201,17 +200,13 @@ public sealed partial class MainPage : Page
             comboBox.SelectedIndex = Convert.ToInt32(value);
             comboBox.Tag = property;
 
-            if (isResult) 
-            { 
-                comboBox.IsEnabled = false;
-                comboBox.Foreground = (Brush)Resources["BoxBorderPrimary"];
-            }
             
             comboBox.SelectionChanged += (s, e) =>
             {
-                property.SetValue(entry.arg_value, Convert.ToBoolean(comboBox.SelectedIndex));
+                if (isResult) property.SetValue(entry.ret_value, Convert.ToBoolean(comboBox.SelectedIndex));
+                else property.SetValue(entry.arg_value, Convert.ToBoolean(comboBox.SelectedIndex));
 
-                EditCodeBlock(container);
+                EditCodeBlock();
             };
 
             comboBox.Style = (Style)Resources["ParameterValueComboBox"];
@@ -228,8 +223,7 @@ public sealed partial class MainPage : Page
             }
             if (isResult)
             {
-                comboBox.IsEnabled = false;
-                comboBox.Foreground = (Brush)Resources["BoxBorderPrimary"];
+                comboBox.SelectedItem = property.GetValue(entry.ret_value)?.ToString();
             }
             else
                 comboBox.SelectedItem = property.GetValue(entry.arg_value)?.ToString();
@@ -239,9 +233,11 @@ public sealed partial class MainPage : Page
             {
                 var selectedValue = comboBox.SelectedItem.ToString();
                 var enumValue = Enum.Parse(property.PropertyType, selectedValue);
-                property.SetValue(entry.arg_value, enumValue);
+                
+                if (isResult) property.SetValue(entry.ret_value, enumValue);
+                else property.SetValue(entry.arg_value, enumValue);
 
-                EditCodeBlock(container);
+                EditCodeBlock();
             };
 
             comboBox.Style = (Style)Resources["ParameterValueComboBox"];
@@ -252,10 +248,10 @@ public sealed partial class MainPage : Page
         else if (property.PropertyType.GetInterfaces().Contains(typeof(IList)))
         {
             var button = new Button();
-            button.Content = "Edit collection";
+            button.Content = "View items";
             button.Style = (Style)Resources["EditCollectionButton"];
 
-            button.Click += (s, e) => OnChangeCollection(entry, property);
+            button.Click += (s, e) => OnChangeCollection(entry, property, isResult);
 
             return button;
         }
@@ -266,10 +262,8 @@ public sealed partial class MainPage : Page
             textBox.Text = value?.ToString();
             textBox.Tag = property;
 
-            if (isResult) 
-                textBox.IsReadOnly = true;
-            else 
-                textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, container);
+             
+            textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox);
 
             textBox.Style = (Style)Resources["ParameterValueTextBox"];
 
@@ -277,7 +271,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void OnValueChanged(System.Reflection.PropertyInfo property, string newValue, ApiEntry entry, Control visualBlock, Border container)
+    private void OnValueChanged(System.Reflection.PropertyInfo property, string newValue, ApiEntry entry, Control visualBlock)
     {
         try
         {
@@ -300,7 +294,7 @@ public sealed partial class MainPage : Page
                 Debug.WriteLine("A property of a non-built-in type was changed, but this could not have any consequences.");
             }
 
-            EditCodeBlock(container);
+            EditCodeBlock();
             visualBlock.Background = (SolidColorBrush)Resources["Transparent"];
         }
         catch (Exception ex)
@@ -310,20 +304,29 @@ public sealed partial class MainPage : Page
         }
     }
 
-    void EditCodeBlock(Border container)
+    void EditCodeBlock()
     {
-        var meta = container.Tag as IndexedEntry;
-        var editedBlock = CreateViewCodeBlock(CodeBlocks, meta.apiEntry, meta.index);
+        var meta = _lastSelectedBlock.Tag as ExpandedEntry;
 
-        _lastSelectedBlock = editedBlock;
-        _lastSelectedBlock.Background = _selectedBackground;
+        if (meta.isConnectedBlockSequentialInitialized)
+        {
+            
+            ChangeBlockInitializationType();
+        }
+        else
+        {
+            var editedBlock = CreateViewCodeBlock(CodeBlocks, meta.apiEntry, meta.index);
 
-        CodeBlocks.Children[meta.index - 1] = editedBlock;
+            _lastSelectedBlock = editedBlock;
+            _lastSelectedBlock.Background = _selectedBackground;
+
+            CodeBlocks.Children[meta.index - 1] = editedBlock;
+        }
     }
 
-    private async void OnChangeCollection(ApiEntry entry, PropertyInfo property)
+    private async void OnChangeCollection(ApiEntry entry, PropertyInfo property, bool isResult)
     {
-        var dialog = new EditCollectionDialog(entry, property);
+        var dialog = new EditCollectionDialog(entry, property, isResult);
         dialog.XamlRoot = this.XamlRoot;
         var result = await dialog.ShowAsync();
 
@@ -342,7 +345,7 @@ public sealed partial class MainPage : Page
 
         //Debug.WriteLine((_lastSelectedBlock.Child as TextBlock).Text);
 
-        var tag = _lastSelectedBlock.Tag as IndexedEntry;
+        var tag = _lastSelectedBlock.Tag as ExpandedEntry;
         ApiEntry entry = tag.apiEntry;
         int id = tag.index;
 
@@ -444,7 +447,7 @@ public sealed partial class MainPage : Page
         newBlock.Style = (Style)Resources["CodeBlockBorder"];
         if (id == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
-        newBlock.Tag = new IndexedEntry(entry, id);
+        newBlock.Tag = new ExpandedEntry(entry, id, true);
 
         _lastSelectedBlock = newBlock;
         _lastSelectedBlock.Background = _selectedBackground;
@@ -465,12 +468,12 @@ public sealed partial class MainPage : Page
             selectedBlock.Background = _selectedBackground;
             _lastSelectedBlock = selectedBlock;
 
-            var entry = (selectedBlock.Tag as IndexedEntry).apiEntry;
+            var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
 
             ClearShownParameters();
 
-            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input, selectedBlock);
-            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output, selectedBlock);
+            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
+            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
         }
 
     }
