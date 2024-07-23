@@ -1,5 +1,7 @@
 
 
+using System.Collections.ObjectModel;
+
 namespace NewAppWizardComponents;
 internal class Helpers
 {
@@ -24,6 +26,12 @@ public class ValueProperty<T> : IValueProperty
         get => value;
         set => this.value = (T)value;
     }
+}
+
+public class CategoryViewModel
+{
+    public string CategoryName { get; set; }
+    public ObservableCollection<ApiEntry> Methods { get; set; } = new ObservableCollection<ApiEntry>();
 }
 
 

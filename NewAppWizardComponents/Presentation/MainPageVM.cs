@@ -24,6 +24,17 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
+    private ObservableCollection<TreeViewItemModel> _treeViewItems;
+    public ObservableCollection<TreeViewItemModel> TreeViewItems
+    {
+        get => _treeViewItems;
+        set
+        {
+            _treeViewItems = value;
+            OnPropertyChanged();
+        }
+    }
+
     public int lastSelectedBlock { get; set; }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -34,8 +45,9 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         CodeBlocks = new ObservableCollection<ApiEntry>();
         ReadAllMethodParameters();
-
+        PopulateTreeViewItems();
     }
+
     public void AddToCodeBlocks(ApiEntry method)
     {
         if (method != null)
@@ -54,6 +66,40 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         Methods = new List<ApiEntry>();
         QForm.api_get(Methods);
+        PopulateTreeViewItems(); // Populate and sort TreeView items after loading data
+    }
+
+    private void PopulateTreeViewItems()
+    {
+        var categoryDict = new Dictionary<string, TreeViewItemModel>();
+
+        foreach (var method in Methods)
+        {
+            foreach (var group in method.groups)
+            {
+                if (!categoryDict.ContainsKey(group.key))
+                {
+                    categoryDict[group.key] = new TreeViewItemModel(group.key, method);
+                }
+                categoryDict[group.key].Children.Add(new TreeViewItemModel(method.Name, method));
+            }
+        }
+
+        // Create TreeView collection and sort it by category keys
+        TreeViewItems = new ObservableCollection<TreeViewItemModel>(
+            categoryDict.Values.OrderBy(c => c.Name)
+        );
+
+        // Sort children of each category by name
+        foreach (var category in TreeViewItems)
+        {
+            var sortedChildren = category.Children.OrderBy(c => c.Name).ToList();
+            category.Children.Clear();
+            foreach (var child in sortedChildren)
+            {
+                category.Children.Add(child);
+            }
+        }
     }
 
     [RelayCommand]
@@ -63,26 +109,22 @@ public partial class MainPageVM : INotifyPropertyChanged
         ClearedCodeBlocks?.Invoke(this, EventArgs.Empty);
     }
 
-    //public void OpenEditCollectionWindow(ApiEntry entry) {
-        
-
-    //    var dialog = new EditCollectionDialog();
-    //    dialog.XamlRoot = this.XamlRoot;
-    //    var result = await dialog.ShowAsync();
-
-    //    if (result == ContentDialogResult.Primary)
-    //    {
-    //        Debug.WriteLine("Pressed OK!");
-    //    }
-    //    else if (result == ContentDialogResult.Secondary)
-    //    {
-    //        Debug.WriteLine("Pressed Cancel!");
-    //    }
-    //}
-
     public void OnModifingApiEntryChanged(ApiEntry entry)
     {
-
     }
+}
 
+
+public class TreeViewItemModel
+{
+    public string Name { get; set; }
+    public ObservableCollection<TreeViewItemModel> Children { get; set; }
+    public ApiEntry apiEntry { get; set; }
+
+    public TreeViewItemModel(string name, ApiEntry apiEntry)
+    {
+        Name = name;
+        Children = new ObservableCollection<TreeViewItemModel>();
+        this.apiEntry = apiEntry;
+    }
 }

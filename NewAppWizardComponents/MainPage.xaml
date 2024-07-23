@@ -76,17 +76,47 @@
 
     
     <!--Methods list-->
-    <ListView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"
-                  x:Name="MethodsList"
-                  ItemsSource="{Binding Methods}"
-                  IsItemClickEnabled="True" ItemClick="OnItemClick"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Margin="16" Padding="8">
-      <ListView.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding Name}" />
-        </DataTemplate>
-      </ListView.ItemTemplate>
-    </ListView>
+    <TabView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="16"
+             AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
+             BorderBrush="#E0E0E0" BorderThickness="1 0 1 1">
+      <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
+
+        <!--Втф как это вообще работает-->
+
+        <TreeView ItemsSource="{x:Bind mainPageVM.TreeViewItems}"
+                  AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
+                  ItemInvoked="TreeView_ItemInvoked" Background="White">
+          <TreeView.ItemTemplate>
+            <DataTemplate x:DataType="local:TreeViewItemModel" >
+              <TreeViewItem ItemsSource="{x:Bind Children}" Content="{x:Bind Name}"/>
+            </DataTemplate>
+          </TreeView.ItemTemplate>
+        </TreeView>
+
+      </TabViewItem>
+
+      <TabViewItem IsClosable="False" Header="All methods" HorizontalAlignment="Left">
+        <ListView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"
+              x:Name="MethodsList"
+              ItemsSource="{Binding Methods}"
+              IsItemClickEnabled="True" ItemClick="OnItemClick"
+              Background="White" Padding="8">
+          <ListView.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+          </ListView.ItemTemplate>
+        </ListView>
+        
+      </TabViewItem>
+    </TabView>
+
+    
+    <TreeView>
+      
+    </TreeView>
+
+    
 
     
     <!-- Code view -->

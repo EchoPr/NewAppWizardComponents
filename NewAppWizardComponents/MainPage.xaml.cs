@@ -56,8 +56,12 @@ public sealed partial class MainPage : Page
 
         mainPageVM.AddedNewCodeBlock += AddNewCodeBlock;
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
-    }
 
+    }
+    private void MyTreeView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        Debug.WriteLine("!=!=!=!");
+    }
     public void AddNewCodeBlock(object sender, EventArgs e) {
         CodeBlocks.Children.Add(CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count)); 
     }
@@ -536,6 +540,23 @@ public sealed partial class MainPage : Page
     {
         _isResizing = false;
         (sender as UIElement).ReleasePointerCapture(e.Pointer);
+    }
+
+    private void TreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
+    {
+        var clickedItem = (args.InvokedItem as TreeViewItemModel);
+
+        if (clickedItem.Children.Count != 0) return;
+
+        if (!clickedItem.apiEntry.menu_only)
+        {
+
+            mainPageVM.AddToCodeBlocks(clickedItem.apiEntry);
+        }
+        else
+        {
+            ShowMessageBox("To add this method use the context menu in QForm");
+        }
     }
 }
 
