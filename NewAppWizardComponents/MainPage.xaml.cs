@@ -1,16 +1,10 @@
-using System;
+
 using System.Collections;
-using System.ComponentModel;
-using System.Data.Common;
 using System.Diagnostics;
-using System.Drawing;
 using System.Reflection;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Hosting;
-using Windows.UI;
-using Windows.UI.WindowManagement;
 using Microsoft.UI.Xaml.Input;
+using Windows.UI.Core;
 
 
 namespace NewAppWizardComponents;
@@ -18,6 +12,8 @@ namespace NewAppWizardComponents;
 public sealed partial class MainPage : Page
 {
     public MainPageVM mainPageVM;
+    
+    private CoreDispatcher dispatcher;
 
     SolidColorBrush? codeTypeBrush;
     SolidColorBrush? codeDefaultBrush;
@@ -42,6 +38,8 @@ public sealed partial class MainPage : Page
         mainPageVM = new MainPageVM();
         this.DataContext = mainPageVM;
 
+       
+
         codeTypeBrush = Resources["CodeType"] as SolidColorBrush;
         codeDefaultBrush = Resources["CodeDefault"] as SolidColorBrush;
         codeKeywordBrush = Resources["CodeKeyword"] as SolidColorBrush;
@@ -58,15 +56,14 @@ public sealed partial class MainPage : Page
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
 
     }
-    private void MyTreeView_ItemClick(object sender, ItemClickEventArgs e)
-    {
-        Debug.WriteLine("!=!=!=!");
-    }
+
     public void AddNewCodeBlock(object sender, EventArgs e) {
-        CodeBlocks.Children.Add(CreateViewCodeBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count)); 
+        Border newBlock = CreateObjectInitializedBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, false);
+        CodeBlocks.Children.Add(newBlock);
+        ScrollToCodeBlock(newBlock);
     }
 
-    public Border CreateViewCodeBlock(StackPanel codeContainer, ApiEntry entry, int num)
+    public Border CreateObjectInitializedBlock(StackPanel codeContainer, ApiEntry entry, int num, bool editingMode)
     {
         var newCodeLines = new TextBlock();
 
@@ -116,6 +113,7 @@ public sealed partial class MainPage : Page
         newCodeLines.AllowFocusOnInteraction = true;
         newCodeLines.GotFocus += CodeBlockGotFocus;
 
+
         var newBlock = new Border();
 
         newBlock.Child = newCodeLines;
@@ -123,6 +121,122 @@ public sealed partial class MainPage : Page
         if (num == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
         newBlock.Tag = new ExpandedEntry(entry, num);
+
+        SetCodeBlockSelection(newBlock);
+        if (!editingMode)
+            ShowParameters(entry);
+
+        return newBlock;
+    }
+    private Border CreateStepByStepInitializedBlock(bool editingMode)
+    {
+        var newCodeLines = new TextBlock();
+
+        var tag = _lastSelectedBlock.Tag as ExpandedEntry;
+        ApiEntry entry = tag.apiEntry;
+        int id = tag.index;
+
+        if (entry.arg_type != null)
+        {
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"arg{id} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]}", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
+            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+
+            PropertyInfo[] properties = entry.arg_type.GetProperties();
+
+            foreach (PropertyInfo property in properties)
+            {
+                var value = property.GetValue(entry.arg_value);
+
+                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                {
+                    var val = value as IList;
+                    var elementType = property.PropertyType.GetGenericArguments()[0];
+
+                    if (elementType == typeof(int) || elementType == typeof(double) ||
+                        elementType == typeof(bool) || elementType == typeof(string)) 
+                    {
+                        foreach(var v in val)
+                        {
+                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.{property.Name}.", Foreground = codeDefaultBrush});
+                            newCodeLines.Inlines.Add(new Run { Text = "Add", Foreground = codeMethodBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"{v}", Foreground = codeValueBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < val.Count; i++)
+                        {
+                            string objectName = val[i].GetType().Name[1..];
+                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName} ", Foreground = codeTypeBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id + 1}_object{i + 1}", Foreground = codeDefaultBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName}", Foreground = codeTypeBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
+                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
+
+                            PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
+                            foreach( PropertyInfo innerProperty in innerProperties)
+                            {
+                                newCodeLines.Inlines.Add(new Run { Text = $"{objectName}.", Foreground = codeDefaultBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.Name} ", Foreground = codeDefaultBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.GetValue(val[i])}", Foreground = codeValueBrush });
+                                newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
+                            }
+                        }
+                    }
+
+                }
+                else
+                {
+                    newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.", Foreground = codeDefaultBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"{property.Name} ", Foreground = codeDefaultBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $"{value}", Foreground = codeValueBrush });
+                    newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
+
+                }
+            }
+        }
+
+        if (entry.ret_type != null)
+        {
+            newCodeLines.Inlines.Add(new Run { Text = $"{entry.ret_type.Name[1..]} ", Foreground = codeTypeBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"ret{id} ", Foreground = codeDefaultBrush });
+            newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
+        }
+
+        newCodeLines.Inlines.Add(new Run { Text = "qform.", Foreground = codeDefaultBrush });
+        newCodeLines.Inlines.Add(new Run { Text = $"{entry.Name}", Foreground = codeMethodBrush });
+        newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
+
+        if (entry.arg_type != null) { newCodeLines.Inlines.Add(new Run { Text = $"arg{id}", Foreground = codeDefaultBrush }); }
+
+        newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
+        newCodeLines.Inlines.Add(new Run { Text = ";", Foreground = codeDefaultBrush });
+
+        newCodeLines.Style = (Style)Resources["CodeBlock"];
+        newCodeLines.AllowFocusOnInteraction = true;
+        newCodeLines.GotFocus += CodeBlockGotFocus;
+
+        var newBlock = new Border();
+
+        newBlock.Child = newCodeLines;
+        newBlock.Style = (Style)Resources["CodeBlockBorder"];
+        if (id == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
+
+        newBlock.Tag = new ExpandedEntry(entry, id, true);
+
+        SetCodeBlockSelection(newBlock);
+        if (!editingMode)
+            ShowParameters(entry);
 
         return newBlock;
     }
@@ -267,7 +381,7 @@ public sealed partial class MainPage : Page
             textBox.Tag = property;
 
              
-            textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox);
+            textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, isResult);
 
             textBox.Style = (Style)Resources["ParameterValueTextBox"];
 
@@ -275,7 +389,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void OnValueChanged(System.Reflection.PropertyInfo property, string newValue, ApiEntry entry, Control visualBlock)
+    private void OnValueChanged(System.Reflection.PropertyInfo property, string newValue, ApiEntry entry, Control visualBlock, bool isResult)
     {
         try
         {
@@ -283,15 +397,15 @@ public sealed partial class MainPage : Page
 
             if (targetType == typeof(int))
             {
-                property.SetValue(entry.arg_value, int.Parse(newValue));
+                property.SetValue(isResult ? entry.ret_value : entry.arg_value, int.Parse(newValue));
             }
             else if (targetType == typeof(double))
             {
-                property.SetValue(entry.arg_value, double.Parse(newValue));
+                property.SetValue(isResult ? entry.ret_value : entry.arg_value, double.Parse(newValue));
             }
             else if (targetType == typeof(string))
             {
-                property.SetValue(entry.arg_value, newValue);
+                property.SetValue(isResult ? entry.ret_value : entry.arg_value, newValue);
             }
             else
             {
@@ -301,9 +415,8 @@ public sealed partial class MainPage : Page
             EditCodeBlock();
             visualBlock.Background = (SolidColorBrush)Resources["Transparent"];
         }
-        catch (Exception ex)
+        catch
         {
-            Debug.WriteLine($"Invalid value {newValue} for property {property.Name}");
             visualBlock.Background = (SolidColorBrush)Resources["FailStatus"];
         }
     }
@@ -312,20 +425,19 @@ public sealed partial class MainPage : Page
     {
         var meta = _lastSelectedBlock.Tag as ExpandedEntry;
 
+        Border updatedBlock;
         if (meta.isConnectedBlockSequentialInitialized)
         {
-            
-            ChangeBlockInitializationType();
+
+            updatedBlock = CreateStepByStepInitializedBlock(true);
         }
         else
         {
-            var editedBlock = CreateViewCodeBlock(CodeBlocks, meta.apiEntry, meta.index);
-
-            _lastSelectedBlock = editedBlock;
-            _lastSelectedBlock.Background = _selectedBackground;
-
-            CodeBlocks.Children[meta.index - 1] = editedBlock;
+            updatedBlock = CreateObjectInitializedBlock(CodeBlocks, meta.apiEntry, meta.index, true);
         }
+
+        CodeBlocks.Children[meta.index - 1] = updatedBlock;
+
     }
 
     private async void OnChangeCollection(ApiEntry entry, PropertyInfo property, bool isResult)
@@ -336,150 +448,53 @@ public sealed partial class MainPage : Page
 
         if (result == ContentDialogResult.Primary)
         {
-            ChangeBlockInitializationType();
+            if (!isResult)
+                CodeBlocks.Children[CodeBlocks.Children.Count - 1] = CreateStepByStepInitializedBlock(true);
         }
         else if (result == ContentDialogResult.Secondary)
         {
         }
     }
 
-    private void ChangeBlockInitializationType()
-    {
-        var newCodeLines = new TextBlock();
 
-        //Debug.WriteLine((_lastSelectedBlock.Child as TextBlock).Text);
-
-        var tag = _lastSelectedBlock.Tag as ExpandedEntry;
-        ApiEntry entry = tag.apiEntry;
-        int id = tag.index;
-
-        if (entry.arg_type != null)
-        {
-            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]} ", Foreground = codeTypeBrush });
-            newCodeLines.Inlines.Add(new Run { Text = $"arg{id} ", Foreground = codeDefaultBrush });
-            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
-            newCodeLines.Inlines.Add(new Run { Text = $"{entry.arg_type.Name[1..]}", Foreground = codeTypeBrush });
-            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
-            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
-
-            PropertyInfo[] properties = entry.arg_type.GetProperties();
-
-            foreach (PropertyInfo property in properties)
-            {
-                var value = property.GetValue(entry.arg_value);
-
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
-                {
-                    var val = value as IList;
-                    var elementType = property.PropertyType.GetGenericArguments()[0];
-                    Debug.WriteLine(elementType);
-
-                    if (elementType == typeof(int) || elementType == typeof(double) ||
-                        elementType == typeof(bool) || elementType == typeof(string)) 
-                    {
-                        Debug.WriteLine("!!!!!");
-                        foreach(var v in val)
-                        {
-                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.{property.Name}.", Foreground = codeDefaultBrush});
-                            newCodeLines.Inlines.Add(new Run { Text = "Add", Foreground = codeMethodBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = $"{v}", Foreground = codeValueBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < val.Count; i++)
-                        {
-                            string objectName = val[i].GetType().Name[1..];
-                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName} ", Foreground = codeTypeBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = $"arg{id + 1}_object{i + 1}", Foreground = codeDefaultBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = "= new ", Foreground = codeKeywordBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = $"{objectName}", Foreground = codeTypeBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = "()", Foreground = codeBracketsBrush });
-                            newCodeLines.Inlines.Add(new Run { Text = ";\n", Foreground = codeDefaultBrush });
-
-                            PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
-                            foreach( PropertyInfo innerProperty in innerProperties)
-                            {
-                                newCodeLines.Inlines.Add(new Run { Text = $"{objectName}.", Foreground = codeDefaultBrush });
-                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.Name} ", Foreground = codeDefaultBrush });
-                                newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
-                                newCodeLines.Inlines.Add(new Run { Text = $"{innerProperty.GetValue(val[i])}", Foreground = codeValueBrush });
-                                newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
-                            }
-                        }
-                    }
-
-                }
-                else
-                {
-                    newCodeLines.Inlines.Add(new Run { Text = $"arg{id}.", Foreground = codeDefaultBrush });
-                    newCodeLines.Inlines.Add(new Run { Text = $"{property.Name} ", Foreground = codeDefaultBrush });
-                    newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
-                    newCodeLines.Inlines.Add(new Run { Text = $"{value}", Foreground = codeValueBrush });
-                    newCodeLines.Inlines.Add(new Run { Text = $";\n", Foreground = codeDefaultBrush });
-
-                }
-            }
-        }
-
-        if (entry.ret_type != null)
-        {
-            newCodeLines.Inlines.Add(new Run { Text = $"{entry.ret_type.Name[1..]} ", Foreground = codeTypeBrush });
-            newCodeLines.Inlines.Add(new Run { Text = $"ret{id} ", Foreground = codeDefaultBrush });
-            newCodeLines.Inlines.Add(new Run { Text = $"= ", Foreground = codeKeywordBrush });
-        }
-
-        newCodeLines.Inlines.Add(new Run { Text = "qform.", Foreground = codeDefaultBrush });
-        newCodeLines.Inlines.Add(new Run { Text = $"{entry.Name}", Foreground = codeMethodBrush });
-        newCodeLines.Inlines.Add(new Run { Text = "(", Foreground = codeBracketsBrush });
-
-        if (entry.arg_type != null) { newCodeLines.Inlines.Add(new Run { Text = $"arg{id}", Foreground = codeDefaultBrush }); }
-
-        newCodeLines.Inlines.Add(new Run { Text = ")", Foreground = codeBracketsBrush });
-        newCodeLines.Inlines.Add(new Run { Text = ";", Foreground = codeDefaultBrush });
-
-        newCodeLines.Style = (Style)Resources["CodeBlock"];
-        newCodeLines.AllowFocusOnInteraction = true;
-        newCodeLines.GotFocus += CodeBlockGotFocus;
-
-        var newBlock = new Border();
-
-        newBlock.Child = newCodeLines;
-        newBlock.Style = (Style)Resources["CodeBlockBorder"];
-        if (id == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
-
-        newBlock.Tag = new ExpandedEntry(entry, id, true);
-
-        _lastSelectedBlock = newBlock;
-        _lastSelectedBlock.Background = _selectedBackground;
-
-        CodeBlocks.Children[id - 1] = newBlock;
-    }
-
-    private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
+    private void SetCodeBlockSelection(Border newBlock)
     {
         if (_lastSelectedBlock != null)
         {
             _lastSelectedBlock.Background = _defaultBackground;
         }
 
+        _lastSelectedBlock = newBlock;
+        _lastSelectedBlock.Background = _selectedBackground;
+    }
+
+    private async void ScrollToCodeBlock(Border block)
+    {
+        await Task.Delay(100);
+
+        double posY = block.TransformToVisual(CodeView.Content as UIElement).TransformPoint(new Windows.Foundation.Point()).Y;
+        CodeView.ChangeView(null, posY, null);
+    }
+
+    private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
+    {
         var selectedBlock = (Border)VisualTreeHelper.GetParent((TextBlock)sender);
-        if (selectedBlock != null)
-        {
-            selectedBlock.Background = _selectedBackground;
-            _lastSelectedBlock = selectedBlock;
+        if (selectedBlock == null) return;
+        
+        SetCodeBlockSelection(selectedBlock);
+        ScrollToCodeBlock(selectedBlock);
 
-            var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
+        var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
+        ShowParameters(entry);
+        
+    }
 
-            ClearShownParameters();
+    private void ShowParameters(ApiEntry entry) 
+    {
+        ClearShownParameters();
 
-            if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
-            if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
-        }
-
+        if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
+        if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
     }
 
     public void OnItemClick(object sender, ItemClickEventArgs e)

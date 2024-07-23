@@ -19,17 +19,15 @@
     <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
   </PropertyGroup>
   <ItemGroup>
-    <Content Remove="Assets\Fonts\Roboto-Black.ttf" />
-    <Content Remove="Assets\Fonts\Roboto-Bold.ttf" />
-    <Content Remove="Assets\Fonts\Roboto-Medium.ttf" />
-    <Content Remove="Assets\Fonts\Roboto-Regular.ttf" />
-    <Content Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
+    <None Remove="Assets\Fonts\Roboto-Black.ttf" />
+    <None Remove="Assets\Fonts\Roboto-Bold.ttf" />
+    <None Remove="Assets\Fonts\Roboto-Medium.ttf" />
+    <None Remove="Assets\Fonts\Roboto-Regular.ttf" />
+    <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
@@ -74,6 +72,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <UpToDateCheckInput Remove="Resources\CustomButtons.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="EditCollectionDialog.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="MessageBox.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Page Update="Resources\Controls\BlockScrollViewer.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
@@ -86,18 +96,6 @@
     <Page Update="Resources\TextStyling.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Resources\CustomButtons.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="EditCollectionDialog.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="MessageBox.xaml" />
   </ItemGroup>
 
 </Project>

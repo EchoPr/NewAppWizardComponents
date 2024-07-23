@@ -37,7 +37,7 @@
       <StackPanel  x:Name="CollectionElements" />
     </ScrollViewer>
 
-    <Grid Grid.Column="0" Grid.Row="2" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="16 0 0 16" >
+    <Grid Grid.Column="0" Grid.Row="2" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="16 0 0 16" x:Name="ButtonsEdit">
       <Button Grid.Column="0" Style="{StaticResource EditCollectionButton}" Margin="0 0 8 0" Click="AddButtonClick">Add</Button>
       <Button Grid.Column="1" Style="{StaticResource EditCollectionButton}" Margin="8 0 0 0" Click="RemoveButtonClick">Remove</Button>
     </Grid>

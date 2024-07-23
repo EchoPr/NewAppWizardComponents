@@ -8,8 +8,8 @@
   <Page.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Resources/CustomColors.xaml"/>
         <ResourceDictionary Source="Resources/TextStyling.xaml"/>
+        <ResourceDictionary Source="Resources/CustomColors.xaml"/>
         <ResourceDictionary Source="Resources/CustomBorders.xaml"/>
         <ResourceDictionary Source="Resources/CustomButtons.xaml"/>
         <ResourceDictionary Source="Resources/Controls/BlockScrollViewer.xaml"/>

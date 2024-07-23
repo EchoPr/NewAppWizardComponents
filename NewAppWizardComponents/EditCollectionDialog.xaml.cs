@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.UI.Xaml.Input;
 using Newtonsoft.Json;
+using Windows.UI.ViewManagement;
 
 namespace NewAppWizardComponents;
 
@@ -35,11 +36,23 @@ public sealed partial class EditCollectionDialog : ContentDialog
         isResult = isResult_;
 
         elementType = property.PropertyType.GetGenericArguments()[0];
-        collection = (isResult ? property.GetValue(apiEntry.ret_value) : property.GetValue(apiEntry.arg_value)) as IList;
+
+        if (isResult)
+        {
+            property.SetValue(apiEntry.ret_value, (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType)));
+            collection = property.GetValue(apiEntry.ret_value) as IList;
+        }
+        else
+        {
+            collection = property.GetValue(apiEntry.arg_value) as IList;
+        }
 
         LoadRowDefinitions();
         LoadElements();
-	}
+
+        if (isResult) ButtonsEdit.Visibility = Visibility.Collapsed;
+
+    }
 
     private void LoadRowDefinitions()
     {
@@ -328,11 +341,6 @@ public sealed partial class EditCollectionDialog : ContentDialog
     {
         ClearVisual();
         _commandsStack.Clear();
-
-        foreach (var item in collection)
-        {
-            Debug.WriteLine(item.ToString() + " ");
-        }
     }
 
 	private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
