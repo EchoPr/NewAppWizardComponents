@@ -12,8 +12,6 @@ namespace NewAppWizardComponents;
 public sealed partial class MainPage : Page
 {
     public MainPageVM mainPageVM;
-    
-    private CoreDispatcher dispatcher;
 
     SolidColorBrush? codeTypeBrush;
     SolidColorBrush? codeDefaultBrush;
@@ -56,6 +54,8 @@ public sealed partial class MainPage : Page
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
 
     }
+
+    
 
     public void AddNewCodeBlock(object sender, EventArgs e) {
         Border newBlock = CreateObjectInitializedBlock(CodeBlocks, mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, false);
@@ -563,10 +563,10 @@ public sealed partial class MainPage : Page
 
         if (clickedItem.Children.Count != 0) return;
 
-        if (!clickedItem.apiEntry.menu_only)
+        if (!clickedItem.ApiEntry.menu_only)
         {
 
-            mainPageVM.AddToCodeBlocks(clickedItem.apiEntry);
+            mainPageVM.AddToCodeBlocks(clickedItem.ApiEntry);
         }
         else
         {

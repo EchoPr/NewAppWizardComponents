@@ -80,19 +80,27 @@
              AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
              BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
       <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
 
-        <!--Втф как это вообще работает-->
+          <TextBox Grid.Row="0" Name="FilterMethodsTree"
+             PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}" BorderThickness="0 0 0 1"
+             TextChanged="{x:Bind mainPageVM.FilterMethodsTreeTextChanged, Mode=OneWay}"/>
 
-        <TreeView ItemsSource="{x:Bind mainPageVM.TreeViewItems}"
-                  AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
-                  ItemInvoked="TreeView_ItemInvoked" Background="White">
-          <TreeView.ItemTemplate>
-            <DataTemplate x:DataType="local:TreeViewItemModel" >
-              <TreeViewItem ItemsSource="{x:Bind Children}" Content="{x:Bind Name}"/>
-            </DataTemplate>
-          </TreeView.ItemTemplate>
-        </TreeView>
-
+          <TreeView Grid.Row="1" ItemsSource="{x:Bind mainPageVM.TreeViewItems, Mode=OneWay}"
+          AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
+          ItemInvoked="TreeView_ItemInvoked" Background="White" x:Name="TreeViewMethods">
+            <TreeView.ItemTemplate>
+              <DataTemplate x:DataType="local:TreeViewItemModel">
+                <TreeViewItem ItemsSource="{x:Bind Children, Mode=OneWay}" Content="{x:Bind Name}"
+                          Visibility="{x:Bind ViewVisibility, Mode=OneWay}"/>
+              </DataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </Grid>
       </TabViewItem>
 
       <TabViewItem IsClosable="False" Header="All methods" HorizontalAlignment="Left">
@@ -103,8 +111,8 @@
           </Grid.RowDefinitions>
 
           <TextBox Grid.Row="0" Name="FilterMethodsList"
-                   PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}"
-                   TextChanged="{x:Bind mainPageVM.FilterTextChanged, Mode=OneWay}"/>
+                   PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}" BorderThickness="0 0 0 1"
+                   TextChanged="{x:Bind mainPageVM.FilterMethodsListTextChanged, Mode=OneWay}"/>
           <ListView Grid.Row="1"
                     x:Name="MethodsList"
                     ItemsSource="{Binding FilteredMethods}"

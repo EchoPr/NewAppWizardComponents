@@ -18,7 +18,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             _methods = value;
             OnPropertyChanged();
-            FilterMethods(null);
+            FilterMethodsList(null);
         }
     }
 
@@ -107,12 +107,10 @@ public partial class MainPageVM : INotifyPropertyChanged
             }
         }
 
-        // Create TreeView collection and sort it by category keys
         TreeViewItems = new ObservableCollection<TreeViewItemModel>(
             categoryDict.Values.OrderBy(c => c.Name)
         );
 
-        // Sort children of each category by name
         foreach (var category in TreeViewItems)
         {
             var sortedChildren = category.Children.OrderBy(c => c.Name).ToList();
@@ -135,13 +133,13 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
     }
 
-    public void FilterTextChanged(object sender, TextChangedEventArgs e)
+    public void FilterMethodsListTextChanged(object sender, TextChangedEventArgs e)
     {
-        FilterMethods(sender as TextBox);
+        FilterMethodsList(sender as TextBox);
 
     }
 
-    private void FilterMethods(TextBox? viewFilter)
+    private void FilterMethodsList(TextBox? viewFilter)
     {
         string filterText;
 
@@ -159,19 +157,74 @@ public partial class MainPageVM : INotifyPropertyChanged
             FilteredMethods = new ObservableCollection<ApiEntry>(filtered);
         }
     }
+
+    public void FilterMethodsTreeTextChanged(object sender, TextChangedEventArgs e)
+    {
+        FilterMethodsTree(sender as TextBox);
+    }
+
+    private void FilterMethodsTree(TextBox? viewFilter)
+    {
+        string filterText = viewFilter?.Text?.ToLowerInvariant() ?? string.Empty;
+
+        foreach (var item in TreeViewItems)
+        {
+            SetVisibility(item, filterText);
+        }
+    }
+
+    private bool SetVisibility(TreeViewItemModel item, string filterText)
+    {
+        bool isVisible = item.Name.ToLowerInvariant().Contains(filterText);
+
+        foreach (var child in item.Children)
+        {
+            bool childIsVisible = SetVisibility(child, filterText);
+            isVisible |= childIsVisible;
+        }
+
+        item.IsVisible = isVisible;
+
+        return isVisible;
+    }
 }
 
 
-public class TreeViewItemModel
+public class TreeViewItemModel : INotifyPropertyChanged
 {
     public string Name { get; set; }
     public ObservableCollection<TreeViewItemModel> Children { get; set; }
-    public ApiEntry apiEntry { get; set; }
+    public ApiEntry ApiEntry { get; set; }
+
+    private bool _isVisible;
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            if (_isVisible != value)
+            {
+                _isVisible = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ViewVisibility));
+            }
+        }
+    }
+
+    public Visibility ViewVisibility => IsVisible ? Visibility.Visible : Visibility.Collapsed;
 
     public TreeViewItemModel(string name, ApiEntry apiEntry)
     {
         Name = name;
         Children = new ObservableCollection<TreeViewItemModel>();
-        this.apiEntry = apiEntry;
+        ApiEntry = apiEntry;
+        IsVisible = true; // Default to visible
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
