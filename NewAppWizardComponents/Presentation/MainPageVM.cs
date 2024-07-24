@@ -11,7 +11,27 @@ namespace NewAppWizardComponents;
 public partial class MainPageVM : INotifyPropertyChanged
 {
     private List<ApiEntry> _methods;
-    public List<ApiEntry> Methods { get => _methods; set => _methods = value; }
+    public List<ApiEntry> Methods
+    {
+        get => _methods;
+        set
+        {
+            _methods = value;
+            OnPropertyChanged();
+            FilterMethods(null);
+        }
+    }
+
+    private ObservableCollection<ApiEntry> _filteredMethods;
+    public ObservableCollection<ApiEntry> FilteredMethods
+    {
+        get => _filteredMethods;
+        set
+        {
+            _filteredMethods = value;
+            OnPropertyChanged();
+        }
+    }
 
     private ObservableCollection<ApiEntry> _codeBlocks;
     public ObservableCollection<ApiEntry> CodeBlocks
@@ -44,6 +64,7 @@ public partial class MainPageVM : INotifyPropertyChanged
     public MainPageVM()
     {
         CodeBlocks = new ObservableCollection<ApiEntry>();
+        FilteredMethods = new ObservableCollection<ApiEntry>();
         ReadAllMethodParameters();
         PopulateTreeViewItems();
     }
@@ -66,7 +87,8 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         Methods = new List<ApiEntry>();
         QForm.api_get(Methods);
-        PopulateTreeViewItems(); // Populate and sort TreeView items after loading data
+        FilteredMethods = new ObservableCollection<ApiEntry>(Methods);
+        PopulateTreeViewItems(); 
     }
 
     private void PopulateTreeViewItems()
@@ -111,6 +133,31 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public void OnModifingApiEntryChanged(ApiEntry entry)
     {
+    }
+
+    public void FilterTextChanged(object sender, TextChangedEventArgs e)
+    {
+        FilterMethods(sender as TextBox);
+
+    }
+
+    private void FilterMethods(TextBox? viewFilter)
+    {
+        string filterText;
+
+        if (viewFilter == null) 
+            filterText = "";
+        else 
+            filterText = viewFilter.Text?.ToLowerInvariant();
+        if (string.IsNullOrEmpty(filterText))
+        {
+            FilteredMethods = new ObservableCollection<ApiEntry>(Methods);
+        }
+        else
+        {
+            var filtered = Methods.Where(m => m.Name.ToLowerInvariant().Contains(filterText)).ToList();
+            FilteredMethods = new ObservableCollection<ApiEntry>(filtered);
+        }
     }
 }
 

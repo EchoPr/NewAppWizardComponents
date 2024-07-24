@@ -78,7 +78,7 @@
     <!--Methods list-->
     <TabView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="16"
              AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
-             BorderBrush="#E0E0E0" BorderThickness="1 0 1 1">
+             BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
       <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
 
         <!--Втф как это вообще работает-->
@@ -96,27 +96,30 @@
       </TabViewItem>
 
       <TabViewItem IsClosable="False" Header="All methods" HorizontalAlignment="Left">
-        <ListView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2"
-              x:Name="MethodsList"
-              ItemsSource="{Binding Methods}"
-              IsItemClickEnabled="True" ItemClick="OnItemClick"
-              Background="White" Padding="8">
-          <ListView.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Name}" />
-            </DataTemplate>
-          </ListView.ItemTemplate>
-        </ListView>
-        
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+
+          <TextBox Grid.Row="0" Name="FilterMethodsList"
+                   PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}"
+                   TextChanged="{x:Bind mainPageVM.FilterTextChanged, Mode=OneWay}"/>
+          <ListView Grid.Row="1"
+                    x:Name="MethodsList"
+                    ItemsSource="{Binding FilteredMethods}"
+                    IsItemClickEnabled="True" ItemClick="OnItemClick"
+                    Background="White" Padding="8" VerticalAlignment="Stretch">
+            <ListView.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ListView.ItemTemplate>
+          </ListView>
+        </Grid>
       </TabViewItem>
     </TabView>
-
-    
-    <TreeView>
-      
-    </TreeView>
-
-    
+ 
 
     
     <!-- Code view -->
