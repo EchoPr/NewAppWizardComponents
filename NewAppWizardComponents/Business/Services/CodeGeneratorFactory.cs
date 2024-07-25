@@ -11,6 +11,7 @@ public class CodeGeneratorFactory
     {
         { "C#", new CSharpCodeGenerator() },
         { "Python", new PythonCodeGenerator() },
+        { "VB.Net", new VBNETCodeGenerator() },
     };
 
     public static ICodeGenerator GetGenerator(string language)

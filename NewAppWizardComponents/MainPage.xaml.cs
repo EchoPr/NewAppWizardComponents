@@ -511,11 +511,17 @@ public sealed partial class MainPage : Page
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CodeBlocks == null) return;
-        _ClearCodeBlocks();
-        
-        for (int i = 1; i < mainPageVM.CodeBlocks.Count + 1; i++)
+
+        for (int i = 0; i < CodeBlocks.Children.Count; i++)
         {
-            _AddNewCodeBlock(mainPageVM.CodeBlocks[i - 1], i, CodeGenerationMode.StepByStep, false);
+            Border cb = CodeBlocks.Children[i] as Border;
+            var meta = cb.Tag as ExpandedEntry;
+            CodeBlocks.Children[i] = CreateViewCodeBlock(
+                meta.apiEntry,
+                meta.index,
+                meta.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
+                true
+            );
         }
     }
 }
