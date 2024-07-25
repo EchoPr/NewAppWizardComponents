@@ -13,6 +13,8 @@ public class CodeGeneratorFactory
         { "Python", new PythonCodeGenerator() },
         { "VB.Net", new VBNETCodeGenerator() },
         { "VBA", new VBACodeGenerator() },
+        { "MATLAB", new MATLABCodeGenerator() },
+        { "S-expr", new SexprCodeGenerator() },
     };
 
     public static ICodeGenerator GetGenerator(string language)

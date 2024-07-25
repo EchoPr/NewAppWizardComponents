@@ -38,6 +38,10 @@ public class VBACodeGenerator : ICodeGenerator
 
                 codeEntries.Add(new ViewCodeSample($"\t.{property.Name} ", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample($"= ", ViewCodeSampleType.Keyword));
+
+                if (property.PropertyType.IsEnum)
+                    codeEntries.Add(new ViewCodeSample($"QFormAPI.{property.PropertyType.Name}.", ViewCodeSampleType.Value));
+
                 codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
             }
 
@@ -122,6 +126,10 @@ public class VBACodeGenerator : ICodeGenerator
                             {
                                 codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+
+                                if (innerProperty.PropertyType.IsEnum)
+                                    codeEntries.Add(new ViewCodeSample($"QFormAPI.{innerProperty.PropertyType.Name}.", ViewCodeSampleType.Value));
+
                                 codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
                             }
                         }
@@ -133,6 +141,10 @@ public class VBACodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample($"arg{num}.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample($"{property.Name} ", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+
+                    if (property.PropertyType.IsEnum)
+                        codeEntries.Add(new ViewCodeSample($"QFormAPI.{property.PropertyType.Name}.", ViewCodeSampleType.Value));
+
                     codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
                 }
             }

@@ -134,6 +134,7 @@
     
     <!-- Code view -->
     <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  HorizontalScrollBarVisibility="Auto"
                   Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16" Padding="8">
       <StackPanel x:Name="CodeBlocks" Padding="10"/>
     </ScrollViewer>
