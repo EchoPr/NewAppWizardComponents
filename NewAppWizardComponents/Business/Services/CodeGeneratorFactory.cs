@@ -15,6 +15,7 @@ public class CodeGeneratorFactory
         { "VBA", new VBACodeGenerator() },
         { "MATLAB", new MATLABCodeGenerator() },
         { "S-expr", new SexprCodeGenerator() },
+        { "XML", new XMLCodeGenerator() },
     };
 
     public static ICodeGenerator GetGenerator(string language)
