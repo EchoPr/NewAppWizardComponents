@@ -10,6 +10,7 @@ public class CodeGeneratorFactory
     private static readonly Dictionary<string, ICodeGenerator> Generators = new Dictionary<string, ICodeGenerator>
     {
         { "C#", new CSharpCodeGenerator() },
+        { "Python", new PythonCodeGenerator() },
     };
 
     public static ICodeGenerator GetGenerator(string language)

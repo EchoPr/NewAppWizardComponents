@@ -64,7 +64,11 @@ public sealed partial class MainPage : Page
     }
 
     public void AddNewCodeBlock(object sender, EventArgs e) {
-        Border newBlock = CreateViewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, CodeGenerationMode.ObjectInit, false);
+        _AddNewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, CodeGenerationMode.ObjectInit, false);
+    }
+    private void _AddNewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig) 
+    {
+        Border newBlock = CreateViewCodeBlock(entry, entryNumber, generationMode, isEditig);
         CodeBlocks.Children.Add(newBlock);
         ScrollToCodeBlock(newBlock);
     }
@@ -133,8 +137,14 @@ public sealed partial class MainPage : Page
 
     public void ClearCodeBlocks(object sender, EventArgs e)
     {
+        _ClearCodeBlocks();
+    }
+
+    private void _ClearCodeBlocks() 
+    {
         CodeBlocks.Children.Clear();
         ClearShownParameters();
+        _selectedBlocks.Clear();
     }
 
     private void ShowParameters(ApiEntry entry, ParameterTypes type)
@@ -313,6 +323,7 @@ public sealed partial class MainPage : Page
 
     void EditCodeBlock()
     {
+        Debug.WriteLine("Action Was In EditCodeBlock");
         var meta = _selectedBlocks.Last().Tag as ExpandedEntry;
 
         Border updatedBlock;
@@ -337,7 +348,7 @@ public sealed partial class MainPage : Page
         if (result == ContentDialogResult.Primary)
         {
             if (!isResult)
-                CodeBlocks.Children[CodeBlocks.Children.Count - 1] = CreateViewCodeBlock(meta.apiEntry, meta.index, CodeGenerationMode.StepByStep, true);
+                CodeBlocks.Children[(_selectedBlocks.Last().Tag as ExpandedEntry).index - 1] = CreateViewCodeBlock(meta.apiEntry, meta.index, CodeGenerationMode.StepByStep, true);
         }
         else if (result == ContentDialogResult.Secondary)
         {
@@ -497,7 +508,16 @@ public sealed partial class MainPage : Page
         mainPageVM.SaveCodeLines(content, lang);
     }
 
-
+    private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (CodeBlocks == null) return;
+        _ClearCodeBlocks();
+        
+        for (int i = 1; i < mainPageVM.CodeBlocks.Count + 1; i++)
+        {
+            _AddNewCodeBlock(mainPageVM.CodeBlocks[i - 1], i, CodeGenerationMode.StepByStep, false);
+        }
+    }
 }
 
 public enum ParameterTypes

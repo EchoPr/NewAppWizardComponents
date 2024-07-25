@@ -120,8 +120,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                             PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
                             foreach (PropertyInfo innerProperty in innerProperties)
                             {
-                                codeEntries.Add(new ViewCodeSample($"{objectName}.", ViewCodeSampleType.Default));
-                                codeEntries.Add(new ViewCodeSample($"{innerProperty.Name} ", ViewCodeSampleType.Default));
+                                codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
                                 codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}", ViewCodeSampleType.Value));
                                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));

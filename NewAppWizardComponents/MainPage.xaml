@@ -55,6 +55,7 @@
                 BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
       <ComboBox x:Name="LanguageComboBox"
                 SelectedIndex="0"
+                SelectionChanged="LanguageSelectionChanged"
                 MinWidth="100" MinHeight="100" Margin="0 0 20 0">
         <ComboBoxItem Content="C#"/>
         <ComboBoxItem Content="Python"/>
