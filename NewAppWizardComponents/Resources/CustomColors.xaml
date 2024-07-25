@@ -11,6 +11,9 @@
   <SolidColorBrush x:Key="BorderSolid" Color="#A1A1A1"/>
   <SolidColorBrush x:Key="Transparent" Color="#0000"/>
 
+  <SolidColorBrush x:Key="SelectedBlockPrimary" Color="#330078D2"/>
+  <SolidColorBrush x:Key="SelectedBlockSecondary" Color="#1A0078D2"/>
+
   <SolidColorBrush x:Key="APILevel1" Color="#5DA251"/>
   <!--<SolidColorBrush x:Key="A"-->
 

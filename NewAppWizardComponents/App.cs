@@ -7,30 +7,31 @@ public class App : Application
     {
         RequestedTheme = ApplicationTheme.Light;
     }
-    protected Window? MainWindow { get; private set; }
+    public static Window? MainWindow => _mainWindow;
+    protected static Window? _mainWindow { get; private set; }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
 #if NET6_0_OR_GREATER && WINDOWS && !HAS_UNO
-        MainWindow = new Window();
+        _mainWindow = new Window();
 #else
-        MainWindow = Microsoft.UI.Xaml.Window.Current;
+        _mainWindow = Microsoft.UI.Xaml.Window.Current;
 #endif
 
 #if DEBUG
-        MainWindow.EnableHotReload();
+        _mainWindow.EnableHotReload();
 #endif
 
 
         // Do not repeat app initialization when the Window already has content,
         // just ensure that the window is active
-        if (MainWindow.Content is not Frame rootFrame)
+        if (_mainWindow.Content is not Frame rootFrame)
         {
             // Create a Frame to act as the navigation context and navigate to the first page
             rootFrame = new Frame();
 
             // Place the frame in the current Window
-            MainWindow.Content = rootFrame;
+            _mainWindow.Content = rootFrame;
 
             rootFrame.NavigationFailed += OnNavigationFailed;
         }
@@ -44,7 +45,7 @@ public class App : Application
         }
 
         // Ensure the current window is active
-        MainWindow.Activate();
+        _mainWindow.Activate();
     }
 
     /// <summary>

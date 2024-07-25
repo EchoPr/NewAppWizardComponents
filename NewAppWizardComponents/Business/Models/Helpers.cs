@@ -7,11 +7,6 @@ internal class Helpers
 {
 }
 
-public interface IValueProperty
-{
-    object Value { get; set; }
-}
-
 public class ValueProperty<T> : IValueProperty
 {
     public T value { get; set; }

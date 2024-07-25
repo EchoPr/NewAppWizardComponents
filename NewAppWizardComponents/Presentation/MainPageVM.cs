@@ -57,12 +57,16 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public int lastSelectedBlock { get; set; }
 
+    private ProjectManager _projectManager;
+
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler AddedNewCodeBlock;
     public event EventHandler ClearedCodeBlocks;
 
     public MainPageVM()
     {
+        _projectManager = new ProjectManager();
+
         CodeBlocks = new ObservableCollection<ApiEntry>();
         FilteredMethods = new ObservableCollection<ApiEntry>();
         ReadAllMethodParameters();
@@ -186,6 +190,11 @@ public partial class MainPageVM : INotifyPropertyChanged
         item.IsVisible = isVisible;
 
         return isVisible;
+    }
+
+    public void SaveCodeLines(string codeLines, string progLang)
+    {
+        _projectManager.SaveCode(codeLines, progLang);
     }
 }
 
