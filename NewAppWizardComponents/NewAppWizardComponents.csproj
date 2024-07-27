@@ -38,14 +38,13 @@
     <None Remove="Resources\TextStyling.xaml" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup>    
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Uno.WinUI.Lottie" Condition="!$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Uno.WinUI.DevServer" Condition="'$(Configuration)'=='Debug' AND !$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Uno.Resizetizer" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Uno.Material.WinUI" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Condition="$(TargetFramework.Contains('windows10'))" />
@@ -83,6 +82,8 @@
     <UpToDateCheckInput Remove="MessageBox.xaml" />
   </ItemGroup>
 
+  
+  
   <ItemGroup>
     <Page Update="Resources\Controls\BlockScrollViewer.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
