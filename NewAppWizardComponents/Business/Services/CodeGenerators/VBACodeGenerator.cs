@@ -173,7 +173,7 @@ public class VBACodeGenerator : ICodeGenerator
             codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default));
         }
 
-        codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
 
         return codeEntries;
     }

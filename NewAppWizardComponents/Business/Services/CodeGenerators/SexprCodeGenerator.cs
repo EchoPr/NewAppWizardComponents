@@ -60,6 +60,7 @@ public class SexprCodeGenerator : ICodeGenerator
                                     codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}", ViewCodeSampleType.Value));
                                     codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                                 }
+                                codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                             }
                         }
 
@@ -81,7 +82,7 @@ public class SexprCodeGenerator : ICodeGenerator
         {
             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
             codeEntries.Add(new ViewCodeSample($"{entry.Name}", ViewCodeSampleType.Method));
-            codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+            codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
         }
         return codeEntries;
     }

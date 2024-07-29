@@ -166,7 +166,7 @@ public class CSharpCodeGenerator : ICodeGenerator
         if (entry.arg_type != null) { codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default)); }
 
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
-        codeEntries.Add(new ViewCodeSample(";", ViewCodeSampleType.Default)); 
+        codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default)); 
         
         return codeEntries;
     }
