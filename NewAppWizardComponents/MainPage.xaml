@@ -27,7 +27,7 @@
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="40"/>
-      <RowDefinition Height="10*"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="45*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
@@ -35,11 +35,10 @@
     <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
              VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
       <MenuBarItem Title="File">
-        <MenuFlyoutItem Text="Save selected" Click="SaveSelectedBlocks"/>
-        <MenuFlyoutSubItem Text="Project">
-          <MenuFlyoutItem Text="Save" Click="SaveProject"/>
-          <MenuFlyoutItem Text="Load" Click="LoadProject"/>
-        </MenuFlyoutSubItem>
+        <MenuFlyoutItem Text="Save Selected" Click="SaveSelectedBlocks"/>
+        <MenuFlyoutSeparator/>
+        <MenuFlyoutItem Text="Save Project" Click="SaveProject"/>
+        <MenuFlyoutItem Text="Load Project" Click="LoadProject"/>
       </MenuBarItem>
 
       <MenuBarItem Title="Edit">
@@ -52,12 +51,16 @@
     
 
     <!-- Toolbar -->
-    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                BorderBrush="LightGray" BorderThickness="1" Orientation="Horizontal">
+    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Horizontal">
+
+      <TextBlock Text="Code:" Style="{StaticResource TextDefault}" FontSize="16" VerticalAlignment="Center"
+                 Margin="20 0 10 0"/>
+
       <ComboBox x:Name="LanguageComboBox"
                 SelectedIndex="0"
                 SelectionChanged="LanguageSelectionChanged"
-                MinWidth="100" MinHeight="100" Margin="0 0 20 0">
+                Style="{StaticResource LanguageSelectorComboBox}">
         <ComboBoxItem Content="C#"/>
         <ComboBoxItem Content="Python"/>
         <ComboBoxItem Content="VB.Net"/>
@@ -68,8 +71,12 @@
       </ComboBox>
 
       <Button Command="{Binding ClearCodeBlocksCommand}" 
-                  MinHeight="100">
-        Clear</Button>
+              Style="{StaticResource UIButton}">
+        <StackPanel Orientation="Horizontal">
+          <FontIcon Glyph="&#xED62;" FontSize="14" Margin="0 0 10 0"/>
+          <TextBlock Text="Clear code"/>
+        </StackPanel>
+      </Button>
 
       <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>-->
 
@@ -78,7 +85,7 @@
 
     
     <!--Methods list-->
-    <TabView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="16"
+    <TabView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="16 6 16 16"
              AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
              BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
       <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
