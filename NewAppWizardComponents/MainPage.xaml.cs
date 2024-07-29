@@ -5,9 +5,11 @@ using System.Reflection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Windows.Graphics.Printing.PrintTicket;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace NewAppWizardComponents;
@@ -46,6 +48,7 @@ public sealed partial class MainPage : Page
         mainPageVM.AddedNewCodeBlock += AddNewCodeBlock;
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
 
+
     }
 
     private void InitializeBrushes()
@@ -63,8 +66,8 @@ public sealed partial class MainPage : Page
         }
     }
 
-    public void AddNewCodeBlock(object sender, EventArgs e) {
-        _AddNewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, CodeGenerationMode.ObjectInit, false);
+    public void AddNewCodeBlock(object sender, CodeGenerationMode mode) {
+        _AddNewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, mode, false);
     }
     private void _AddNewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig) 
     {
@@ -74,7 +77,7 @@ public sealed partial class MainPage : Page
     }
 
     private Border CreateViewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
-    {
+    { 
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
         var generatedCode = generator.GenerateCodeEntry(entry, entryNumber, generationMode);
@@ -494,20 +497,6 @@ public sealed partial class MainPage : Page
             ShowMessageBox("To add this method use the context menu in QForm");
         }
     }
-
-    private async void SaveAllCodeLines(object sender, RoutedEventArgs e)
-    {
-        string content = "";
-        foreach(Border cd in CodeBlocks.Children)
-        {
-            content += (cd.Child as TextBlock).Text + "\n";
-        }
-        string lang = (string)LanguageComboBox.SelectedItem;
-        //string lang = ((ComboBoxItem)LanguageComboBox.SelectedItem).Content.ToString();
-        Debug.WriteLine(lang);
-        mainPageVM.SaveCodeLines(content, lang);
-    }
-
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CodeBlocks == null) return;
@@ -523,6 +512,52 @@ public sealed partial class MainPage : Page
                 true
             );
         }
+    }
+
+    private void SaveSelectedBlocks(object sender, RoutedEventArgs e)
+    {
+        SaveCode(_selectedBlocks.OrderBy(b => (b.Tag as ExpandedEntry).index).Select(b => (b.Child as TextBlock).Text));
+    }
+
+    private void SaveProject(object sender, RoutedEventArgs e)
+    {
+        string selectedLanguage = "S-expr";
+
+        ICodeGenerator codeGenerator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
+
+        List<string> generatedCodeList = new List<string>();
+        foreach (Border codeBlock in CodeBlocks.Children)
+        {
+            var blockMetadata = codeBlock.Tag as ExpandedEntry;
+
+            CodeGenerationMode generationMode = blockMetadata.isConnectedBlockSequentialInitialized
+                ? CodeGenerationMode.StepByStep
+                : CodeGenerationMode.ObjectInit;
+
+            var generatedEntries = codeGenerator.GenerateCodeEntry(blockMetadata.apiEntry, blockMetadata.index, generationMode);
+            string generatedCode = string.Join(null, generatedEntries.Select(entry => entry.content));
+            generatedCodeList.Add(generatedCode);
+        }
+
+        SaveCode(generatedCodeList, "S-expr");
+    }
+
+    private void SaveCode(IEnumerable collection, string? lang = null)
+    {
+        string data = "";
+
+        foreach (var line in collection)
+        {
+            data += line;
+        }
+
+        lang ??= ((ComboBoxItem)LanguageComboBox.SelectedItem).Content.ToString();
+        mainPageVM.SaveCodeLines(data, lang);
+    }
+
+    private async void LoadProject(object sender, RoutedEventArgs e)
+    {
+        await mainPageVM.LoadApiEntriesFromScm();
     }
 }
 

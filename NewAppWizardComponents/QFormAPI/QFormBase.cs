@@ -54,6 +54,38 @@ public class _QFormAttach
     public string in_sem { get; set; }
 	}
 
+public class CodeEntry
+{
+    static ulong uid_seq = 0;
+    public CodeEntry(uint Id)
+    {
+        id = Id;
+        uid_seq++;
+        eid = uid_seq.ToString();
+    }
+
+    public uint id;
+    public string eid;
+    public string cmd;
+    public string cmd_id;
+    public int service_cmd = 0;
+    public System.Reflection.MethodInfo code_func = null;
+    public List<string> comment = new List<string>();
+    public Object arg;
+    public string arg_json;
+    public Object res;
+    public Ret status;
+    public string html;
+    public bool changed = false;
+    public bool New = true;
+    public Type property_value_type = null;
+    public bool property_is_bool = false;
+    public string property_name = null;
+    public string property_units = null;
+    public int property_db_type = -1;
+}
+
+
 ////del no-private
 public struct LStr : IComparable<LStr>, IEquatable<LStr>
 {

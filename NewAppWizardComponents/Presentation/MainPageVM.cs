@@ -3,8 +3,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Services.Maps;
+using Windows.UI.Core;
 
 namespace NewAppWizardComponents;
 
@@ -60,25 +63,25 @@ public partial class MainPageVM : INotifyPropertyChanged
     private ProjectManager _projectManager;
 
     public event PropertyChangedEventHandler PropertyChanged;
-    public event EventHandler AddedNewCodeBlock;
+    public event EventHandler<CodeGenerationMode> AddedNewCodeBlock;
     public event EventHandler ClearedCodeBlocks;
 
     public MainPageVM()
     {
-        _projectManager = new ProjectManager();
-
         CodeBlocks = new ObservableCollection<ApiEntry>();
         FilteredMethods = new ObservableCollection<ApiEntry>();
         ReadAllMethodParameters();
         PopulateTreeViewItems();
+
+        _projectManager = new ProjectManager(Methods);
     }
 
-    public void AddToCodeBlocks(ApiEntry method)
+    public void AddToCodeBlocks(ApiEntry method, bool loadingProject = false, CodeGenerationMode generationMode = CodeGenerationMode.ObjectInit)
     {
         if (method != null)
         {
-            _codeBlocks.Add(method.Clone());
-            AddedNewCodeBlock?.Invoke(this, EventArgs.Empty);
+            _codeBlocks.Add(loadingProject ? method : method.Clone());
+            AddedNewCodeBlock?.Invoke(this, generationMode);
         }
     }
 
@@ -128,6 +131,11 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     [RelayCommand]
     private void ClearCodeBlocks()
+    {
+        _ClearCodeBlocks();
+    }
+
+    private void _ClearCodeBlocks()
     {
         _codeBlocks?.Clear();
         ClearedCodeBlocks?.Invoke(this, EventArgs.Empty);
@@ -195,6 +203,27 @@ public partial class MainPageVM : INotifyPropertyChanged
     public void SaveCodeLines(string codeLines, string progLang)
     {
         _projectManager.SaveCode(codeLines, progLang);
+    }
+
+    public async Task LoadApiEntriesFromScm()
+    {
+        try
+        {
+            List<ApiEntry> readData = await _projectManager.LoadCode();
+
+            _ClearCodeBlocks();
+
+
+
+            foreach (ApiEntry entry in readData)
+            {
+                AddToCodeBlocks(entry, loadingProject: true, generationMode: CodeGenerationMode.StepByStep);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
     }
 }
 

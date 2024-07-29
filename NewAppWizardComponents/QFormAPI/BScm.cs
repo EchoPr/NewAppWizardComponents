@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -669,15 +670,20 @@ public class BScm
         Type t = obj.GetType();
         var props = t.GetProperties();
         int prop_count = props.Length;
-        foreach(BScm c in childs)
+        
+        if (childs != null)
         {
-            string nam = c.value_str_get();
-            if (nam == null)
-                continue;
-            var p = find(props, nam, ref prop_count);
-            if (p != null)
-                c.load(obj, p);
-        }
+            Debug.WriteLine(obj + "!");
+            foreach(BScm c in childs)
+            {
+                string nam = c.value_str_get();
+                if (nam == null)
+                    continue;
+                var p = find(props, nam, ref prop_count);
+                if (p != null)
+                    c.load(obj, p);
+            }
+        } 
     }
 
     public int

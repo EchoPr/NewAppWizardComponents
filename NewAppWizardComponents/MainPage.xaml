@@ -26,18 +26,20 @@
       <ColumnDefinition Width="3*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
-      <RowDefinition Height="5*"/>
+      <RowDefinition Height="40"/>
       <RowDefinition Height="10*"/>
       <RowDefinition Height="45*"/>
-      <RowDefinition Height="40*"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
-    <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3">
-      <MenuBarItem Title="File" FontSize="8" Foreground="{StaticResource SolidDarkGray}" Background="Black" Height="20">
-        <MenuFlyoutItem Text="New" Icon="OpenFile"/>
-        <MenuFlyoutItem Text="Open..."/>
-        <MenuFlyoutItem Text="Save"/>
-        <MenuFlyoutItem Text="Exit"/>
+    <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+      <MenuBarItem Title="File">
+        <MenuFlyoutItem Text="Save selected" Click="SaveSelectedBlocks"/>
+        <MenuFlyoutSubItem Text="Project">
+          <MenuFlyoutItem Text="Save" Click="SaveProject"/>
+          <MenuFlyoutItem Text="Load" Click="LoadProject"/>
+        </MenuFlyoutSubItem>
       </MenuBarItem>
 
       <MenuBarItem Title="Edit">
@@ -71,7 +73,6 @@
 
       <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>-->
 
-      <Button Click="SaveAllCodeLines">Save</Button>
       
     </StackPanel>
 
