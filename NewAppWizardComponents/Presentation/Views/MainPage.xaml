@@ -7,11 +7,11 @@
   <Page.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="Resources/TextStyling.xaml"/>
-        <ResourceDictionary Source="Resources/CustomColors.xaml"/>
-        <ResourceDictionary Source="Resources/CustomBorders.xaml"/>
-        <ResourceDictionary Source="Resources/CustomButtons.xaml"/>
-        <ResourceDictionary Source="Resources/Controls/BlockScrollViewer.xaml"/>
+        <ResourceDictionary Source="../../Resources/TextStyling.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomColors.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomBorders.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomButtons.xaml"/>
+        <ResourceDictionary Source="../../Resources/Controls/BlockScrollViewer.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
       
@@ -71,12 +71,16 @@
       </ComboBox>
 
       <Button Command="{Binding ClearCodeBlocksCommand}" 
-              Style="{StaticResource UIButton}">
+              Style="{StaticResource UIButton}"
+              Margin="20 0 0 0">
         <StackPanel Orientation="Horizontal">
           <FontIcon Glyph="&#xED62;" FontSize="14" Margin="0 0 10 0"/>
           <TextBlock Text="Clear code"/>
         </StackPanel>
       </Button>
+
+      <Button Content="Invoke" Command="{Binding InvokeSelectedMethodCommand}"
+              Style="{StaticResource UIButton}" Margin="20 0 0 0"/>
 
       <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>-->
 

@@ -99,4 +99,10 @@
     </Page>
   </ItemGroup>
 
+  
+  
+  <ItemGroup>
+    <Folder Include="Presentation\Views\" />
+  </ItemGroup>
+
 </Project>

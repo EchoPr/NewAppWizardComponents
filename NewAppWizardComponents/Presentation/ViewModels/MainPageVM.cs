@@ -135,6 +135,12 @@ public partial class MainPageVM : INotifyPropertyChanged
         _ClearCodeBlocks();
     }
 
+    [RelayCommand]
+    private void InvokeSelectedMethod()
+    {
+        Debug.WriteLine("Pressed invoke button");
+    }
+
     private void _ClearCodeBlocks()
     {
         _codeBlocks?.Clear();
