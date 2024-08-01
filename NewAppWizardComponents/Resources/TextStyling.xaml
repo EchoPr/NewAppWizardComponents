@@ -18,6 +18,7 @@
   <FontFamily x:Key="JBM-Italic">ms-appx:///Assets/Fonts/JetBrainsMono-Italic.ttf#JetBrains Mono</FontFamily>
 
   <FontFamily x:Key="SourceCodePro-Regular">ms-appx:///Assets/Fonts/SourceCodePro/SourceCodePro-Regular.ttf#Source Code Pro</FontFamily>
+  <FontFamily x:Key="SourceCodePro-Medium">ms-appx:///Assets/Fonts/SourceCodePro/SourceCodePro-Medium.ttf#Source Code Pro</FontFamily>
 
   <Style TargetType="TextBlock" x:Name="TextDefault">
     <Setter Property="FontFamily" Value="{StaticResource RobotoRegular}"/>

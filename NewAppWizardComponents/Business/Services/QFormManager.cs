@@ -72,7 +72,7 @@ public class QFormManager
             Ret rv = apiEntry.ret_value as Ret;
             if (rv == null)
                 rv = new Ret();
-            rv._status = "\u231B";
+            rv.invocationResultStatus = "\u231B";
             apiEntry.ret_value = rv;
 
             object ret;
@@ -84,13 +84,13 @@ public class QFormManager
             if (ret_type != null)
             {
                 Ret r = ret as Ret;
-                r._status = "Ok";
+                r.invocationResultStatus = "Ok";
                 apiEntry.ret_value = ret;
             }
             else
             {
                 Ret st = new Ret();
-                apiEntry.ret_value = new Ret { _status = "Ok" };
+                apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
                 apiEntry.ret_type = typeof(Ret);
             }
         }
@@ -100,13 +100,13 @@ public class QFormManager
             {
                 object ret = Activator.CreateInstance(ret_type);
                 Ret r = ret as Ret;
-                r._status = ex.Message;
+                r.invocationResultStatus = ex.Message;
                 apiEntry.ret_value = ret;
             }
             else
             {
                 Ret st = new Ret();
-                apiEntry.ret_value = new Ret { _status = "Ok" };
+                apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
                 apiEntry.ret_type = typeof(Ret);
             }
         }

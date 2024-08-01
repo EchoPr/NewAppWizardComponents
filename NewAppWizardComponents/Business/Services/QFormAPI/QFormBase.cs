@@ -137,7 +137,7 @@ public class ApiEntry : IComparable<ApiEntry>
 }
 public class Ret
 {
-    public string _status { get; set; }
+    public string invocationResultStatus { get; set; }
 }
 
 ////end del
