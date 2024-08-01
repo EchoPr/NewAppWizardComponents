@@ -60,6 +60,7 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public int lastSelectedBlock { get; set; }
 
+    public QFormManager qformManager;
     private ProjectManager _projectManager;
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -74,6 +75,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         PopulateTreeViewItems();
 
         _projectManager = new ProjectManager(Methods);
+        qformManager = new QFormManager();
     }
 
     public void AddToCodeBlocks(ApiEntry method, bool loadingProject = false, CodeGenerationMode generationMode = CodeGenerationMode.ObjectInit)
@@ -133,12 +135,6 @@ public partial class MainPageVM : INotifyPropertyChanged
     private void ClearCodeBlocks()
     {
         _ClearCodeBlocks();
-    }
-
-    [RelayCommand]
-    private void InvokeSelectedMethod()
-    {
-        Debug.WriteLine("Pressed invoke button");
     }
 
     private void _ClearCodeBlocks()

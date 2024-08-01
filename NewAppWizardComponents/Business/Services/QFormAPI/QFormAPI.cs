@@ -4424,7 +4424,17 @@ public partial class QForm
 		public bool is_simulation_running { get; set; }
 		public string opened_project { get; set; }
 		public string qform_dir { get; set; }
-	}
+
+    public override string ToString() 
+    {
+        string name = "[" + session_id + "]";
+
+        if (!string.IsNullOrEmpty(opened_project))
+            name += " " + opened_project;
+
+        return name;
+    }
+}
 
 	public class RSessionList : Ret {
 		public List<RSession> sessions { get; set; }

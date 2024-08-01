@@ -1,0 +1,43 @@
+﻿<ContentDialog
+    x:Class="NewAppWizardComponents.ConnectQFormDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NewAppWizardComponents"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Connect QForm"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    Background="#F3F3F3"
+    PrimaryButtonText="Connect selected session"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+  <ContentDialog.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../../Resources/CustomColors.xaml"/>
+        <ResourceDictionary Source="../../Resources/TextStyling.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomBorders.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomButtons.xaml"/>
+        <ResourceDictionary Source="../../Resources/Controls/BlockScrollViewer.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ContentDialog.Resources>
+
+  <Grid RowDefinitions="Auto, Auto, *"  x:Name="MainDialogGrid"
+        Width="400" Height="400">
+    <TextBlock Grid.Row="0" Style="{StaticResource TextDefault}" Text="Current available QForm sessions" Margin="0 0 0 16"/>
+    <TextBlock Grid.Row="1" x:Name="ErrorsBufferTextBlock"
+               Style="{StaticResource TextDefault}" Foreground="{StaticResource CodeValue}" Visibility="Collapsed" Margin="0 0 0 8"/>
+    <ListView Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+              ItemsSource="{Binding VisualSessions}"
+              SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+              BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="1">
+      <ListView.ItemTemplate>
+        <DataTemplate>
+          <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+      </ListView.ItemTemplate>
+    </ListView>
+  </Grid>
+</ContentDialog>

@@ -26,7 +26,7 @@
 
 
   <Grid ColumnDefinitions="*, Auto, *" RowDefinitions="Auto, *, Auto"  x:Name="MainDialogGrid"
-        Width="500" Height="500" >
+        Width="500" Height="400" >
 
     <Border Grid.Column="0" Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Padding="9 0 0 0" Margin="16 16 0 0">
       <TextBlock Style="{StaticResource ContentBlockHeader}">Collection elements</TextBlock>

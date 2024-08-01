@@ -31,7 +31,7 @@ public sealed partial class MainPage : Page
     private double _initialPosition;
     private RowDefinition _firstMovedGrip;
     private RowDefinition _secondMovedGrip;
-    
+
     private bool _isShiftPressed;
 
     public MainPage()
@@ -42,13 +42,23 @@ public sealed partial class MainPage : Page
         this.DataContext = mainPageVM;
 
         InitializeBrushes();
-        
+
         this.KeyDown += MainPage_KeyDown;
         this.KeyUp += MainPage_KeyUp;
         mainPageVM.AddedNewCodeBlock += AddNewCodeBlock;
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
+        mainPageVM.qformManager.ErrorMessageRequested += OnMessageBoxRequested;
+        mainPageVM.qformManager.InvokationResultsReceived += OnInvokationResultsReceived;
+    }
 
+    private void OnInvokationResultsReceived(object? sender, EventArgs e)
+    {
+        ShowParameters((_selectedBlocks.Last().Tag as ExpandedEntry)?.apiEntry);
+    }
 
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        mainPageVM.qformManager.attachQForm();
     }
 
     private void InitializeBrushes()
@@ -66,10 +76,11 @@ public sealed partial class MainPage : Page
         }
     }
 
-    public void AddNewCodeBlock(object sender, CodeGenerationMode mode) {
+    public void AddNewCodeBlock(object sender, CodeGenerationMode mode)
+    {
         _AddNewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, mode, false);
     }
-    private void _AddNewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig) 
+    private void _AddNewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
     {
         Border newBlock = CreateViewCodeBlock(entry, entryNumber, generationMode, isEditig);
         CodeBlocks.Children.Add(newBlock);
@@ -77,7 +88,7 @@ public sealed partial class MainPage : Page
     }
 
     private Border CreateViewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
-    { 
+    {
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
         var generatedCode = generator.GenerateCodeEntry(entry, entryNumber, generationMode);
@@ -143,7 +154,7 @@ public sealed partial class MainPage : Page
         _ClearCodeBlocks();
     }
 
-    private void _ClearCodeBlocks() 
+    private void _ClearCodeBlocks()
     {
         CodeBlocks.Children.Clear();
         ClearShownParameters();
@@ -177,17 +188,21 @@ public sealed partial class MainPage : Page
             }
 
             for (int i = 0; i < properties.Length; i++)
-            { 
+            {
 
                 var property = properties[i];
                 var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
+
+                var propertyNameToolTip = new ToolTip { Content = property.Name, VerticalOffset = -40 };
+                ToolTipService.SetToolTip(propertyNameTextBlock, propertyNameToolTip);
+
                 var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
                 propertyNameVisual.Child = propertyNameTextBlock;
 
                 var propertyValueControl = CreateControlForProperty(
-                    property, 
-                    property.GetValue(type == ParameterTypes.Input ? entry.arg_value : entry.ret_value), 
-                    entry, 
+                    property,
+                    property.GetValue(type == ParameterTypes.Input ? entry.arg_value : entry.ret_value),
+                    entry,
                     type == ParameterTypes.Output
                 );
 
@@ -221,7 +236,7 @@ public sealed partial class MainPage : Page
             comboBox.SelectedIndex = Convert.ToInt32(value);
             comboBox.Tag = property;
 
-            
+
             comboBox.SelectionChanged += (s, e) =>
             {
                 if (isResult) property.SetValue(entry.ret_value, Convert.ToBoolean(comboBox.SelectedIndex));
@@ -254,7 +269,7 @@ public sealed partial class MainPage : Page
             {
                 var selectedValue = comboBox.SelectedItem.ToString();
                 var enumValue = Enum.Parse(property.PropertyType, selectedValue);
-                
+
                 if (isResult) property.SetValue(entry.ret_value, enumValue);
                 else property.SetValue(entry.arg_value, enumValue);
 
@@ -283,7 +298,7 @@ public sealed partial class MainPage : Page
             textBox.Text = value?.ToString();
             textBox.Tag = property;
 
-             
+
             textBox.TextChanged += (sender, e) => OnValueChanged(property, textBox.Text, entry, textBox, isResult);
 
             textBox.Style = (Style)Resources["ParameterValueTextBox"];
@@ -331,9 +346,9 @@ public sealed partial class MainPage : Page
 
         Border updatedBlock;
         updatedBlock = CreateViewCodeBlock(
-            meta.apiEntry, 
+            meta.apiEntry,
             meta.index,
-            meta.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit, 
+            meta.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
             true
         );
 
@@ -388,13 +403,13 @@ public sealed partial class MainPage : Page
 
         var selectedBlock = (Border)VisualTreeHelper.GetParent((TextBlock)sender);
         if (selectedBlock == null) return;
-        
+
         SetCodeBlockSelection(selectedBlock, shiftPressed);
         ScrollToCodeBlock(selectedBlock);
 
         var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
         ShowParameters(entry);
-        
+
     }
 
     private void MainPage_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -413,8 +428,14 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void ShowParameters(ApiEntry entry) 
+    private void ShowParameters(ApiEntry? entry)
     {
+        if (entry == null)
+        {
+            Debug.WriteLine("[ShowParameters] entry wa null");
+            return;
+        }
+
         ClearShownParameters();
 
         if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
@@ -436,8 +457,22 @@ public sealed partial class MainPage : Page
         }
 
     }
-    private async void ShowMessageBox(string content) {
+
+    public void OnMessageBoxRequested(object sender, string message)
+    {
+        ShowConnectQFormDialog();
+    }
+    private async void ShowMessageBox(string content)
+    {
         var dialog = new MessageBox(content);
+        dialog.XamlRoot = this.XamlRoot;
+
+        await dialog.ShowAsync();
+    }
+
+    private async void ShowConnectQFormDialog() 
+    {
+        var dialog = new ConnectQFormDialog(mainPageVM);
         dialog.XamlRoot = this.XamlRoot;
 
         await dialog.ShowAsync();
@@ -465,9 +500,9 @@ public sealed partial class MainPage : Page
         double newFirstHeight = _firstMovedGrip.ActualHeight + delta;
         double newSecondHeight = _secondMovedGrip.ActualHeight - delta;
 
-        
 
-        if (newFirstHeight > 16  && newSecondHeight > 16 )
+
+        if (newFirstHeight > 16 && newSecondHeight > 16)
         {
             _firstMovedGrip.Height = new GridLength(newFirstHeight);
             _secondMovedGrip.Height = new GridLength(newSecondHeight);
@@ -559,6 +594,20 @@ public sealed partial class MainPage : Page
     {
         await mainPageVM.LoadApiEntriesFromScm();
     }
+
+    private void InvokeButtonCommand(object sender, RoutedEventArgs e)
+    {
+        if (_selectedBlocks.Count == 0)
+        {
+            ShowMessageBox("There are no selected bloks to invoke");
+            return;
+        }
+
+        var lastSelectedBlock = _selectedBlocks.Last();
+        var apiEntry = (lastSelectedBlock.Tag as ExpandedEntry).apiEntry;
+
+        mainPageVM.qformManager.invokeMethod(apiEntry);
+    }
 }
 
 public enum ParameterTypes
@@ -566,3 +615,15 @@ public enum ParameterTypes
     Input = 0,
     Output = 1,
 }
+
+public class CodeArg
+{
+    public virtual object value_get() { return null; }
+}
+
+public class CodeRet : Ret
+{
+    public virtual void value_set(object o) { }
+}
+
+    

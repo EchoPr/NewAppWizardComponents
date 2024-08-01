@@ -30,6 +30,7 @@
     <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
+    <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
     <None Remove="Resources\CustomBorders.xaml" />
@@ -102,7 +103,7 @@
   
   
   <ItemGroup>
-    <Folder Include="Presentation\Views\" />
+    <UpToDateCheckInput Remove="Presentation\Views\ConnectQFormDialog.xaml" />
   </ItemGroup>
 
 </Project>
