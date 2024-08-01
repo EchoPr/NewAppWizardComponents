@@ -19,6 +19,9 @@
     <!-- <WindowsSdkPackageVersion>10.0.22621.28</WindowsSdkPackageVersion> -->
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
     <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
@@ -28,6 +31,8 @@
     <None Remove="Assets\Fonts\Roboto-Medium.ttf" />
     <None Remove="Assets\Fonts\Roboto-Regular.ttf" />
     <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
+    <None Remove="Assets\Icons\connected_to_qform.svg" />
+    <None Remove="Assets\Icons\QFormLogo.svg" />
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
     <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
@@ -40,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Newtonsoft.Json" />    
     <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Uno.WinUI.Lottie" Condition="!$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Uno.WinUI.DevServer" Condition="'$(Configuration)'=='Debug' AND !$(TargetFramework.Contains('windows10'))" />
@@ -49,6 +54,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Condition="$(TargetFramework.Contains('windows10'))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Icons\connected_to_qform.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -104,6 +115,80 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ConnectQFormDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\QFormLogo.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\connected_to_qform.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Update="Assets\Icons\connected_to_qform.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </UnoImage>
   </ItemGroup>
 
 </Project>

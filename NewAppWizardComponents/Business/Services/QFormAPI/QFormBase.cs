@@ -652,14 +652,13 @@ class QForm : IDisposable
         disconnect(MSG_DETACH);
 		}
 
-    Object
-        error(string msg, string func = null)
+    object error(string msg, string func = null)
     {
         m_last_error = msg;
         m_last_error_func = func;
 
         if (m_throw)
-            throw new Exception(m_last_error);
+            throw new Exception($"{m_last_error} in {m_last_error_func}");
         return null;
     }
 
@@ -686,7 +685,7 @@ class QForm : IDisposable
         return this;
     }
 
-    public Object invoke(int service_cmd, string cmd, Object arg, Type ret_type, CmdInfo nfo = null)
+    public object invoke(int service_cmd, string cmd, object arg, Type ret_type, CmdInfo nfo = null)
     {
         try
         {
@@ -694,11 +693,11 @@ class QForm : IDisposable
         }
         catch (Exception ex)
         {
-            return error(ex.Message, cmd);
+            return new Tuple<string>(ex.Message);
         }
     }
 
-		Object invoke_private(int service_cmd, string cmd, Object arg, Type ret_type, CmdInfo nfo = null)
+    Object invoke_private(int service_cmd, string cmd, Object arg, Type ret_type, CmdInfo nfo = null)
     {
         if (!qfcon_is_running())
         {

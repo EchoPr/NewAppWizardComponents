@@ -29,7 +29,11 @@ public sealed partial class ConnectQFormDialog : ContentDialog
 
         var connectionResult = _conQFormVM.ConnectQFormSession(selectedSession);
 
-        if (connectionResult.Item1) sender.Hide();
+        if (connectionResult.Item1)
+        {
+            sender.Hide();
+            _conQFormVM._mainPageVM.OnSessionInfoChanged(selectedSession);
+        }
         else
         {
             if (connectionResult.Item2 != null)

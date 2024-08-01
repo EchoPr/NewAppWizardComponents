@@ -39,10 +39,13 @@ public class ConnectQFormDialogVM
     private RSessionList _availableSessions;
     private QFormManager _qformManager;
 
+    public MainPageVM _mainPageVM;
+
     public event PropertyChangedEventHandler PropertyChanged;
 
     public ConnectQFormDialogVM(MainPageVM mainPageVM)
     {
+        _mainPageVM = mainPageVM;
         _qformManager = mainPageVM.qformManager;
         VisualSessions = new ObservableCollection<SessionInfo>();
         LoadAvailableSessions();
@@ -81,7 +84,7 @@ public class ConnectQFormDialogVM
             }
         }
 
-        return new Tuple<bool, string?>(false, null);
+        return new Tuple<bool, string?>(true, null);
     }
 
     private void LoadAvailableSessions() 
@@ -98,5 +101,4 @@ public class ConnectQFormDialogVM
         _availableSessions.sessions.ForEach(s => { if (!s.is_api_connected) VisualSessions.Add(new SessionInfo(s.ToString(), s.session_id)); });
 
     }
-
 }

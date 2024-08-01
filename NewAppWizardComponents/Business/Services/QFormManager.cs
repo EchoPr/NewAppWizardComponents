@@ -17,6 +17,9 @@ public class QFormManager
 
     public event EventHandler<string> ErrorMessageRequested;
     public event EventHandler InvokationResultsReceived;
+    public event EventHandler InvocationStarted;
+    public event EventHandler InvocationSuccess;
+    public event EventHandler InvocationFailed;
 
     public QFormManager(string qformDir = "C:\\QForm\\11.0.2\\x64")
     {
@@ -32,7 +35,7 @@ public class QFormManager
         }
     }
 
-    public void invokeMethod(ApiEntry apiEntry)
+    public async Task invokeMethod(ApiEntry apiEntry)
     {
         if (apiEntry == null)
             return;
@@ -43,10 +46,6 @@ public class QFormManager
             {
                 if (!_qform.qform_is_running())
                 {
-                    //ConnectForm frm = new ConnectForm(qform);
-                    //frm.StartPosition = FormStartPosition.CenterParent;
-                    //frm.ShowDialog(this);
-
                     ErrorMessageRequested?.Invoke(this, "There will be able to connect QForm session");
                     return;
                 }
@@ -61,14 +60,13 @@ public class QFormManager
             }
         }
 
+        InvocationStarted?.Invoke(this, null);
         object arg = apiEntry.arg_value;
-        Type? ret_type = null;
-        ret_type = apiEntry.ret_type;
+        Type ret_type = apiEntry.ret_type;
 
         var info = new QForm.CmdInfo();
         try
         {
-
             Ret rv = apiEntry.ret_value as Ret;
             if (rv == null)
                 rv = new Ret();
@@ -77,21 +75,31 @@ public class QFormManager
 
             object ret;
             if (apiEntry.code_func != null)
-                ret = _CodeFunctionInvoke(apiEntry, arg, ret_type);
+                ret = await Task.Run(() => _CodeFunctionInvoke(apiEntry, arg, ret_type));
             else
-                ret = _qform.invoke(apiEntry.service_cmd, apiEntry.Name, arg, ret_type, info);
+                ret = await Task.Run(() => _qform.invoke(apiEntry.service_cmd, apiEntry.Name, arg, ret_type, info));
+
+            if (ret.GetType() == typeof(Tuple<string>)) throw new Exception((ret as Tuple<string>).Item1);
 
             if (ret_type != null)
             {
-                Ret r = ret as Ret;
-                r.invocationResultStatus = "Ok";
-                apiEntry.ret_value = ret;
+                if (ret is Ret r)
+                {
+                    r.invocationResultStatus = "Ok";
+                    apiEntry.ret_value = ret;
+                }
+                else
+                {
+                    apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
+                    apiEntry.ret_type = typeof(Ret);
+                }
+                InvocationSuccess?.Invoke(this, null);
             }
             else
             {
-                Ret st = new Ret();
                 apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
                 apiEntry.ret_type = typeof(Ret);
+                InvocationSuccess?.Invoke(this, null);
             }
         }
         catch (Exception ex)
@@ -99,20 +107,23 @@ public class QFormManager
             if (ret_type != null)
             {
                 object ret = Activator.CreateInstance(ret_type);
-                Ret r = ret as Ret;
-                r.invocationResultStatus = ex.Message;
-                apiEntry.ret_value = ret;
+                if (ret is Ret r)
+                {
+                    r.invocationResultStatus = ex.Message;
+                    apiEntry.ret_value = ret;
+                }
             }
             else
             {
-                Ret st = new Ret();
-                apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
+                apiEntry.ret_value = new Ret { invocationResultStatus = ex.Message };
                 apiEntry.ret_type = typeof(Ret);
             }
+            InvocationFailed?.Invoke(this, null);
         }
 
         InvokationResultsReceived?.Invoke(this, null);
     }
+
 
     public RSessionList GetAvailableSessions()
     {

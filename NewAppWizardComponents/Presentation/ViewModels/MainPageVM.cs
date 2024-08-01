@@ -60,6 +60,28 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public int lastSelectedBlock { get; set; }
 
+    private string? _currentSession = null;
+    public string? CurrentSession
+    {
+        get => _currentSession;
+        set
+        {
+            _currentSession = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private Visibility _statusBarVisibility = Visibility.Collapsed;
+    public Visibility StatusBarVisibility
+    {
+        get => _statusBarVisibility;
+        set
+        {
+            _statusBarVisibility = value;
+            OnPropertyChanged();
+        }
+    }
+
     public QFormManager qformManager;
     private ProjectManager _projectManager;
 
@@ -90,6 +112,12 @@ public partial class MainPageVM : INotifyPropertyChanged
     public void OnPropertyChanged([CallerMemberName] string propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public void OnSessionInfoChanged(SessionInfo sessionInfo)
+    {
+        CurrentSession = sessionInfo.ToString();
+        StatusBarVisibility = Visibility.Visible;
     }
 
     private void ReadAllMethodParameters()

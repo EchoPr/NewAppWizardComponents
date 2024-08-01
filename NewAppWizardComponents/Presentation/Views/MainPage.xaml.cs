@@ -49,6 +49,34 @@ public sealed partial class MainPage : Page
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
         mainPageVM.qformManager.ErrorMessageRequested += OnMessageBoxRequested;
         mainPageVM.qformManager.InvokationResultsReceived += OnInvokationResultsReceived;
+        mainPageVM.qformManager.InvocationStarted += OnInvocationStarted;
+        mainPageVM.qformManager.InvocationSuccess += OnInvocationSuccess;
+        mainPageVM.qformManager.InvocationFailed += OnInvocationFailed;
+    }
+
+    private void OnInvocationFailed(object? sender, EventArgs e)
+    {
+        //InvokeProgressBar.Value = 0;
+        InvokeProgressBar.ShowError = true;
+    }
+
+    private void OnInvocationSuccess(object? sender, EventArgs e)
+    {
+        InvokeProgressBar.IsIndeterminate = false;
+        InvokeProgressBar.ShowError = false;
+        InvokeProgressBar.Value = 100;
+    }
+
+    private void OnInvocationStarted(object? sender, EventArgs e)
+    {
+        InvokeProgressBar.Value = 0;
+        InvokeProgressBar.IsIndeterminate = true;
+        InvokeProgressBar.ShowError = false;
+    }
+
+    private void OnSessionInfoChanged(object? sender, SessionInfo e)
+    {
+        
     }
 
     private void OnInvokationResultsReceived(object? sender, EventArgs e)
@@ -611,7 +639,7 @@ public sealed partial class MainPage : Page
         await mainPageVM.LoadApiEntriesFromScm();
     }
 
-    private void InvokeButtonCommand(object sender, RoutedEventArgs e)
+    private async void InvokeButtonCommand(object sender, RoutedEventArgs e)
     {
         if (_selectedBlocks.Count == 0)
         {
@@ -622,7 +650,9 @@ public sealed partial class MainPage : Page
         var lastSelectedBlock = _selectedBlocks.Last();
         var apiEntry = (lastSelectedBlock.Tag as ExpandedEntry).apiEntry;
 
-        mainPageVM.qformManager.invokeMethod(apiEntry);
+        Debug.WriteLine("Start");
+        await mainPageVM.qformManager.invokeMethod(apiEntry);
+        Debug.WriteLine("End");
     }
 }
 
