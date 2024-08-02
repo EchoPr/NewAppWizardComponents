@@ -9,6 +9,7 @@ using Windows.Graphics.Printing.PrintTicket;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.Core.Preview;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
@@ -41,7 +42,7 @@ public sealed partial class MainPage : Page
         mainPageVM = new MainPageVM();
         this.DataContext = mainPageVM;
 
-        InitializeBrushes();
+        InitializeBrushes(); 
 
         this.KeyDown += MainPage_KeyDown;
         this.KeyUp += MainPage_KeyUp;
@@ -662,6 +663,24 @@ public sealed partial class MainPage : Page
         Debug.WriteLine("Start");
         await mainPageVM.qformManager.invokeMethod(apiEntry);
         Debug.WriteLine("End");
+    }
+
+    private void MenuConnectQForm(object sender, RoutedEventArgs e)
+    {
+        if (mainPageVM.CurrentSession != null)
+        {
+            ShowMessageBox($"Already connected to: {mainPageVM.CurrentSession}\nDiscoonect or end current session to connect new");
+            return;
+        }
+
+        ShowConnectQFormDialog();
+    }
+
+    private void MenuDisconnectQForm(object sender, RoutedEventArgs e)
+    {
+        mainPageVM.qformManager.DetachQForm();
+        mainPageVM.CurrentSession = null;
+        mainPageVM.StatusBarVisibility = Visibility.Collapsed;
     }
 }
 

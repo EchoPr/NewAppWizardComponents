@@ -135,6 +135,11 @@ public class QFormManager
         _qform.qform_start();
     }
 
+    public void DetachQForm()
+    {
+        _qform.qform_detach();
+    }
+
     public void AttachToSession(ASessionId sessionId) 
     {
         _qform.qform_attach_to(sessionId);

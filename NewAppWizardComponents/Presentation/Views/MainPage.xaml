@@ -3,6 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="using:NewAppWizardComponents"
       Loaded="Page_Loaded"
+      
       Background="#F3F3F3">
 
   <Page.Resources>
@@ -42,11 +43,9 @@
         <MenuFlyoutItem Text="Load Project" Click="LoadProject"/>
       </MenuBarItem>
 
-      <MenuBarItem Title="Edit">
-        <MenuFlyoutItem Text="Undo"/>
-        <MenuFlyoutItem Text="Cut"/>
-        <MenuFlyoutItem Text="Copy"/>
-        <MenuFlyoutItem Text="Paste"/>
+      <MenuBarItem Title="QForm">
+        <MenuFlyoutItem Text="Connect session" Click="MenuConnectQForm"/>
+        <MenuFlyoutItem Text="Disconnect" Click="MenuDisconnectQForm"/>
       </MenuBarItem>
     </MenuBar>
     
