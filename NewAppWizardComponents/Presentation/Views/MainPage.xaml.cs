@@ -205,43 +205,36 @@ public sealed partial class MainPage : Page
             parameters = entry.ret_type;
             dest = OutputParametersGrid;
 
-            var statusPropertyTextBlock = new TextBlock { Text = "Status", Style = (Style)Resources["ParameterName"], FontFamily = (FontFamily)Resources["SourceCodePro-Medium"] };
-            var statusPropertyBlockVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
-            statusPropertyBlockVisual.Child = statusPropertyTextBlock;
+            Border statusNameBlock = CreatePropertyVisibleName("Status", true);
 
-            var statusTextBlock = new TextBlock { Text = (entry.ret_value as Ret)?.invocationResultStatus ?? "", Style = (Style)Resources["ParameterName"] };
-            var statusBlockVisual = new Border { Style = (Style)Resources["ParameterNameBorder"], BorderThickness = new Thickness(1, 0, 0, 1) };
-            statusBlockVisual.Child = statusTextBlock;
+            var statusValueTextBlock = new TextBlock { Text = (entry.ret_value as Ret)?.invocationResultStatus ?? "", Style = (Style)Resources["ParameterName"] };
+            var statusValueBlock = new Border { Style = (Style)Resources["ParameterNameBorder"], BorderThickness = new Thickness(1, 0, 0, 1) };
+            statusValueBlock.Child = statusValueTextBlock;
 
-            var propertyNameToolTip = new ToolTip { Content = statusTextBlock.Text, VerticalOffset = -40 };
-            ToolTipService.SetToolTip(statusBlockVisual, propertyNameToolTip);
+            var propertyNameToolTip = new ToolTip { Content = statusValueTextBlock.Text, VerticalOffset = -40 };
+            ToolTipService.SetToolTip(statusValueBlock, propertyNameToolTip);
 
-            Grid.SetRow(statusPropertyBlockVisual, 0);
-            Grid.SetColumn(statusPropertyBlockVisual, 0);
-            dest.Children.Add(statusPropertyBlockVisual);
-
-            Grid.SetRow(statusBlockVisual, 0);
-            Grid.SetColumn(statusBlockVisual, 1);
-            dest.Children.Add(statusBlockVisual);
+            AddOnParametersGrid(dest, statusNameBlock, 0, 0);
+            AddOnParametersGrid(dest, statusValueBlock, 0, 1);
         }
 
         if (parameters != null)
         {
+            var factor = Convert.ToInt32(type == ParameterTypes.Output);
             PropertyInfo[] properties = parameters.GetProperties();
 
+
             var rows = dest.RowDefinitions.Count;
-            for (int i = 0; i < properties.Length - rows + Convert.ToInt32(type == ParameterTypes.Output); i++)
+            for (int i = 0; i < properties.Length - rows + factor; i++)
             {
                 dest.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             }
 
-            for (int i = 0; i < properties.Length - 1; i++)
+            for (int i = 0; i < properties.Length - factor; i++)
             {
                 var property = properties[i];
-                var propertyNameTextBlock = new TextBlock { Text = property.Name, Style = (Style)Resources["ParameterName"] };
 
-                var propertyNameVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
-                propertyNameVisual.Child = propertyNameTextBlock;
+                Border propertyNameBlock = CreatePropertyVisibleName(property.Name);
 
                 var propertyValueControl = CreateControlForProperty(
                     property,
@@ -250,13 +243,8 @@ public sealed partial class MainPage : Page
                     type == ParameterTypes.Output
                 );
 
-                Grid.SetRow(propertyNameVisual, i + Convert.ToInt32(type == ParameterTypes.Output));
-                Grid.SetColumn(propertyNameVisual, 0);
-                dest.Children.Add(propertyNameVisual);
-
-                Grid.SetRow(propertyValueControl, i + Convert.ToInt32(type == ParameterTypes.Output));
-                Grid.SetColumn(propertyValueControl, 1);
-                dest.Children.Add(propertyValueControl);
+                AddOnParametersGrid(dest, propertyNameBlock, i + factor, 0);
+                AddOnParametersGrid(dest, propertyValueControl, i + factor, 1);
             }
         }
     }
@@ -265,6 +253,27 @@ public sealed partial class MainPage : Page
     {
         InputParametersGrid.Children.Clear();
         OutputParametersGrid.Children.Clear();
+    }
+
+    private void AddOnParametersGrid(Grid grid, FrameworkElement block, int row, int col)
+    {
+        Grid.SetRow(block, row);
+        Grid.SetColumn(block, col);
+        grid.Children.Add(block);
+    }
+
+    private Border CreatePropertyVisibleName(string name, bool highlighted = false) 
+    {
+        var propertyTextBlock = new TextBlock { Text = name, Style = (Style)Resources["ParameterName"] };
+        if (highlighted) propertyTextBlock.FontFamily = (FontFamily)Resources["SourceCodePro-Medium"];
+
+        var propertyBlockVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
+        propertyBlockVisual.Child = propertyTextBlock;
+
+        var propertyNameToolTip = new ToolTip { Content = propertyTextBlock.Text, VerticalOffset = -40 };
+        ToolTipService.SetToolTip(propertyBlockVisual, propertyNameToolTip);
+
+        return propertyBlockVisual;
     }
 
     private FrameworkElement CreateControlForProperty(PropertyInfo property, object value, ApiEntry entry, bool isResult)
