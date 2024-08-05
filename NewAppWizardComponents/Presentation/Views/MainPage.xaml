@@ -31,9 +31,9 @@
       <RowDefinition Height="40"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="45*"/>
-      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
+    <!--Menubar-->
     <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
              VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
       <MenuBarItem Title="File">
@@ -89,7 +89,7 @@
 
     
     <!--Methods list-->
-    <TabView Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Margin="16 6 16 16"
+    <TabView Grid.Column="0" Grid.Row="2" Margin="16 6 16 16"
              AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
              BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
       <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
@@ -140,19 +140,138 @@
         </Grid>
       </TabViewItem>
     </TabView>
- 
 
-    
-    <!-- Code view -->
-    <ScrollViewer x:Name="CodeView" Grid.Column="1" Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  HorizontalScrollBarVisibility="Auto"
-                  Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16" Padding="8">
-      <StackPanel x:Name="CodeBlocks" Padding="10"/>
-    </ScrollViewer>
-    
+
+    <Grid Column="1" Row="2" Grid.RowDefinitions="50*, Auto, Auto, Auto">
+      <!-- Code view -->
+      <ScrollViewer x:Name="CodeView" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                    HorizontalScrollBarVisibility="Auto"
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16 0 0" Padding="8">
+        <StackPanel x:Name="CodeBlocks" Padding="10"/>
+      </ScrollViewer>
+
+      <Border Grid.Row="1" Background="#F3F3F3" Height="16" VerticalAlignment="Stretch" ManipulationMode="All"
+        Tag="H1"
+        PointerPressed="Separator_PointerPressed" 
+        PointerMoved="Separator_PointerMoved" 
+        PointerReleased="Separator_PointerReleased">
+
+        <FontIcon Glyph="&#xE76F;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
+      </Border>
+
+      <!--Documentation-->
+      <ScrollViewer Grid.Row="2" x:Name="DocumentationView"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                Visibility="{Binding DocViewVisibility}"
+                Style="{StaticResource ScrollViewerBlock}"
+                Margin="0 0 0 16">
+        <StackPanel>
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 20 10 0"/>
+            <Border Height="24" Padding="3" Background="{StaticResource APILevel1}" Margin="0 17 0 0">
+              <TextBlock Text="Уровень API: доступ к исходным данным" Style="{StaticResource TextDefault}"
+               Foreground="{StaticResource ForegroundWhite}" FontFamily="{StaticResource RobotoMedium}"/>
+            </Border>
+          </StackPanel>
+          <TextBlock Text="{Binding SelectedMethod.DescRu}" Style="{StaticResource TextDefault}" Margin="0 15 0 0"/>
+
+          <TextBlock Text="Аргументы функции" Margin="0 40 0 15" Visibility="{Binding InputVisibility}"/>
+          <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
+              x:Name="MethodInputs" Visibility="{Binding InputVisibility}">
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
+            </Border>
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="1" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Тип</TextBlock>
+            </Border>
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="2" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Описание</TextBlock>
+            </Border>
+
+            <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelectedMethod.Input}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="3*"/>
+                      <ColumnDefinition Width="3*"/>
+                      <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="0">
+                      <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords" Style="{StaticResource TableArgName}"/>
+                    </Border>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="1">
+                      <TextBlock Text="{Binding Type}" TextWrapping="WrapWholeWords" Style="{StaticResource TableTypeName}"/>
+                    </Border>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="2">
+                      <TextBlock Text="{Binding DescRu}" TextWrapping="WrapWholeWords" Style="{StaticResource TableItemText}"/>
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+
+          <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15" Visibility="{Binding OutputVisibility}"/>
+          <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
+              x:Name="MethodOutputs" Visibility="{Binding OutputVisibility}">
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
+            </Border>
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="1" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Тип</TextBlock>
+            </Border>
+            <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="2" Grid.Row="0">
+              <TextBlock Style="{StaticResource TableHeaderText}">Описание</TextBlock>
+            </Border>
+
+            <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelectedMethod.Output}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="3*"/>
+                      <ColumnDefinition Width="3*"/>
+                      <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="0">
+                      <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords" Style="{StaticResource TableArgName}"/>
+                    </Border>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="1">
+                      <TextBlock Text="{Binding Type}" TextWrapping="WrapWholeWords" Style="{StaticResource TableTypeName}"/>
+                    </Border>
+                    <Border Style="{StaticResource TableItemBorder}" Grid.Column="2">
+                      <TextBlock Text="{Binding DescRu}" TextWrapping="WrapWholeWords" Style="{StaticResource TableItemText}"/>
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!--StatusBar-->
+      <Grid Grid.Row="3" Grid.ColumnDefinitions="05*, 95*" Grid.RowDefinitions="Auto, Auto"
+          x:Name="StatusBar" Visibility="{Binding StatusBarVisibility, Mode=TwoWay}"
+          Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 0 16"
+          Padding="8">
+        <Image Grid.Column="0" Grid.Row="0" Source="ms-appx:///NewAppWizardComponents/Assets/Icons/connected_to_qform.png"  Height="16" Margin="0 0 8 0" />
+        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
+          <TextBlock Text="Connected to: " Style="{StaticResource TextDefault}" Margin="0 0 4 0" />
+          <TextBlock Text="{Binding CurrentSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
+          <ToolTipService.ToolTip>
+            <ToolTip Content="{Binding CurrentSession, Mode=TwoWay}" VerticalOffset="-50"/>
+          </ToolTipService.ToolTip>
+          </TextBlock>
+        </StackPanel>
+        <ProgressBar Grid.ColumnSpan="2" Grid.Row="1" x:Name="InvokeProgressBar" Margin="0 8 0 0"/>
+      </Grid>
+
+    </Grid>
 
     <!-- Method parameters -->
-    <Grid Grid.Column="2" Grid.Row="2" Grid.RowSpan="3" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid">
+    <Grid Grid.Column="2" Grid.Row="2" Grid.RowSpan="4" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid">
 
       <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
         <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 16 16 0">
@@ -166,7 +285,7 @@
       </Grid>
 
       <Border Grid.Row="1" Background="#F3F3F3" Height="16" VerticalAlignment="Stretch" ManipulationMode="All"
-          Tag="1"
+          Tag="H1"
           PointerPressed="Separator_PointerPressed" 
           PointerMoved="Separator_PointerMoved" 
           PointerReleased="Separator_PointerReleased">
@@ -186,114 +305,7 @@
       </Grid>
     </Grid>
 
-    <!--StatusBar-->
-    <Grid Grid.Row="3" Grid.Column="1" Grid.ColumnDefinitions="05*, 95*" Grid.RowDefinitions="Auto, Auto"
-          x:Name="StatusBar" Visibility="{Binding StatusBarVisibility, Mode=TwoWay}"
-          Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 0 16"
-          Padding="8">
-      <Image Grid.Column="0" Grid.Row="0" Source="ms-appx:///NewAppWizardComponents/Assets/Icons/connected_to_qform.png"  Height="16" Margin="0 0 8 0" />
-      <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
-        <TextBlock Text="Connected to: " Style="{StaticResource TextDefault}" Margin="0 0 4 0" />
-        <TextBlock Text="{Binding CurrentSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
-          <ToolTipService.ToolTip>
-            <ToolTip Content="{Binding CurrentSession, Mode=TwoWay}" VerticalOffset="-50"/>
-          </ToolTipService.ToolTip>   
-        </TextBlock>
-      </StackPanel>
-      <ProgressBar Grid.ColumnSpan="2" Grid.Row="1" x:Name="InvokeProgressBar" Margin="0 8 0 0"/>
-    </Grid>
 
-      <!--Documentation-->
-    <!--<ScrollViewer Grid.Column="1" Grid.Row="1" x:Name="DocumentationView"
-                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                Visibility="{Binding DocViewVisibility}"
-                Style="{StaticResource ScrollViewerBlock}">
-      <StackPanel>
-        <StackPanel Orientation="Horizontal">
-          <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 20 10 0"/>
-          <Border Height="24" Padding="3" Background="{StaticResource APILevel1}" Margin="0 17 0 0">
-            <TextBlock Text="Уровень API: доступ к исходным данным" Style="{StaticResource TextDefault}"
-               Foreground="{StaticResource ForegroundWhite}" FontFamily="{StaticResource RobotoMedium}"/>
-          </Border>
-        </StackPanel>
-        <TextBlock Text="{Binding SelectedMethod.DescRu}" Style="{StaticResource TextDefault}" Margin="0 15 0 0"/>
-
-        <TextBlock Text="Аргументы функции" Margin="0 40 0 15" Visibility="{Binding InputVisibility}"/>
-        <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
-              x:Name="MethodInputs" Visibility="{Binding InputVisibility}">
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
-          </Border>
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="1" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Тип</TextBlock>
-          </Border>
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="2" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Описание</TextBlock>
-          </Border>
-
-          <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelectedMethodInputParameters}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Grid>
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="4*"/>
-                  </Grid.ColumnDefinitions>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="0">
-                    <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords" Style="{StaticResource TableArgName}"/>
-                  </Border>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="1">
-                    <TextBlock Text="{Binding Type}" TextWrapping="WrapWholeWords" Style="{StaticResource TableTypeName}"/>
-                  </Border>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="2">
-                    <TextBlock Text="{Binding DescRu}" TextWrapping="WrapWholeWords" Style="{StaticResource TableItemText}"/>
-                  </Border>
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </Grid>
-
-        <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15" Visibility="{Binding OutputVisibility}"/>
-        <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
-              x:Name="MethodOutputs" Visibility="{Binding OutputVisibility}">
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
-          </Border>
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="1" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Тип</TextBlock>
-          </Border>
-          <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="2" Grid.Row="0">
-            <TextBlock Style="{StaticResource TableHeaderText}">Описание</TextBlock>
-          </Border>
-
-          <ItemsControl Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding SelectedMethodOutputParameters}">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate>
-                <Grid>
-                  <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="4*"/>
-                  </Grid.ColumnDefinitions>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="0">
-                    <TextBlock Text="{Binding Name}" TextWrapping="WrapWholeWords" Style="{StaticResource TableArgName}"/>
-                  </Border>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="1">
-                    <TextBlock Text="{Binding Type}" TextWrapping="WrapWholeWords" Style="{StaticResource TableTypeName}"/>
-                  </Border>
-                  <Border Style="{StaticResource TableItemBorder}" Grid.Column="2">
-                    <TextBlock Text="{Binding DescRu}" TextWrapping="WrapWholeWords" Style="{StaticResource TableItemText}"/>
-                  </Border>
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </Grid>
-      </StackPanel>
-    </ScrollViewer>-->
-    <!---->
 
   </Grid>
 

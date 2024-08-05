@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Controls;
+using Newtonsoft.Json;
 using Windows.Services.Maps;
 using Windows.UI.Core;
 
@@ -57,6 +58,59 @@ public partial class MainPageVM : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
+    private Visibility _inputVisibility = Visibility.Collapsed;
+    public Visibility InputVisibility
+    {
+        get => _inputVisibility;
+        private set
+        {
+            if (_inputVisibility != value)
+            {
+                _inputVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private Visibility _outputVisibility = Visibility.Collapsed;
+    public Visibility OutputVisibility
+    {
+        get => _outputVisibility;
+        private set
+        {
+            if (_outputVisibility != value)
+            {
+                _outputVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private Visibility _docViewVisibility = Visibility.Collapsed;
+    public Visibility DocViewVisibility
+    {
+        get => _docViewVisibility;
+        set
+        {
+            _docViewVisibility = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public List<Method> Docs {  get; set; }
+
+    private Method _selectedMethod = null;
+    public Method SelectedMethod
+    {
+        get => _selectedMethod;
+        set
+        {
+            _selectedMethod = value;
+            OnPropertyChanged();
+        }
+    }
+
 
     public int lastSelectedBlock { get; set; }
 
@@ -114,6 +168,31 @@ public partial class MainPageVM : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
+    public void UpdateDocsVisibility(ApiEntry entry)
+    {
+        var docMethod = Docs.Find(m => m.Name == entry.Name);
+        SelectedMethod = docMethod;
+
+        SetVisibility();
+
+    }
+
+    private void SetVisibility()
+    {
+        DocViewVisibility = Visibility.Visible;
+
+        if (SelectedMethod != null)
+        {
+            InputVisibility = SelectedMethod.Input.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+            OutputVisibility = SelectedMethod.Output.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
+        else
+        {
+            InputVisibility = Visibility.Collapsed;
+            OutputVisibility = Visibility.Collapsed;
+        }
+    }
+
     public void OnSessionInfoChanged(SessionInfo sessionInfo)
     {
         CurrentSession = sessionInfo.ToString();
@@ -125,7 +204,11 @@ public partial class MainPageVM : INotifyPropertyChanged
         Methods = new List<ApiEntry>();
         QForm.api_get(Methods);
         FilteredMethods = new ObservableCollection<ApiEntry>(Methods);
-        PopulateTreeViewItems(); 
+        PopulateTreeViewItems();
+
+        string jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets/api_new.json");
+        var allMethods = JsonConvert.DeserializeObject<AllMethods>(File.ReadAllText(jsonFilePath));
+        Docs = allMethods.Functions;
     }
 
     private void PopulateTreeViewItems()
@@ -136,11 +219,11 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             foreach (var group in method.groups)
             {
-                if (!categoryDict.ContainsKey(group.key))
+                if (!categoryDict.ContainsKey(group.ru))
                 {
-                    categoryDict[group.key] = new TreeViewItemModel(group.key, method);
+                    categoryDict[group.ru] = new TreeViewItemModel(group.ru, method);
                 }
-                categoryDict[group.key].Children.Add(new TreeViewItemModel(method.Name, method));
+                categoryDict[group.ru].Children.Add(new TreeViewItemModel(method.Name, method));
             }
         }
 

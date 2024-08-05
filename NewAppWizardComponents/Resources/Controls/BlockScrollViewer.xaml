@@ -13,6 +13,7 @@
     <Setter Property="Padding" Value="10 0 10 20"/>
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="Background" Value="White"/>
   </Style>
 
 </ResourceDictionary>

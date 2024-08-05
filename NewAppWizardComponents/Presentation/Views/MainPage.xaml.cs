@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Windows.ApplicationModel.Search;
 using Windows.Graphics.Printing.PrintTicket;
 using Windows.Storage.Pickers;
 using Windows.System;
@@ -30,8 +31,12 @@ public sealed partial class MainPage : Page
 
     private bool _isResizing = false;
     private double _initialPosition;
-    private RowDefinition _firstMovedGrip;
-    private RowDefinition _secondMovedGrip;
+    // RowDefinition or ColumnDefinition
+    private object _firstMovedGrip;
+    private object _secondMovedGrip;
+    //
+    private GripSeparatorType usingSeparator;
+    private Grid resizingGrid;
 
     private bool _isShiftPressed;
 
@@ -496,21 +501,6 @@ public sealed partial class MainPage : Page
         if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
     }
 
-    public void OnItemClick(object sender, ItemClickEventArgs e)
-    {
-        var clickedItem = e.ClickedItem as ApiEntry;
-
-        if (!clickedItem.menu_only)
-        {
-
-            mainPageVM.AddToCodeBlocks(clickedItem);
-        }
-        else
-        {
-            ShowMessageBox("To add this method use the context menu in QForm");
-        }
-
-    }
 
     public void OnMessageBoxRequested(object sender, string message)
     {
@@ -537,10 +527,24 @@ public sealed partial class MainPage : Page
         _isResizing = true;
         _initialPosition = e.GetCurrentPoint(MethodParametersGrid).Position.Y;
         var separator = sender as Border;
-        int columnIndex = int.Parse(separator.Tag.ToString());
-        _firstMovedGrip = MethodParametersGrid.RowDefinitions[columnIndex - 1];
-        _secondMovedGrip = MethodParametersGrid.RowDefinitions[columnIndex + 1];
-        separator.CapturePointer(e.Pointer);
+
+        string separatorInfo = separator.Tag.ToString();
+        usingSeparator = separatorInfo[0] == 'H' ? GripSeparatorType.Horizontal : GripSeparatorType.Vertiacal;
+        int separatorIndex = int.Parse(separatorInfo[1].ToString());
+
+        resizingGrid = separator.Parent as Grid;
+
+        if (usingSeparator == GripSeparatorType.Horizontal)
+        {
+            _firstMovedGrip = resizingGrid.RowDefinitions[separatorIndex - 1];
+            _secondMovedGrip = resizingGrid.RowDefinitions[separatorIndex + 1];
+        }
+        else
+        {
+            _firstMovedGrip = resizingGrid.ColumnDefinitions[separatorIndex - 1];
+            _secondMovedGrip = resizingGrid.ColumnDefinitions[separatorIndex + 1];
+        }
+            separator.CapturePointer(e.Pointer);
     }
 
     private void Separator_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -548,18 +552,43 @@ public sealed partial class MainPage : Page
         if (!_isResizing)
             return;
 
-        double currentPosition = e.GetCurrentPoint(MethodParametersGrid).Position.Y;
+        double currentPosition = e.GetCurrentPoint(resizingGrid).Position.Y;
         double delta = currentPosition - _initialPosition;
 
-        double newFirstHeight = _firstMovedGrip.ActualHeight + delta;
-        double newSecondHeight = _secondMovedGrip.ActualHeight - delta;
-
-
-
-        if (newFirstHeight > 16 && newSecondHeight > 16)
+        double newFirstDim;
+        double newSecondDim;
+        if (usingSeparator == GripSeparatorType.Horizontal)
         {
-            _firstMovedGrip.Height = new GridLength(newFirstHeight);
-            _secondMovedGrip.Height = new GridLength(newSecondHeight);
+            newFirstDim = (_firstMovedGrip as RowDefinition).ActualHeight + delta;
+            newSecondDim = (_secondMovedGrip as RowDefinition).ActualHeight - delta;
+            Debug.WriteLine(newFirstDim);
+            Debug.WriteLine(resizingGrid.ActualHeight);
+        }
+        else
+        {
+            newFirstDim = (_firstMovedGrip as ColumnDefinition).ActualWidth + delta;
+            newSecondDim = (_secondMovedGrip as ColumnDefinition).ActualWidth - delta;
+        }
+
+        if (newFirstDim > 16 && newSecondDim > 16 && newFirstDim < ActualHeight && newSecondDim < ActualHeight)
+        {
+            if (usingSeparator == GripSeparatorType.Horizontal)
+            {
+                var starredFirstDim = newFirstDim / resizingGrid.ActualHeight;
+                var starredSecondDim = newSecondDim / resizingGrid.ActualHeight;
+                Debug.WriteLine(starredFirstDim);
+                (_firstMovedGrip as RowDefinition).Height = new GridLength(starredFirstDim, GridUnitType.Star);
+                (_secondMovedGrip as RowDefinition).Height = new GridLength(starredSecondDim, GridUnitType.Star);
+            }
+            else
+            {
+                var starredFirstDim = newFirstDim / resizingGrid.ActualWidth;
+                var starredSecondDim = newSecondDim / resizingGrid.ActualWidth;
+                (_firstMovedGrip as ColumnDefinition).Width = new GridLength(starredFirstDim, GridUnitType.Star);
+                (_secondMovedGrip as ColumnDefinition).Width = new GridLength(starredSecondDim, GridUnitType.Star);
+            }
+
+                
             _initialPosition = currentPosition;
         }
     }
@@ -570,22 +599,35 @@ public sealed partial class MainPage : Page
         (sender as UIElement).ReleasePointerCapture(e.Pointer);
     }
 
+    public void OnItemClick(object sender, ItemClickEventArgs e)
+    {
+        var clickedItem = e.ClickedItem as ApiEntry;
+
+        ProcessMethodInvocation(clickedItem);
+    }
+
     private void TreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
     {
         var clickedItem = (args.InvokedItem as TreeViewItemModel);
 
         if (clickedItem.Children.Count != 0) return;
 
-        if (!clickedItem.ApiEntry.menu_only)
-        {
+        ProcessMethodInvocation(clickedItem.ApiEntry);
+    }
 
-            mainPageVM.AddToCodeBlocks(clickedItem.ApiEntry);
+    private void ProcessMethodInvocation(ApiEntry entry)
+    {
+        if (!entry.menu_only)
+        {
+            mainPageVM.AddToCodeBlocks(entry);
+            mainPageVM.UpdateDocsVisibility(entry);
         }
         else
         {
             ShowMessageBox("To add this method use the context menu in QForm");
         }
     }
+
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CodeBlocks == null) return;
@@ -684,12 +726,6 @@ public sealed partial class MainPage : Page
     }
 }
 
-public enum ParameterTypes
-{
-    Input = 0,
-    Output = 1,
-}
-
 public class CodeArg
 {
     public virtual object value_get() { return null; }
@@ -700,4 +736,15 @@ public class CodeRet : Ret
     public virtual void value_set(object o) { }
 }
 
+public enum ParameterTypes
+{
+    Input = 0,
+    Output = 1,
+}
+
+public enum GripSeparatorType
+{
+    Horizontal,
+    Vertiacal
+}
     
