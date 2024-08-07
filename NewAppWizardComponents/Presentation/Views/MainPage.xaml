@@ -21,11 +21,13 @@
   </Page.Resources>
 
 
-  <Grid>
+  <Grid x:Name="MainGrid">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="2*"/>
+      <ColumnDefinition Width="Auto"/>
       <ColumnDefinition Width="5*"/>
-      <ColumnDefinition Width="3*"/>
+      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="Auto"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="40"/>
@@ -89,7 +91,7 @@
 
     
     <!--Methods list-->
-    <TabView Grid.Column="0" Grid.Row="2" Margin="16 6 16 16"
+    <TabView Grid.Column="0" Grid.Row="2" Margin="16 6 0 16"
              AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
              BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
       <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
@@ -141,8 +143,17 @@
       </TabViewItem>
     </TabView>
 
+    <Border Grid.Row="2" Grid.Column="1" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
+      Tag="V1"
+      PointerPressed="Separator_PointerPressed" 
+      PointerMoved="Separator_PointerMoved" 
+      PointerReleased="Separator_PointerReleased">
 
-    <Grid Column="1" Row="2" Grid.RowDefinitions="50*, Auto, Auto, Auto">
+      <FontIcon Glyph="&#xE784;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
+    </Border>
+
+    <!--Middle Section-->
+    <Grid Grid.Column="2" Grid.Row="2" Grid.RowDefinitions="50*, Auto, Auto, Auto">
       <!-- Code view -->
       <ScrollViewer x:Name="CodeView" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     HorizontalScrollBarVisibility="Auto"
@@ -256,7 +267,7 @@
           x:Name="StatusBar" Visibility="{Binding StatusBarVisibility, Mode=TwoWay}"
           Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 0 16"
           Padding="8">
-        <Image Grid.Column="0" Grid.Row="0" Source="ms-appx:///NewAppWizardComponents/Assets/Icons/connected_to_qform.png"  Height="16" Margin="0 0 8 0" />
+        <!--<Image Grid.Column="0" Grid.Row="0" Source="ms-appx:///NewAppWizardComponents/Assets/Icons/connected_to_qform.png"  Height="16" Margin="0 0 8 0" />-->
         <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
           <TextBlock Text="Connected to: " Style="{StaticResource TextDefault}" Margin="0 0 4 0" />
           <TextBlock Text="{Binding CurrentSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
@@ -270,16 +281,25 @@
 
     </Grid>
 
+    <Border Grid.Row="2" Grid.Column="3" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
+      Tag="V3"
+      PointerPressed="Separator_PointerPressed" 
+      PointerMoved="Separator_PointerMoved" 
+      PointerReleased="Separator_PointerReleased">
+
+      <FontIcon Glyph="&#xE784;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
+    </Border>
+
     <!-- Method parameters -->
-    <Grid Grid.Column="2" Grid.Row="2" Grid.RowSpan="4" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid">
+    <Grid Grid.Column="4" Grid.Row="2" Grid.RowSpan="4" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid" VerticalAlignment="Stretch">
 
       <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 16 16 0">
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="0 16 16 0">
           <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-           Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 0">
+           Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 16 0">
           <Grid  x:Name="InputParametersGrid" ColumnDefinitions="*, *" />
         </ScrollViewer>
       </Grid>
@@ -294,12 +314,12 @@
       </Border>
 
       <Grid Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="16 0 16 0">
-          <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="0 0 16 0">
+          <TextBlock Style="{StaticResource ContentBlockHeader}">Results</TextBlock>
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="16 0 16 16">
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 16 16">
           <Grid  x:Name="OutputParametersGrid" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </ScrollViewer>
       </Grid>

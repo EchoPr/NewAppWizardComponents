@@ -35,8 +35,13 @@ public sealed partial class MainPage : Page
     private object _firstMovedGrip;
     private object _secondMovedGrip;
     //
-    private GripSeparatorType usingSeparator;
+    private GripSeparatorType? usingSeparator = null;
     private Grid resizingGrid;
+
+    private bool _VisResizing = false;
+    private double _VinitialPosition;
+    private ColumnDefinition _VfirstMovedColumn;
+    private ColumnDefinition _VsecondMovedColumn;
 
     private bool _isShiftPressed;
 
@@ -525,14 +530,18 @@ public sealed partial class MainPage : Page
     private void Separator_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         _isResizing = true;
-        _initialPosition = e.GetCurrentPoint(MethodParametersGrid).Position.Y;
+
         var separator = sender as Border;
+        resizingGrid = separator.Parent as Grid;
+
 
         string separatorInfo = separator.Tag.ToString();
-        usingSeparator = separatorInfo[0] == 'H' ? GripSeparatorType.Horizontal : GripSeparatorType.Vertiacal;
         int separatorIndex = int.Parse(separatorInfo[1].ToString());
+        usingSeparator = separatorInfo[0] == 'H' ? GripSeparatorType.Horizontal : GripSeparatorType.Vertical;
 
-        resizingGrid = separator.Parent as Grid;
+        _initialPosition = usingSeparator == GripSeparatorType.Horizontal
+            ? e.GetCurrentPoint(resizingGrid).Position.Y
+            : e.GetCurrentPoint(resizingGrid).Position.X;
 
         if (usingSeparator == GripSeparatorType.Horizontal)
         {
@@ -544,7 +553,8 @@ public sealed partial class MainPage : Page
             _firstMovedGrip = resizingGrid.ColumnDefinitions[separatorIndex - 1];
             _secondMovedGrip = resizingGrid.ColumnDefinitions[separatorIndex + 1];
         }
-            separator.CapturePointer(e.Pointer);
+
+        separator.CapturePointer(e.Pointer);
     }
 
     private void Separator_PointerMoved(object sender, PointerRoutedEventArgs e)
@@ -552,17 +562,19 @@ public sealed partial class MainPage : Page
         if (!_isResizing)
             return;
 
-        double currentPosition = e.GetCurrentPoint(resizingGrid).Position.Y;
+        double currentPosition = usingSeparator == GripSeparatorType.Horizontal
+            ? e.GetCurrentPoint(resizingGrid).Position.Y
+            : e.GetCurrentPoint(resizingGrid).Position.X;
+
         double delta = currentPosition - _initialPosition;
 
         double newFirstDim;
         double newSecondDim;
+
         if (usingSeparator == GripSeparatorType.Horizontal)
         {
             newFirstDim = (_firstMovedGrip as RowDefinition).ActualHeight + delta;
             newSecondDim = (_secondMovedGrip as RowDefinition).ActualHeight - delta;
-            Debug.WriteLine(newFirstDim);
-            Debug.WriteLine(resizingGrid.ActualHeight);
         }
         else
         {
@@ -570,25 +582,19 @@ public sealed partial class MainPage : Page
             newSecondDim = (_secondMovedGrip as ColumnDefinition).ActualWidth - delta;
         }
 
-        if (newFirstDim > 16 && newSecondDim > 16 && newFirstDim < ActualHeight && newSecondDim < ActualHeight)
+        if (newFirstDim > 16 && newSecondDim > 16)
         {
             if (usingSeparator == GripSeparatorType.Horizontal)
             {
-                var starredFirstDim = newFirstDim / resizingGrid.ActualHeight;
-                var starredSecondDim = newSecondDim / resizingGrid.ActualHeight;
-                Debug.WriteLine(starredFirstDim);
-                (_firstMovedGrip as RowDefinition).Height = new GridLength(starredFirstDim, GridUnitType.Star);
-                (_secondMovedGrip as RowDefinition).Height = new GridLength(starredSecondDim, GridUnitType.Star);
+                (_firstMovedGrip as RowDefinition).Height = new GridLength(newFirstDim, GridUnitType.Pixel);
+                (_secondMovedGrip as RowDefinition).Height = new GridLength(newSecondDim, GridUnitType.Pixel);
             }
             else
             {
-                var starredFirstDim = newFirstDim / resizingGrid.ActualWidth;
-                var starredSecondDim = newSecondDim / resizingGrid.ActualWidth;
-                (_firstMovedGrip as ColumnDefinition).Width = new GridLength(starredFirstDim, GridUnitType.Star);
-                (_secondMovedGrip as ColumnDefinition).Width = new GridLength(starredSecondDim, GridUnitType.Star);
+                (_firstMovedGrip as ColumnDefinition).Width = new GridLength(newFirstDim, GridUnitType.Pixel);
+                (_secondMovedGrip as ColumnDefinition).Width = new GridLength(newSecondDim, GridUnitType.Pixel);
             }
 
-                
             _initialPosition = currentPosition;
         }
     }
@@ -596,8 +602,32 @@ public sealed partial class MainPage : Page
     private void Separator_PointerReleased(object sender, PointerRoutedEventArgs e)
     {
         _isResizing = false;
+
+        if (usingSeparator == GripSeparatorType.Horizontal)
+        {
+            double totalHeight = resizingGrid.ActualHeight;
+            double firstStar = (_firstMovedGrip as RowDefinition).ActualHeight / totalHeight;
+            double secondStar = (_secondMovedGrip as RowDefinition).ActualHeight / totalHeight;
+
+            (_firstMovedGrip as RowDefinition).Height = new GridLength(firstStar, GridUnitType.Star);
+            (_secondMovedGrip as RowDefinition).Height = new GridLength(secondStar, GridUnitType.Star);
+        }
+        else
+        {
+            double totalWidth = resizingGrid.ActualWidth;
+            double firstStar = (_firstMovedGrip as ColumnDefinition).ActualWidth / totalWidth;
+            double secondStar = (_secondMovedGrip as ColumnDefinition).ActualWidth / totalWidth;
+
+            Debug.WriteLine($"{totalWidth} {firstStar} {secondStar} | {resizingGrid.Name}");
+
+            (_firstMovedGrip as ColumnDefinition).Width = new GridLength(firstStar, GridUnitType.Star);
+            (_secondMovedGrip as ColumnDefinition).Width = new GridLength(secondStar, GridUnitType.Star);
+        }
+
         (sender as UIElement).ReleasePointerCapture(e.Pointer);
     }
+
+
 
     public void OnItemClick(object sender, ItemClickEventArgs e)
     {
@@ -745,6 +775,6 @@ public enum ParameterTypes
 public enum GripSeparatorType
 {
     Horizontal,
-    Vertiacal
+    Vertical
 }
     
