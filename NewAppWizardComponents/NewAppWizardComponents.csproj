@@ -20,6 +20,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Remove="Assets\Icons\QFormLogo.svg" />
+    <Content Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
@@ -33,6 +34,7 @@
     <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
     <None Remove="Assets\Icons\connected_to_qform.svg" />
     <None Remove="Assets\Icons\QFormLogo.svg" />
+    <None Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
     <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
@@ -46,6 +48,7 @@
 
   <ItemGroup>    
     <PackageReference Include="Newtonsoft.Json" />    
+    <PackageReference Include="Uno.Toolkit.WinUI" />    
     <PackageReference Include="Uno.WinUI" />
     <PackageReference Include="Uno.WinUI.Lottie" Condition="!$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Uno.WinUI.DevServer" Condition="'$(Configuration)'=='Debug' AND !$(TargetFramework.Contains('windows10'))" />
@@ -189,6 +192,18 @@
     <UnoImage Update="Assets\Icons\connected_to_qform.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </UnoImage>
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UnoImage Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
   </ItemGroup>
 
 </Project>

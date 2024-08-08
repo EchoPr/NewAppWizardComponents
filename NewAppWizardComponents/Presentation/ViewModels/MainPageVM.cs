@@ -59,11 +59,41 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
+    private Visibility _treeMethodsVisibility = Visibility.Visible;
+    public Visibility TreeMethodsVisibility
+    {
+        get => _treeMethodsVisibility;
+        set
+        {
+            if (_treeMethodsVisibility != value)
+            {
+                _treeMethodsVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private Visibility _listMethodsVisibility = Visibility.Collapsed;
+    public Visibility ListMethodsVisibility
+    {
+        get => _listMethodsVisibility;
+        set
+        {
+            if (_listMethodsVisibility != value)
+            {
+                _listMethodsVisibility = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Объеденить это дело во что-то нормальное
+
     private Visibility _inputVisibility = Visibility.Collapsed;
     public Visibility InputVisibility
     {
         get => _inputVisibility;
-        private set
+        set
         {
             if (_inputVisibility != value)
             {
@@ -337,6 +367,12 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             Debug.WriteLine(ex);
         }
+    }
+
+    internal void ChangeApiFunctionsVisibility(int selectedIndex)
+    {
+        TreeMethodsVisibility = selectedIndex == 0 ? Visibility.Visible : Visibility.Collapsed;
+        ListMethodsVisibility = selectedIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
     }
 }
 

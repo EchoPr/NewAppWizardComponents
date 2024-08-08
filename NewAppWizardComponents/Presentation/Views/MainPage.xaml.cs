@@ -65,6 +65,8 @@ public sealed partial class MainPage : Page
         mainPageVM.qformManager.InvocationFailed += OnInvocationFailed;
     }
 
+    
+
     private void OnInvocationFailed(object? sender, EventArgs e)
     {
         //InvokeProgressBar.Value = 0;
@@ -753,6 +755,11 @@ public sealed partial class MainPage : Page
         mainPageVM.qformManager.DetachQForm();
         mainPageVM.CurrentSession = null;
         mainPageVM.StatusBarVisibility = Visibility.Collapsed;
+    }
+
+    private void TabBar_SelectionChanged(TabBar sender, TabBarSelectionChangedEventArgs args)
+    {
+        mainPageVM.ChangeApiFunctionsVisibility(sender.SelectedIndex);
     }
 }
 
