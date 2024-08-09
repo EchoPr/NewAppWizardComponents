@@ -87,47 +87,6 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    // Объеденить это дело во что-то нормальное
-
-    private Visibility _inputVisibility = Visibility.Collapsed;
-    public Visibility InputVisibility
-    {
-        get => _inputVisibility;
-        set
-        {
-            if (_inputVisibility != value)
-            {
-                _inputVisibility = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    private Visibility _outputVisibility = Visibility.Collapsed;
-    public Visibility OutputVisibility
-    {
-        get => _outputVisibility;
-        private set
-        {
-            if (_outputVisibility != value)
-            {
-                _outputVisibility = value;
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    private Visibility _docViewVisibility = Visibility.Collapsed;
-    public Visibility DocViewVisibility
-    {
-        get => _docViewVisibility;
-        set
-        {
-            _docViewVisibility = value;
-            OnPropertyChanged();
-        }
-    }
-
     public List<Method> Docs {  get; set; }
 
     private Method _selectedMethod = null;
@@ -138,7 +97,12 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             _selectedMethod = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(DocsPlaceholderVisibility));
         }
+    }
+
+    public Visibility DocsPlaceholderVisibility { 
+        get => _selectedMethod == null ? Visibility.Visible : Visibility.Collapsed;
     }
 
 
@@ -152,18 +116,13 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             _currentSession = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(VisualSession));
         }
     }
 
-    private Visibility _statusBarVisibility = Visibility.Collapsed;
-    public Visibility StatusBarVisibility
+    public string VisualSession
     {
-        get => _statusBarVisibility;
-        set
-        {
-            _statusBarVisibility = value;
-            OnPropertyChanged();
-        }
+        get => _currentSession == null ? "QForm disconnected" : $"Connected to: {_currentSession}";
     }
 
     public QFormManager qformManager;
@@ -202,31 +161,11 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         var docMethod = Docs.Find(m => m.Name == entry.Name);
         SelectedMethod = docMethod;
-
-        SetVisibility();
-
-    }
-
-    private void SetVisibility()
-    {
-        DocViewVisibility = Visibility.Visible;
-
-        if (SelectedMethod != null)
-        {
-            InputVisibility = SelectedMethod.Input.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-            OutputVisibility = SelectedMethod.Output.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        }
-        else
-        {
-            InputVisibility = Visibility.Collapsed;
-            OutputVisibility = Visibility.Collapsed;
-        }
     }
 
     public void OnSessionInfoChanged(SessionInfo sessionInfo)
     {
         CurrentSession = sessionInfo.ToString();
-        StatusBarVisibility = Visibility.Visible;
     }
 
     private void ReadAllMethodParameters()

@@ -29,6 +29,8 @@ public sealed partial class MainPage : Page
 
     private List<Border> _selectedBlocks = new List<Border>();
 
+    private ApiEntry _lastClickedMethod;
+
     private bool _isResizing = false;
     private double _initialPosition;
     // RowDefinition or ColumnDefinition
@@ -37,11 +39,6 @@ public sealed partial class MainPage : Page
     //
     private GripSeparatorType? usingSeparator = null;
     private Grid resizingGrid;
-
-    private bool _VisResizing = false;
-    private double _VinitialPosition;
-    private ColumnDefinition _VfirstMovedColumn;
-    private ColumnDefinition _VsecondMovedColumn;
 
     private bool _isShiftPressed;
 
@@ -60,36 +57,8 @@ public sealed partial class MainPage : Page
         mainPageVM.ClearedCodeBlocks += ClearCodeBlocks;
         mainPageVM.qformManager.ErrorMessageRequested += OnMessageBoxRequested;
         mainPageVM.qformManager.InvokationResultsReceived += OnInvokationResultsReceived;
-        mainPageVM.qformManager.InvocationStarted += OnInvocationStarted;
-        mainPageVM.qformManager.InvocationSuccess += OnInvocationSuccess;
-        mainPageVM.qformManager.InvocationFailed += OnInvocationFailed;
-    }
-
-    
-
-    private void OnInvocationFailed(object? sender, EventArgs e)
-    {
-        //InvokeProgressBar.Value = 0;
-        InvokeProgressBar.ShowError = true;
-    }
-
-    private void OnInvocationSuccess(object? sender, EventArgs e)
-    {
-        InvokeProgressBar.IsIndeterminate = false;
-        InvokeProgressBar.ShowError = false;
-        InvokeProgressBar.Value = 100;
-    }
-
-    private void OnInvocationStarted(object? sender, EventArgs e)
-    {
-        InvokeProgressBar.Value = 0;
-        InvokeProgressBar.IsIndeterminate = true;
-        InvokeProgressBar.ShowError = false;
-    }
-
-    private void OnSessionInfoChanged(object? sender, SessionInfo e)
-    {
-        
+        mainPageVM.qformManager.InvocationStarted += (s, e) => { InvokeProgressRing.IsActive = true; };
+        mainPageVM.qformManager.InvocationEnded += (s, e) => { InvokeProgressRing.IsActive = false; };
     }
 
     private void OnInvokationResultsReceived(object? sender, EventArgs e)
@@ -629,22 +598,45 @@ public sealed partial class MainPage : Page
         (sender as UIElement).ReleasePointerCapture(e.Pointer);
     }
 
-
-
-    public void OnItemClick(object sender, ItemClickEventArgs e)
+    private void OnListMethodDoubleClick(object sender, DoubleTappedRoutedEventArgs e)
     {
-        var clickedItem = e.ClickedItem as ApiEntry;
-
-        ProcessMethodInvocation(clickedItem);
+        if (!_lastClickedMethod.menu_only)
+            mainPageVM.AddToCodeBlocks(_lastClickedMethod);
     }
 
-    private void TreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
+    public void OnListMethodClick(object sender, ItemClickEventArgs e)
     {
-        var clickedItem = (args.InvokedItem as TreeViewItemModel);
+        _lastClickedMethod = e.ClickedItem as ApiEntry;
+        if (e.ClickedItem is ApiEntry entry && !entry.menu_only)
+        {
+            mainPageVM.UpdateDocsVisibility(_lastClickedMethod);
+        }
+        else
+        {
+            ShowMessageBox("To add this method use the context menu in QForm");
+        }
+    }
 
-        if (clickedItem.Children.Count != 0) return;
+    private void OnTreeMethodDoubleClick(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if (!_lastClickedMethod.menu_only)
+            mainPageVM.AddToCodeBlocks(_lastClickedMethod);
+    }
 
-        ProcessMethodInvocation(clickedItem.ApiEntry);
+    private void OnTreeMethodClick(TreeView sender, TreeViewItemInvokedEventArgs args)
+    {
+        if (args.InvokedItem is TreeViewItemModel item && item.Children.Count == 0)
+        {
+            _lastClickedMethod = item.ApiEntry;
+            if (!item.ApiEntry.menu_only)
+            {
+                mainPageVM.UpdateDocsVisibility(item.ApiEntry);
+            }
+            else
+            {
+                ShowMessageBox("To add this method use the context menu in QForm");
+            }
+        }
     }
 
     private void ProcessMethodInvocation(ApiEntry entry)
@@ -723,6 +715,11 @@ public sealed partial class MainPage : Page
         await mainPageVM.LoadApiEntriesFromScm();
     }
 
+    private void AddMethodToWorkspace(object sender, RoutedEventArgs e)
+    {
+        mainPageVM.AddToCodeBlocks(_lastClickedMethod);
+    }
+
     private async void InvokeButtonCommand(object sender, RoutedEventArgs e)
     {
         if (_selectedBlocks.Count == 0)
@@ -754,7 +751,6 @@ public sealed partial class MainPage : Page
     {
         mainPageVM.qformManager.DetachQForm();
         mainPageVM.CurrentSession = null;
-        mainPageVM.StatusBarVisibility = Visibility.Collapsed;
     }
 
     private void TabBar_SelectionChanged(TabBar sender, TabBarSelectionChangedEventArgs args)

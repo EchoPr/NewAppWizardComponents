@@ -9,7 +9,6 @@
   <Style TargetType="ScrollViewer" x:Name="ScrollViewerBlock">
     <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
     <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="CornerRadius" Value="2"/>
     <Setter Property="Padding" Value="10 0 10 20"/>
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="VerticalAlignment" Value="Stretch" />

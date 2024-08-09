@@ -18,8 +18,7 @@ public class QFormManager
     public event EventHandler<string> ErrorMessageRequested;
     public event EventHandler InvokationResultsReceived;
     public event EventHandler InvocationStarted;
-    public event EventHandler InvocationSuccess;
-    public event EventHandler InvocationFailed;
+    public event EventHandler InvocationEnded;
 
     public QFormManager(string qformDir = "C:\\QForm\\11.0.2\\x64")
     {
@@ -93,13 +92,13 @@ public class QFormManager
                     apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
                     apiEntry.ret_type = typeof(Ret);
                 }
-                InvocationSuccess?.Invoke(this, null);
+                InvocationEnded?.Invoke(this, null);
             }
             else
             {
                 apiEntry.ret_value = new Ret { invocationResultStatus = "Ok" };
                 apiEntry.ret_type = typeof(Ret);
-                InvocationSuccess?.Invoke(this, null);
+                InvocationEnded?.Invoke(this, null);
             }
         }
         catch (Exception ex)
@@ -118,7 +117,7 @@ public class QFormManager
                 apiEntry.ret_value = new Ret { invocationResultStatus = ex.Message };
                 apiEntry.ret_type = typeof(Ret);
             }
-            InvocationFailed?.Invoke(this, null);
+            InvocationEnded?.Invoke(this, null);
         }
 
         InvokationResultsReceived?.Invoke(this, null);

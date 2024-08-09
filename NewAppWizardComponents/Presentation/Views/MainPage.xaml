@@ -35,6 +35,7 @@
       <RowDefinition Height="40"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="45*"/>
+      <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
 
     <!--Menubar-->
@@ -108,7 +109,7 @@
         <TextBlock Style="{StaticResource ContentBlockHeader}">API Functions</TextBlock>
       </Border>
 
-      <Button Grid.Row="1" Margin="0 12" HorizontalAlignment="Center">
+      <Button Grid.Row="1" Margin="0 12" HorizontalAlignment="Center" Click="AddMethodToWorkspace">
         <StackPanel Orientation="Horizontal">
           <FontIcon Glyph="&#xECC8;" Margin="0 0 8 0"/>
           <TextBlock Text="Add to workspace" />
@@ -130,7 +131,8 @@
 
         <TreeView Grid.Row="1" ItemsSource="{Binding TreeViewItems, Mode=OneWay}"
                   AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
-                  ItemInvoked="TreeView_ItemInvoked" Background="White" x:Name="TreeViewMethods">
+                  IsDoubleTapEnabled="True" DoubleTapped="OnTreeMethodDoubleClick"
+                  ItemInvoked="OnTreeMethodClick" Background="White" x:Name="TreeViewMethods">
           <TreeView.ItemTemplate>
             <DataTemplate x:DataType="local:TreeViewItemModel">
               <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
@@ -152,7 +154,8 @@
         <ListView Grid.Row="1"
                   x:Name="MethodsList"
                   ItemsSource="{Binding FilteredMethods}"
-                  IsItemClickEnabled="True" ItemClick="OnItemClick"
+                  IsItemClickEnabled="True" ItemClick="OnListMethodClick"
+                  IsDoubleTapEnabled="True" DoubleTapped="OnListMethodDoubleClick"
                   Background="White" Padding="8" VerticalAlignment="Stretch">
           <ListView.ItemTemplate>
             <DataTemplate>
@@ -181,66 +184,6 @@
 
     </Grid>
     
-    
-
-
-
-
-
-
-      <!--Methods list-->
-    <!--<TabView Grid.Column="0" Grid.Row="2" Margin="16 6 0 16"
-             AllowDropTabs="False" IsAddTabButtonVisible="False" CanReorderTabs="False"
-             BorderBrush="#E0E0E0" BorderThickness="1 0 1 1" VerticalAlignment="Stretch">
-      <TabViewItem IsClosable="False" Header="By categories" HorizontalAlignment="Left">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
-
-          <TextBox Grid.Row="0" Name="FilterMethodsTree"
-             PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}" BorderThickness="0 0 0 1"
-             TextChanged="{x:Bind mainPageVM.FilterMethodsTreeTextChanged, Mode=OneWay}"/>
-
-          <TreeView Grid.Row="1" ItemsSource="{Binding TreeViewItems, Mode=OneWay}"
-          AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
-          ItemInvoked="TreeView_ItemInvoked" Background="White" x:Name="TreeViewMethods">
-            <TreeView.ItemTemplate>
-              <DataTemplate x:DataType="local:TreeViewItemModel">
-                <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
-                          Visibility="{Binding ViewVisibility, Mode=OneWay}"/>
-              </DataTemplate>
-            </TreeView.ItemTemplate>
-          </TreeView>
-        </Grid>
-      </TabViewItem>
-
-      <TabViewItem IsClosable="False" Header="All methods" HorizontalAlignment="Left">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
-
-          <TextBox Grid.Row="0" Name="FilterMethodsList"
-                   PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}" BorderThickness="0 0 0 1"
-                   TextChanged="{x:Bind mainPageVM.FilterMethodsListTextChanged, Mode=OneWay}"/>
-          <ListView Grid.Row="1"
-                    x:Name="MethodsList"
-                    ItemsSource="{Binding FilteredMethods}"
-                    IsItemClickEnabled="True" ItemClick="OnItemClick"
-                    Background="White" Padding="8" VerticalAlignment="Stretch">
-            <ListView.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding Name}" />
-              </DataTemplate>
-            </ListView.ItemTemplate>
-          </ListView>
-        </Grid>
-      </TabViewItem>
-    </TabView>-->
-
     <Border Grid.Row="2" Grid.Column="1" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
       Tag="V1"
       PointerPressed="Separator_PointerPressed" 
@@ -251,7 +194,7 @@
     </Border>
 
     <!--Middle Section-->
-    <Grid Grid.Column="2" Grid.Row="2" Grid.RowDefinitions="50*, Auto, Auto, Auto">
+    <Grid Grid.Column="2" Grid.Row="2" Grid.RowDefinitions="*, Auto, *">
       <!-- Code view -->
       <ScrollViewer x:Name="CodeView" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     HorizontalScrollBarVisibility="Auto"
@@ -269,9 +212,9 @@
       </Border>
 
       <!--Documentation-->
+      
       <ScrollViewer Grid.Row="2" x:Name="DocumentationView"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                Visibility="{Binding DocViewVisibility}"
                 Style="{StaticResource ScrollViewerBlock}"
                 Margin="0 0 0 16">
         <StackPanel>
@@ -286,7 +229,7 @@
 
           <TextBlock Text="Аргументы функции" Margin="0 40 0 15" Visibility="{Binding InputVisibility}"/>
           <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
-              x:Name="MethodInputs" Visibility="{Binding InputVisibility}">
+              x:Name="MethodInputs">
             <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
               <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
             </Border>
@@ -323,7 +266,7 @@
 
           <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15" Visibility="{Binding OutputVisibility}"/>
           <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
-              x:Name="MethodOutputs" Visibility="{Binding OutputVisibility}">
+              x:Name="MethodOutputs">
             <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
               <TextBlock Style="{StaticResource TableHeaderText}">Свойство</TextBlock>
             </Border>
@@ -360,24 +303,16 @@
         </StackPanel>
       </ScrollViewer>
 
-      <!--StatusBar-->
-      <Grid Grid.Row="3" Grid.ColumnDefinitions="05*, 95*" Grid.RowDefinitions="Auto, Auto"
-          x:Name="StatusBar" Visibility="{Binding StatusBarVisibility, Mode=TwoWay}"
-          Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 0 16"
-          Padding="8">
-        <!--<Image Grid.Column="0" Grid.Row="0" Source="ms-appx:///NewAppWizardComponents/Assets/Icons/connected_to_qform.png"  Height="16" Margin="0 0 8 0" />-->
-        <StackPanel Grid.Column="1" Grid.Row="0" Orientation="Horizontal">
-          <TextBlock Text="Connected to: " Style="{StaticResource TextDefault}" Margin="0 0 4 0" />
-          <TextBlock Text="{Binding CurrentSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
-          <ToolTipService.ToolTip>
-            <ToolTip Content="{Binding CurrentSession, Mode=TwoWay}" VerticalOffset="-50"/>
-          </ToolTipService.ToolTip>
-          </TextBlock>
-        </StackPanel>
-        <ProgressBar Grid.ColumnSpan="2" Grid.Row="1" x:Name="InvokeProgressBar" Margin="0 8 0 0"/>
-      </Grid>
+      <Border Grid.Row="2" Visibility="{Binding DocsPlaceholderVisibility}"
+              HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+              Background="White">
+        <TextBlock Text="Select method to view its documentation"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Style="{StaticResource TextDefault}" Foreground="#6f6f6f"/>
+      </Border>
 
     </Grid>
+
 
     <Border Grid.Row="2" Grid.Column="3" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
       Tag="V3"
@@ -389,7 +324,7 @@
     </Border>
 
     <!-- Method parameters -->
-    <Grid Grid.Column="4" Grid.Row="2" Grid.RowSpan="4" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid" VerticalAlignment="Stretch">
+    <Grid Grid.Column="4" Grid.Row="2" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid" VerticalAlignment="Stretch">
 
       <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
         <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="0 16 16 0">
@@ -423,7 +358,20 @@
       </Grid>
     </Grid>
 
+    <!--StatusBar-->
+    <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
+                x:Name="StatusBar"
+                Grid.ColumnDefinitions="*, Auto"
+                Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                Margin="16 0 16 16" Padding="8">
+      <TextBlock Grid.Column="0" Text="{Binding VisualSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
+        <ToolTipService.ToolTip>
+          <ToolTip Content="{Binding VisualSession, Mode=TwoWay}" VerticalOffset="-50"/>
+        </ToolTipService.ToolTip>
+      </TextBlock>
 
+      <ProgressRing Grid.Column="1" x:Name="InvokeProgressRing" IsActive="False" Height="16" Width="16" HorizontalAlignment="Right" VerticalAlignment="Stretch"/>
+    </Grid>
 
   </Grid>
 
