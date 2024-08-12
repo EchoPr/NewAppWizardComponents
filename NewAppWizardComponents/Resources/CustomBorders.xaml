@@ -40,9 +40,12 @@
   </Style>
 
   <Style TargetType="ComboBox" x:Name="LanguageSelectorComboBox">
-    <Setter Property="Height" Value="40"/>
-    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="Height" Value="30"/>
+    <Setter Property="Padding" Value="2"/>
+    <Setter Property="FontSize" Value="12"/>
     <Setter Property="CornerRadius" Value="4"/>
+
+    <Setter Property="Background" Value="Transparent"/>
   </Style>
 
 </ResourceDictionary>

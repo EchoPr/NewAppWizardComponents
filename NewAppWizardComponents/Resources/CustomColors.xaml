@@ -10,14 +10,17 @@
   <SolidColorBrush x:Key="SolidDarkGray" Color="#414141"/>
   <SolidColorBrush x:Key="BorderSolid" Color="#A1A1A1"/>
   <SolidColorBrush x:Key="Transparent" Color="#0000"/>
+  <SolidColorBrush x:Key="ToolbarBackground" Color="#E7E7E7"/>
 
   <SolidColorBrush x:Key="SelectedBlockPrimary" Color="#330078D2"/>
   <SolidColorBrush x:Key="SelectedBlockSecondary" Color="#1A0078D2"/>
 
   <SolidColorBrush x:Key="APILevel1" Color="#5DA251"/>
-  <!--<SolidColorBrush x:Key="A"-->
 
-  <SolidColorBrush x:Key="BlockHeader" Color="#899ABD"/>
+  <LinearGradientBrush x:Key="BlockHeader" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#9eaecd" Offset="0.0"/>
+    <GradientStop Color="#6f82aa" Offset="1.0"/>
+  </LinearGradientBrush>
 
   <SolidColorBrush x:Key="CodeDefault" Color="#565869"/>
   <SolidColorBrush x:Key="CodeValue" Color="#FF5C57"/>
@@ -28,20 +31,9 @@
 
   <SolidColorBrush x:Key="FailStatus" Color="#ff99a4"/>
 
-  <!--<SolidColorBrush x:Key="CodeDefault" Color="#383A42"/>
-  <SolidColorBrush x:Key="CodeValue" Color="#28a745"/>
-  <SolidColorBrush x:Key="CodeKeyword" Color="#386AC3"/>
-  <SolidColorBrush x:Key="CodeType" Color="#163FE4"/>
-  <SolidColorBrush x:Key="CodeBrackets" Color="#383A42"/>-->
-
-  <!--GitHub light-->
-  <!--<SolidColorBrush x:Key="CodeDefault" Color="#1b1f23"/>
-  <SolidColorBrush x:Key="CodeValue" Color="#28a745"/>
-  <SolidColorBrush x:Key="CodeKeyword" Color="#d73a49"/>
-  <SolidColorBrush x:Key="CodeType" Color="#6f42c1"/>
-  <SolidColorBrush x:Key="CodeBrackets" Color="#0366d6"/>
-  <SolidColorBrush x:Key="" Color="#ea4aaa"/>
-  <SolidColorBrush x:Key="" Color="#f66a0a"/>
-  <SolidColorBrush x:Key="" Color="#ffd33d"/>-->
+  <LinearGradientBrush x:Key="ToolbarGradient" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FFFFFF" Offset="0.0"/>
+    <GradientStop Color="#DDDDDD" Offset="1.0"/>
+  </LinearGradientBrush>
 
 </ResourceDictionary>

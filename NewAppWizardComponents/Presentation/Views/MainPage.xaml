@@ -6,7 +6,7 @@
       
       Loaded="Page_Loaded"
       
-      Background="#F3F3F3">
+      Background="#F5F5f5">
 
   <Page.Resources>
     <ResourceDictionary>
@@ -18,18 +18,17 @@
         <ResourceDictionary Source="../../Resources/Controls/BlockScrollViewer.xaml"/>
       </ResourceDictionary.MergedDictionaries>
 
-      
     </ResourceDictionary>
   </Page.Resources>
 
 
   <Grid x:Name="MainGrid">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="2*"/>
+      <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="5*"/>
+      <ColumnDefinition Width="*"/>
       <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="Auto"/>
+      <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="40"/>
@@ -39,16 +38,16 @@
     </Grid.RowDefinitions>
 
     <!--Menubar-->
-    <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3"
-             VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-      <MenuBarItem Title="File">
+    <MenuBar Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="6" MinHeight="1"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Padding="0">
+      <MenuBarItem Title="File" Style="{StaticResource TopMenuBarItem}">
         <MenuFlyoutItem Text="Save Selected" Click="SaveSelectedBlocks"/>
         <MenuFlyoutSeparator/>
         <MenuFlyoutItem Text="Save Project" Click="SaveProject"/>
         <MenuFlyoutItem Text="Load Project" Click="LoadProject"/>
       </MenuBarItem>
 
-      <MenuBarItem Title="QForm">
+      <MenuBarItem Title="QForm" Style="{StaticResource TopMenuBarItem}">
         <MenuFlyoutItem Text="Connect session" Click="MenuConnectQForm"/>
         <MenuFlyoutItem Text="Disconnect" Click="MenuDisconnectQForm"/>
       </MenuBarItem>
@@ -56,16 +55,18 @@
     
 
     <!-- Toolbar -->
-    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3"
-                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Horizontal">
+    <StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="6"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Horizontal"
+                Background="{StaticResource ToolbarGradient}" Padding="4" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 1 0 1">
 
-      <TextBlock Text="Code:" Style="{StaticResource TextDefault}" FontSize="16" VerticalAlignment="Center"
-                 Margin="20 0 10 0"/>
+      <TextBlock Text="Code:" Style="{StaticResource TextDefault}" FontSize="14" VerticalAlignment="Center"
+                 Margin="0 0 4 0"/>
 
       <ComboBox x:Name="LanguageComboBox"
                 SelectedIndex="0"
                 SelectionChanged="LanguageSelectionChanged"
-                Style="{StaticResource LanguageSelectorComboBox}">
+                Style="{StaticResource LanguageSelectorComboBox}"
+                VerticalAlignment="Center">
         <ComboBoxItem Content="C#"/>
         <ComboBoxItem Content="Python"/>
         <ComboBoxItem Content="VB.Net"/>
@@ -76,16 +77,29 @@
       </ComboBox>
 
       <Button Command="{Binding ClearCodeBlocksCommand}" 
-              Style="{StaticResource UIButton}"
-              Margin="20 0 0 0">
-        <StackPanel Orientation="Horizontal">
-          <FontIcon Glyph="&#xED62;" FontSize="14" Margin="0 0 10 0"/>
-          <TextBlock Text="Clear code"/>
-        </StackPanel>
+              Style="{StaticResource ToolbarButton}"
+              Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE75C;" FontSize="16" />
       </Button>
 
-      <Button Content="Invoke" Click="InvokeButtonCommand"
-              Style="{StaticResource UIButton}" Margin="20 0 0 0"/>
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Click="InvokeButtonCommand"
+              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE768;" FontSize="16" />
+      </Button>
+
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Click="SaveProject"
+              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE74E;" FontSize="16" />
+      </Button>
+
+      <Button Click="LoadProject"
+              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+      </Button>
 
       <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>-->
 
@@ -96,101 +110,109 @@
 
 
     <!--TABBAR-->
-    <Grid Grid.Column="0" Grid.Row="2" Margin="16 16 0 16" 
-          Background="White" BorderBrush="#E0E0E0" BorderThickness="1 0 1 1">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="Auto"/>
-        <RowDefinition Height="*"/> 
-        <RowDefinition Height="Auto"/>
-      </Grid.RowDefinitions>
-
-      <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}">
+    <Grid Grid.Column="0" Grid.Row="2" Grid.RowDefinitions="Auto, *">
+      <Border Grid.Row="0"  Style="{StaticResource ParametersBlockHeader}" BorderBrush="#E0E0E0">
         <TextBlock Style="{StaticResource ContentBlockHeader}">API Functions</TextBlock>
       </Border>
 
-      <Button Grid.Row="1" Margin="0 12" HorizontalAlignment="Center" Click="AddMethodToWorkspace">
-        <StackPanel Orientation="Horizontal">
-          <FontIcon Glyph="&#xECC8;" Margin="0 0 8 0"/>
-          <TextBlock Text="Add to workspace" />
-        </StackPanel>
-      </Button>
-
-      <Grid Grid.Row="2" Visibility="{Binding TreeMethodsVisibility}">
+      <Grid Grid.Row="1"
+          Background="White" BorderBrush="#E0E0E0" BorderThickness="1 0 1 1">
         <Grid.RowDefinitions>
           <RowDefinition Height="Auto"/>
           <RowDefinition Height="*"/>
+          <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Grid.ColumnDefinitions="Auto, *" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 1">
-          <TextBox Grid.Column="1" Name="FilterMethodsTree"
+        <Border Grid.Row="0" Background="{StaticResource ToolbarGradient}" Padding="4" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 0 0 1">
+          <Button HorizontalAlignment="Left" Click="AddMethodToWorkspace" Padding="2" Background="Transparent">
+            <StackPanel Orientation="Horizontal">
+              <FontIcon Glyph="&#xECC8;" Margin="0 0 4 0" FontSize="14"/>
+              <TextBlock Text="Add to workspace" FontSize="14" />
+            </StackPanel>
+          </Button>
+        </Border>
+
+
+        <Grid Grid.Row="1" Visibility="{Binding TreeMethodsVisibility}">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
+
+          <Grid Grid.Row="0" Grid.ColumnDefinitions="Auto, *" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 0 0 1">
+            <TextBox Grid.Column="1" Name="FilterMethodsList"
                    PlaceholderText="Search by name" Style="{StaticResource ParameterValueTextBox}"
                    TextChanged="{x:Bind mainPageVM.FilterMethodsTreeTextChanged, Mode=OneWay}" BorderThickness="0"/>
-          <FontIcon Grid.Column="0" Glyph="&#xE721;" Foreground="#6f6f6f" FontSize="14" Margin="8 0 0 0"/>
-        </Grid>
+            <FontIcon Grid.Column="0" Glyph="&#xE721;" Foreground="#6f6f6f" FontSize="14" Margin="8 0 0 0"/>
+          </Grid>
 
-        <TreeView Grid.Row="1" ItemsSource="{Binding TreeViewItems, Mode=OneWay}"
+          <TreeView Grid.Row="1" ItemsSource="{Binding TreeViewItems, Mode=OneWay}"
                   AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
                   IsDoubleTapEnabled="True" DoubleTapped="OnTreeMethodDoubleClick"
                   ItemInvoked="OnTreeMethodClick" Background="White" x:Name="TreeViewMethods">
-          <TreeView.ItemTemplate>
-            <DataTemplate x:DataType="local:TreeViewItemModel">
-              <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
+            <TreeView.ItemTemplate>
+              <DataTemplate x:DataType="local:TreeViewItemModel">
+                <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
                   Visibility="{Binding ViewVisibility, Mode=OneWay}"/>
-            </DataTemplate>
-          </TreeView.ItemTemplate>
-        </TreeView>
-      </Grid>
+              </DataTemplate>
+            </TreeView.ItemTemplate>
+          </TreeView>
+        </Grid>
 
-      <Grid Grid.Row="2" Visibility="{Binding ListMethodsVisibility}">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto"/>
-          <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid Grid.Row="1" Visibility="{Binding ListMethodsVisibility}">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+          </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0" Name="FilterMethodsList"
-                 PlaceholderText="Start typing a name..." Style="{StaticResource ParameterValueTextBox}" BorderThickness="0 1 0 1"
-                 TextChanged="{x:Bind mainPageVM.FilterMethodsListTextChanged, Mode=OneWay}"/>
-        <ListView Grid.Row="1"
+          <Grid Grid.Row="0" Grid.ColumnDefinitions="Auto, *" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 0 0 1">
+            <TextBox Grid.Column="1" Name="FilterMethodsTree"
+           PlaceholderText="Search by name" Style="{StaticResource ParameterValueTextBox}"
+           TextChanged="{x:Bind mainPageVM.FilterMethodsListTextChanged, Mode=OneWay}" BorderThickness="0"/>
+            <FontIcon Grid.Column="0" Glyph="&#xE721;" Foreground="#6f6f6f" FontSize="14" Margin="8 0 0 0"/>
+          </Grid>
+
+          <ListView Grid.Row="1"
                   x:Name="MethodsList"
                   ItemsSource="{Binding FilteredMethods}"
                   IsItemClickEnabled="True" ItemClick="OnListMethodClick"
                   IsDoubleTapEnabled="True" DoubleTapped="OnListMethodDoubleClick"
                   Background="White" Padding="8" VerticalAlignment="Stretch">
-          <ListView.ItemTemplate>
-            <DataTemplate>
-              <TextBlock Text="{Binding Name}" />
-            </DataTemplate>
-          </ListView.ItemTemplate>
-        </ListView>
+            <ListView.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ListView.ItemTemplate>
+          </ListView>
+        </Grid>
+
+        <utu:TabBar Grid.Row="2" SelectedIndex="0" MinHeight="1" VerticalAlignment="Bottom"  SelectionChanged="TabBar_SelectionChanged"
+                  CornerRadius="0"
+                  BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 1 0 0">
+          <utu:TabBar.Items>
+            <utu:TabBarItem VerticalAlignment="Stretch">
+              <StackPanel Orientation="Horizontal" Padding="8">
+                <TextBlock Text="By categories"/>
+              </StackPanel>
+            </utu:TabBarItem>
+            <utu:TabBarItem >
+              <StackPanel Orientation="Horizontal" Padding="8" >
+                <TextBlock Text="By name"/>
+              </StackPanel>
+            </utu:TabBarItem>
+          </utu:TabBar.Items>
+        </utu:TabBar>
+
       </Grid>
-
-      <utu:TabBar Grid.Row="3" SelectedIndex="0" MinHeight="1" VerticalAlignment="Bottom"  SelectionChanged="TabBar_SelectionChanged" CornerRadius="0">
-        <utu:TabBar.Items>
-          <utu:TabBarItem VerticalAlignment="Stretch">
-            <StackPanel Orientation="Horizontal" Padding="8">
-              <FontIcon Glyph="&#xE8A4;" Margin="0 0 8 0"/>
-              <TextBlock Text="Bookmarks"/>
-            </StackPanel>
-          </utu:TabBarItem>
-          <utu:TabBarItem >
-            <StackPanel Orientation="Horizontal" Padding="8" >
-              <ImageIcon Source="/Assets/Icons/sort_by_alpha.png" Width="20" Margin="0 0 8 0"/>
-              <TextBlock Text="Alphabetical"/>
-            </StackPanel>
-          </utu:TabBarItem>
-        </utu:TabBar.Items>
-      </utu:TabBar>
-
     </Grid>
     
-    <Border Grid.Row="2" Grid.Column="1" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
+    <Border Grid.Row="2" Grid.Column="1" Background="#F3F3F3" Width="3" HorizontalAlignment="Stretch" ManipulationMode="All"
       Tag="V1"
       PointerPressed="Separator_PointerPressed" 
       PointerMoved="Separator_PointerMoved" 
       PointerReleased="Separator_PointerReleased">
 
-      <FontIcon Glyph="&#xE784;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
+      
     </Border>
 
     <!--Middle Section-->
@@ -198,25 +220,23 @@
       <!-- Code view -->
       <ScrollViewer x:Name="CodeView" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     HorizontalScrollBarVisibility="Auto"
-                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 16 0 0" Padding="8">
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="8">
         <StackPanel x:Name="CodeBlocks" Padding="10"/>
       </ScrollViewer>
 
-      <Border Grid.Row="1" Background="#F3F3F3" Height="16" VerticalAlignment="Stretch" ManipulationMode="All"
+      <Border Grid.Row="1" Background="#F3F3F3" Height="3" VerticalAlignment="Stretch" ManipulationMode="All"
         Tag="H1"
         PointerPressed="Separator_PointerPressed" 
         PointerMoved="Separator_PointerMoved" 
         PointerReleased="Separator_PointerReleased">
 
-        <FontIcon Glyph="&#xE76F;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
       </Border>
 
       <!--Documentation-->
       
       <ScrollViewer Grid.Row="2" x:Name="DocumentationView"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                Style="{StaticResource ScrollViewerBlock}"
-                Margin="0 0 0 16">
+                Style="{StaticResource ScrollViewerBlock}">
         <StackPanel>
           <StackPanel Orientation="Horizontal">
             <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 20 10 0"/>
@@ -227,7 +247,7 @@
           </StackPanel>
           <TextBlock Text="{Binding SelectedMethod.DescRu}" Style="{StaticResource TextDefault}" Margin="0 15 0 0"/>
 
-          <TextBlock Text="Аргументы функции" Margin="0 40 0 15" Visibility="{Binding InputVisibility}"/>
+          <TextBlock Text="Аргументы функции" Margin="0 40 0 15"/>
           <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
               x:Name="MethodInputs">
             <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
@@ -264,7 +284,7 @@
             </ItemsControl>
           </Grid>
 
-          <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15" Visibility="{Binding OutputVisibility}"/>
+          <TextBlock Text="Возвращаемые значения" Margin="0 40 0 15"/>
           <Grid ColumnDefinitions="3*, 3*, 4*" RowDefinitions="Auto, *"
               x:Name="MethodOutputs">
             <Border Style="{StaticResource TableHeaderBorder}" Grid.Column="0" Grid.Row="0">
@@ -305,7 +325,7 @@
 
       <Border Grid.Row="2" Visibility="{Binding DocsPlaceholderVisibility}"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-              Background="White">
+              BorderBrush="#E0E0E0" BorderThickness="1" Background="White">
         <TextBlock Text="Select method to view its documentation"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Style="{StaticResource TextDefault}" Foreground="#6f6f6f"/>
@@ -314,45 +334,52 @@
     </Grid>
 
 
-    <Border Grid.Row="2" Grid.Column="3" Background="#F3F3F3" Width="16" HorizontalAlignment="Stretch" ManipulationMode="All"
+    <Border Grid.Row="2" Grid.Column="3" Background="#F3F3F3" Width="3" HorizontalAlignment="Stretch" ManipulationMode="All"
       Tag="V3"
       PointerPressed="Separator_PointerPressed" 
       PointerMoved="Separator_PointerMoved" 
       PointerReleased="Separator_PointerReleased">
 
-      <FontIcon Glyph="&#xE784;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
     </Border>
 
     <!-- Method parameters -->
     <Grid Grid.Column="4" Grid.Row="2" RowDefinitions ="*, Auto, *" x:Name="MethodParametersGrid" VerticalAlignment="Stretch">
 
-      <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="0 16 16 0">
+      <Grid Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, Auto, *">
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}">
           <TextBlock Style="{StaticResource ContentBlockHeader}">Arguments</TextBlock>
         </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-           Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 16 0">
+        <Border Grid.Row="1" Padding="4" Background="{StaticResource ToolbarGradient}" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="1 0 1 1">
+          <Button HorizontalAlignment="Left" Click="InvokeButtonCommand" Padding="2" Background="Transparent" >
+            <StackPanel Orientation="Horizontal">
+              <FontIcon Glyph="&#xE768;" Margin="0 0 4 0" FontSize="14"/>
+              <TextBlock Text="Invoke" FontSize="14" />
+            </StackPanel>
+          </Button>
+        </Border>
+
+        <ScrollViewer Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+           Background="White" BorderBrush="#E0E0E0" BorderThickness="1 0 1 1">
           <Grid  x:Name="InputParametersGrid" ColumnDefinitions="*, *" />
         </ScrollViewer>
       </Grid>
 
-      <Border Grid.Row="1" Background="#F3F3F3" Height="16" VerticalAlignment="Stretch" ManipulationMode="All"
+      <Border Grid.Row="1" Background="#F3F3F3" Height="3" VerticalAlignment="Stretch" ManipulationMode="All"
           Tag="H1"
           PointerPressed="Separator_PointerPressed" 
           PointerMoved="Separator_PointerMoved" 
           PointerReleased="Separator_PointerReleased">
 
-        <FontIcon Glyph="&#xE76F;" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="12"/>
       </Border>
 
       <Grid Grid.Row="2" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}" Margin="0 0 16 0">
+        <Border Grid.Row="0" Style="{StaticResource ParametersBlockHeader}">
           <TextBlock Style="{StaticResource ContentBlockHeader}">Results</TextBlock>
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1"  Margin="0 0 16 16">
+                    Background="White" BorderBrush="#E0E0E0" BorderThickness="1">
           <Grid  x:Name="OutputParametersGrid" ColumnDefinitions="*, *" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </ScrollViewer>
       </Grid>
@@ -362,8 +389,7 @@
     <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5"
                 x:Name="StatusBar"
                 Grid.ColumnDefinitions="*, Auto"
-                Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
-                Margin="16 0 16 16" Padding="8">
+                Padding="8">
       <TextBlock Grid.Column="0" Text="{Binding VisualSession, Mode=TwoWay}" Style="{StaticResource TextDefault}">
         <ToolTipService.ToolTip>
           <ToolTip Content="{Binding VisualSession, Mode=TwoWay}" VerticalOffset="-50"/>

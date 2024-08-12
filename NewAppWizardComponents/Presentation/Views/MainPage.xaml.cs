@@ -5,13 +5,7 @@ using System.Reflection;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
-using Windows.ApplicationModel.Search;
-using Windows.Graphics.Printing.PrintTicket;
-using Windows.Storage.Pickers;
 using Windows.System;
-using Windows.UI.Core;
-using Windows.UI.Core.Preview;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace NewAppWizardComponents;
@@ -29,7 +23,7 @@ public sealed partial class MainPage : Page
 
     private List<Border> _selectedBlocks = new List<Border>();
 
-    private ApiEntry _lastClickedMethod;
+    private ApiEntry _lastClickedMethod = null;
 
     private bool _isResizing = false;
     private double _initialPosition;
@@ -600,6 +594,9 @@ public sealed partial class MainPage : Page
 
     private void OnListMethodDoubleClick(object sender, DoubleTappedRoutedEventArgs e)
     {
+
+        if (_lastClickedMethod == null) return;
+
         if (!_lastClickedMethod.menu_only)
             mainPageVM.AddToCodeBlocks(_lastClickedMethod);
     }
@@ -619,6 +616,8 @@ public sealed partial class MainPage : Page
 
     private void OnTreeMethodDoubleClick(object sender, DoubleTappedRoutedEventArgs e)
     {
+        if (_lastClickedMethod == null) return;
+
         if (!_lastClickedMethod.menu_only)
             mainPageVM.AddToCodeBlocks(_lastClickedMethod);
     }
@@ -627,6 +626,7 @@ public sealed partial class MainPage : Page
     {
         if (args.InvokedItem is TreeViewItemModel item && item.Children.Count == 0)
         {
+
             _lastClickedMethod = item.ApiEntry;
             if (!item.ApiEntry.menu_only)
             {
