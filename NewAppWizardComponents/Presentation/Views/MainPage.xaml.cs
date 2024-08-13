@@ -436,8 +436,16 @@ public sealed partial class MainPage : Page
         SetCodeBlockSelection(selectedBlock, shiftPressed);
         ScrollToCodeBlock(selectedBlock);
 
-        var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
-        ShowParameters(entry);
+        if (!shiftPressed)
+        {
+            var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
+            ShowParameters(entry);
+        }
+        else
+        {
+            InvokeButton.IsEnabled = false;
+            ClearShownParameters();
+        }
 
     }
 
@@ -467,7 +475,16 @@ public sealed partial class MainPage : Page
 
         ClearShownParameters();
 
-        if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
+        if (entry.arg_type != null) 
+        {
+            InvokeButton.IsEnabled = true;
+            ShowParameters(entry, ParameterTypes.Input);
+        }
+        else
+        {
+            InvokeButton.IsEnabled = false;
+        }
+
         if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
     }
 
@@ -606,10 +623,12 @@ public sealed partial class MainPage : Page
         _lastClickedMethod = e.ClickedItem as ApiEntry;
         if (e.ClickedItem is ApiEntry entry && !entry.menu_only)
         {
+            AddToWorksapceButton.IsEnabled = true;
             mainPageVM.UpdateDocsVisibility(_lastClickedMethod);
         }
         else
         {
+            AddToWorksapceButton.IsEnabled = false;
             ShowMessageBox("To add this method use the context menu in QForm");
         }
     }
@@ -626,16 +645,21 @@ public sealed partial class MainPage : Page
     {
         if (args.InvokedItem is TreeViewItemModel item && item.Children.Count == 0)
         {
-
             _lastClickedMethod = item.ApiEntry;
             if (!item.ApiEntry.menu_only)
             {
+                AddToWorksapceButton.IsEnabled = true;
                 mainPageVM.UpdateDocsVisibility(item.ApiEntry);
             }
             else
             {
+                AddToWorksapceButton.IsEnabled = false;
                 ShowMessageBox("To add this method use the context menu in QForm");
             }
+        }
+        else
+        {
+            AddToWorksapceButton.IsEnabled = false;
         }
     }
 

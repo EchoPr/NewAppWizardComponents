@@ -124,10 +124,11 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Background="{StaticResource ToolbarGradient}" Padding="4" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 0 0 1">
-          <Button HorizontalAlignment="Left" Click="AddMethodToWorkspace" Padding="2" Background="Transparent">
+          <Button HorizontalAlignment="Left" Click="AddMethodToWorkspace" x:Name="AddToWorksapceButton"
+                  Padding="2" Background="Transparent" IsEnabled="False">
             <StackPanel Orientation="Horizontal">
               <FontIcon Glyph="&#xECC8;" Margin="0 0 4 0" FontSize="14"/>
-              <TextBlock Text="Add to workspace" FontSize="14" />
+              <TextBlock Text="Add to workspace" FontSize="14"/>
             </StackPanel>
           </Button>
         </Border>
@@ -351,7 +352,8 @@
         </Border>
 
         <Border Grid.Row="1" Padding="4" Background="{StaticResource ToolbarGradient}" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="1 0 1 1">
-          <Button HorizontalAlignment="Left" Click="InvokeButtonCommand" Padding="2" Background="Transparent" >
+          <Button HorizontalAlignment="Left" Click="InvokeButtonCommand" x:Name="InvokeButton"
+                  Padding="2" Background="Transparent" IsEnabled="False" >
             <StackPanel Orientation="Horizontal">
               <FontIcon Glyph="&#xE768;" Margin="0 0 4 0" FontSize="14"/>
               <TextBlock Text="Invoke" FontSize="14" />
