@@ -24,11 +24,11 @@
 
   <Grid x:Name="MainGrid">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="2*"/>
       <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="5*"/>
       <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="3*"/>
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="40"/>
@@ -76,8 +76,21 @@
         <ComboBoxItem Content="XML"/>
       </ComboBox>
 
+      <SplitButton Height="30" FontSize="12" Padding="2" Margin="4 0 0 0" Background="Transparent" Click="ApiWizardClick">
+        Wizard
+        <SplitButton.Flyout>
+          <Flyout Placement="Bottom">
+            <StackPanel>
+              <Button Style="{StaticResource ToolbarButton}" Content="Add API setup snipet to workspace" HorizontalAlignment="Stretch"/>
+              <Button Style="{StaticResource ToolbarButton}" Content="Copy QFormAPI.py to folder" Margin="0 8 0 0" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+          </Flyout>
+        </SplitButton.Flyout>
+
+      </SplitButton>
+      
       <Button Command="{Binding ClearCodeBlocksCommand}" 
-              Style="{StaticResource ToolbarButton}"
+              Style="{StaticResource ToolbarIconButton}"
               Margin="4 0 0 0">
         <FontIcon Glyph="&#xE75C;" FontSize="16" />
       </Button>
@@ -85,19 +98,19 @@
       <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
 
       <Button Click="InvokeButtonCommand"
-              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
         <FontIcon Glyph="&#xE768;" FontSize="16" />
       </Button>
 
       <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
 
       <Button Click="SaveProject"
-              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
         <FontIcon Glyph="&#xE74E;" FontSize="16" />
       </Button>
 
       <Button Click="LoadProject"
-              Style="{StaticResource ToolbarButton}" Margin="4 0 0 0">
+              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
         <FontIcon Glyph="&#xE8E5;" FontSize="16" />
       </Button>
 

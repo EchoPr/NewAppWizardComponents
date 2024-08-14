@@ -1,0 +1,62 @@
+﻿<ContentDialog
+    x:Class="NewAppWizardComponents.PythonApiSettingsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NewAppWizardComponents"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="API Wizard for Python"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="Add Snippet to Workspace"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
+    >
+
+  <ContentDialog.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../../../Resources/CustomColors.xaml"/>
+        <ResourceDictionary Source="../../../Resources/TextStyling.xaml"/>
+        <ResourceDictionary Source="../../../Resources/CustomBorders.xaml"/>
+        <ResourceDictionary Source="../../../Resources/CustomButtons.xaml"/>
+        <ResourceDictionary Source="../../../Resources/Controls/BlockScrollViewer.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ContentDialog.Resources>
+
+  <ScrollViewer>
+    <StackPanel>
+      <!-- Первый блок: Script type -->
+      <StackPanel x:Name="ScriptTypePanel" Margin="0,0,0,10">
+        <TextBlock Text="Script type" FontWeight="Bold"/>
+
+        <RadioButton x:Name="PythonFileRadioButton" Content="Python file" Checked="PythonFileRadioButton_Checked"/>
+        <RadioButton x:Name="NotebookRadioButton" Content="Notebook" Checked="NotebookRadioButton_Checked"/>
+      </StackPanel>
+
+      <!-- Второй блок: QForm interaction type -->
+      <StackPanel Margin="0,0,0,10">
+        <TextBlock Text="QForm interaction type" FontWeight="Bold"/>
+        
+        <RadioButton x:Name="NewQFormWindowRadioButton" Content="Script starts new QForm window"/>
+        <RadioButton x:Name="StartFromAppWindowRadioButton" Content="QForm start script from application window" Unchecked="StartFromAppWindowRadioButton_Unchecked" Checked="StartFromAppWindowRadioButton_Checked"/>
+        <CheckBox x:Name="ConnectToExistingWindowCheckBox" Content="or connect to existing window" Margin="20,0,0,0" IsEnabled="False" IsChecked="True"/>
+        <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window"/>
+      </StackPanel>
+
+      <!-- Третий блок: QForm reference type -->
+      <StackPanel Margin="0,0,0,10">
+        <TextBlock Text="QForm reference type" FontWeight="Bold"/>
+        
+        <RadioButton x:Name="UseQFormAPIFromInstallationRadioButton" Content="Use QFormAPI.py from QForm installation folder using 'sys.path.append'" />
+        <RadioButton x:Name="UseCopyOfQFormAPIRadioButton" Content="Use copy of QFormAPI.py from script folder"/>
+        <Button x:Name="SelectAPICopyButton" Content="Select QFormAPI.py" IsEnabled="False" Margin="20,0,0,0"/>
+      </StackPanel>
+
+      <!-- Блок для отображения ошибки -->
+      <TextBlock x:Name="ErrorTextBlock" Text="Please fill in all required fields." Visibility="Collapsed" Foreground="Red"/>
+    </StackPanel>
+  </ScrollViewer>
+
+  
+</ContentDialog>

@@ -96,8 +96,124 @@ public class PythonCodeGenerator : ICodeGenerator
 
         if (entry.arg_type != null) { codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default)); }
 
-        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
 
         return codeEntries;
     }
+
+    public List<ViewCodeSample> GenerateApiSnippet(PythonQFormInteractionType interactionType, PythonQFormReference qformReference)
+    {
+        var codeEntries = new List<ViewCodeSample>();
+
+        codeEntries.Add(new ViewCodeSample("qform_base_dir ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("r'C:\\QForm UK\\11.0.2\\'\n\n", ViewCodeSampleType.Default));
+
+
+
+        if (qformReference == PythonQFormReference.default_folder)
+        {
+            codeEntries.Add(new ViewCodeSample("import ", ViewCodeSampleType.Keyword));
+            codeEntries.Add(new ViewCodeSample("sys\n\n", ViewCodeSampleType.Default));
+
+            codeEntries.Add(new ViewCodeSample("sys.path.", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample("append", ViewCodeSampleType.Method));
+            codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+            codeEntries.Add(new ViewCodeSample("qform_base_dir + r'\\API\\App\\Python'", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+        }
+
+
+        codeEntries.Add(new ViewCodeSample("from ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QFormAPI ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("import ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("*\n\n", ViewCodeSampleType.Default));
+
+
+        codeEntries.Add(new ViewCodeSample("qform ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QForm", ViewCodeSampleType.Type));
+        codeEntries.Add(new ViewCodeSample("()\n", ViewCodeSampleType.Brackets));
+
+
+        switch (interactionType)
+        {
+            case PythonQFormInteractionType.script_starts:
+                codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(".qform_start", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+                break;
+            case PythonQFormInteractionType.qform_starts:
+                codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(".qform_attach", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+                break;
+            case PythonQFormInteractionType.qform_starts_or_connect:
+                codeEntries.Add(new ViewCodeSample("if ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(".is_started_by_qform", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(":\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("    qform", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(".qform_attach", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("else", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample(":\n", ViewCodeSampleType.Default));
+
+                AddConnectionSnippet(codeEntries, isNested: true);
+
+                break;
+            case PythonQFormInteractionType.script_connect:
+                AddConnectionSnippet(codeEntries, isNested: false);
+                break;
+        }
+
+        return codeEntries;
+    }
+
+    private void AddConnectionSnippet(List<ViewCodeSample> codeEntries, bool isNested)
+    {
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(".qform_dir_set", ViewCodeSampleType.Method));
+        codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample("qform_base_dir + r'\\x64'", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform_session_id", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("SessionId", ViewCodeSampleType.Type));
+        codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform_session_id", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(".session_id", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("0", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(".qform_attach_to", ViewCodeSampleType.Method));
+        codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+    }
+}
+public enum PythonQFormInteractionType
+{
+    script_starts,
+    qform_starts,
+    qform_starts_or_connect,
+    script_connect
+}
+
+public enum PythonQFormReference
+{
+    default_folder,
+    local_folder
 }

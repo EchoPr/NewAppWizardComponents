@@ -36,6 +36,10 @@ public sealed partial class MainPage : Page
 
     private bool _isShiftPressed;
 
+    private bool _isCodeSnippetAdded = false;
+
+    private SnippetConfig _savedConfig;
+
     public MainPage()
     {
         this.InitializeComponent();
@@ -780,6 +784,80 @@ public sealed partial class MainPage : Page
     private void TabBar_SelectionChanged(TabBar sender, TabBarSelectionChangedEventArgs args)
     {
         mainPageVM.ChangeApiFunctionsVisibility(sender.SelectedIndex);
+    }
+
+    private Border GetSnippetBlock(List<ViewCodeSample> codeSamples)
+    {
+        var newCodeLines = new TextBlock();
+
+        foreach (ViewCodeSample sample in codeSamples)
+        {
+            newCodeLines.Inlines.Add(new Run { Text = sample.content, Foreground = GetBrush(sample.type) });
+        }
+
+        newCodeLines.Style = (Style)Resources["CodeBlock"];
+        newCodeLines.AllowFocusOnInteraction = true;
+        //newCodeLines.GotFocus += CodeBlockGotFocus;
+
+        newCodeLines.KeyDown += (s, e) =>
+        {
+            if (e.Key == VirtualKey.Shift)
+            {
+                _isShiftPressed = true;
+            }
+        };
+
+        newCodeLines.KeyUp += (s, e) =>
+        {
+            if (e.Key == VirtualKey.Shift)
+            {
+                _isShiftPressed = false;
+            }
+        };
+
+        var newBlock = new Border();
+
+        newBlock.Child = newCodeLines;
+        newBlock.Style = (Style)Resources["CodeBlockBorder"];
+
+
+        SetCodeBlockSelection(newBlock, multipleSelection: false);
+
+        return newBlock;
+    }
+
+    private async void ApiWizardClick(SplitButton sender, SplitButtonClickEventArgs args)
+    {
+        if (_savedConfig !=  null)
+        {
+
+        }
+        string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
+        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, _savedConfig);
+
+        snippetDialog.XamlRoot = this.XamlRoot;
+        var result = await snippetDialog.ShowAsync();
+
+        if (result == ContentDialogResult.Primary)
+        {
+            // Now only for python. later need to add interface to api wizard content dialogs i think
+            _savedConfig = (snippetDialog as PythonApiSettingsDialog).GetConfig();
+
+            var codeSamples = (snippetDialog as PythonApiSettingsDialog).GenerateAPISnippet(_savedConfig.QFormInteractionType, _savedConfig.QFormReferenceType);
+            Border snippet = GetSnippetBlock(codeSamples);
+            if (_isCodeSnippetAdded)
+            {
+                CodeBlocks.Children[0] = snippet;
+            }
+            else
+            {
+                CodeBlocks.Children.Insert(0, snippet);
+                _isCodeSnippetAdded = true;
+            }
+        }
+        else if (result == ContentDialogResult.Secondary)
+        {
+        }
     }
 }
 

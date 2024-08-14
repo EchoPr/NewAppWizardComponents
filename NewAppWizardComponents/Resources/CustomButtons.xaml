@@ -36,7 +36,6 @@
   </Style>
 
   <Style TargetType="Button" x:Key="ToolbarButton">
-    <Setter Property="Width" Value="30"/>
     <Setter Property="Height" Value="30"/>
     <Setter Property="Padding" Value="4"/>
     <Setter Property="FontSize" Value="12"/>
@@ -44,7 +43,10 @@
     <Setter Property="Background" Value="Transparent"/>
   </Style>
 
-  
+  <Style TargetType="Button" x:Key="ToolbarIconButton" BasedOn="{StaticResource ToolbarButton}">
+    <Setter Property="Width" Value="30"/>
+  </Style>
+
   <Style TargetType="MenuBarItem" x:Key="TopMenuBarItem">
     <Setter Property="MinHeight" Value="1"/>
     <Setter Property="FontSize" Value="8"/>
