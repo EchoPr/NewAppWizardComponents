@@ -37,8 +37,7 @@ public sealed partial class MainPage : Page
     private bool _isShiftPressed;
 
     private bool _isCodeSnippetAdded = false;
-
-    private SnippetConfig _savedConfig;
+    private ApiEntry? _apiSnippet = null;
 
     public MainPage()
     {
@@ -99,7 +98,9 @@ public sealed partial class MainPage : Page
     {
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
-        var generatedCode = generator.GenerateCodeEntry(entry, entryNumber, generationMode);
+        var generatedCode = entry.is_snippet
+                            ? generator.GenerateApiSnippet(entry)
+                            : generator.GenerateCodeEntry(entry, entryNumber, generationMode);
 
         var newCodeLines = new TextBlock();
 
@@ -109,6 +110,9 @@ public sealed partial class MainPage : Page
         }
 
         newCodeLines.Style = (Style)Resources["CodeBlock"];
+
+        if (!entry.is_snippet)
+        {
         newCodeLines.AllowFocusOnInteraction = true;
         newCodeLines.GotFocus += CodeBlockGotFocus;
 
@@ -127,6 +131,18 @@ public sealed partial class MainPage : Page
                 _isShiftPressed = false;
             }
         };
+        }
+        else
+        {
+            if (!isEditig)
+            {
+                for (int i = 0; i < CodeBlocks.Children.Count; i++)
+                {
+                    var meta = (CodeBlocks.Children[i] as Border).Tag as ExpandedEntry;
+                    (CodeBlocks.Children[i] as Border).Tag = new ExpandedEntry(meta.apiEntry, meta.index + 1, meta.isConnectedBlockSequentialInitialized);
+                }
+            }
+        }
 
         var newBlock = new Border();
 
@@ -136,9 +152,12 @@ public sealed partial class MainPage : Page
 
         newBlock.Tag = new ExpandedEntry(entry, entryNumber, generationMode == CodeGenerationMode.StepByStep);
 
+        if (!entry.is_snippet)
+        {
         SetCodeBlockSelection(newBlock, multipleSelection: false);
         if (!isEditig)
             ShowParameters(entry);
+        }
 
         return newBlock;
     }
@@ -374,7 +393,7 @@ public sealed partial class MainPage : Page
 
     void EditCodeBlock()
     {
-        Debug.WriteLine("Action Was In EditCodeBlock");
+        //Debug.WriteLine("Action Was In EditCodeBlock");
         var meta = _selectedBlocks.Last().Tag as ExpandedEntry;
 
         Border updatedBlock;
@@ -826,14 +845,40 @@ public sealed partial class MainPage : Page
         return newBlock;
     }
 
-    private async void ApiWizardClick(SplitButton sender, SplitButtonClickEventArgs args)
+    private void ApiWizardClickSplitButton(SplitButton sender, SplitButtonClickEventArgs args)
     {
-        if (_savedConfig !=  null)
-        {
+        ApiWizardClick();
+    }
 
+    private void ApiWizardClickMenuFlyout(object sender, RoutedEventArgs e)
+    {
+        ApiWizardClick();
+    }
+
+    private async void CopyQFormApiPyMenuFlyout(object sender, RoutedEventArgs e)
+        {
+        string baseDir = mainPageVM.qformManager.QFormBaseDir;
+        string qformApi = "API\\App\\Python\\QFormAPI.py";
+        string apiFile = Path.Combine(baseDir, qformApi);
+
+        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
+
+        if (folder != null)
+        {
+            var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
+            if (!string.IsNullOrEmpty(task.Result))
+            {
+                Debug.WriteLine(task.Result);
+                ShowMessageBox(task.Result);
+            }
         }
+    }
+
+    private async void ApiWizardClick()
+    {
+        
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
-        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, _savedConfig);
+        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, mainPageVM, _apiSnippet);
 
         snippetDialog.XamlRoot = this.XamlRoot;
         var result = await snippetDialog.ShowAsync();
