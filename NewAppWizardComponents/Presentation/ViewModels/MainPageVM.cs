@@ -1,14 +1,9 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml.Controls;
+using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using Windows.Services.Maps;
-using Windows.UI.Core;
 
 namespace NewAppWizardComponents;
 
@@ -87,7 +82,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    public List<Method> Docs {  get; set; }
+    public List<Method> Docs { get; set; }
 
     private Method _selectedMethod = null;
     public Method SelectedMethod
@@ -101,7 +96,8 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    public Visibility DocsPlaceholderVisibility { 
+    public Visibility DocsPlaceholderVisibility
+    {
         get => _selectedMethod == null ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -129,7 +125,7 @@ public partial class MainPageVM : INotifyPropertyChanged
     public ProjectManager projectManager;
 
     public event PropertyChangedEventHandler PropertyChanged;
-    public event EventHandler<CodeGenerationMode> AddedNewCodeBlock;
+    public event EventHandler<ExpandedEntry> AddedNewCodeBlock;
     public event EventHandler ClearedCodeBlocks;
 
     public MainPageVM()
@@ -143,12 +139,13 @@ public partial class MainPageVM : INotifyPropertyChanged
         qformManager = new QFormManager();
     }
 
-    public void AddToCodeBlocks(ApiEntry method, bool loadingProject = false, CodeGenerationMode generationMode = CodeGenerationMode.ObjectInit)
+    public void AddToCodeBlocks(ApiEntry entry, int index, bool originalEntry = false, CodeGenerationMode generationMode = CodeGenerationMode.ObjectInit)
     {
-        if (method != null)
+        if (entry != null)
         {
-            _codeBlocks.Add(loadingProject ? method : method.Clone());
-            AddedNewCodeBlock?.Invoke(this, generationMode);
+            var newEntry = originalEntry ? entry : entry.Clone();
+            _codeBlocks.Insert(index, newEntry);
+            AddedNewCodeBlock?.Invoke(this, new ExpandedEntry(newEntry, index, generationMode == CodeGenerationMode.StepByStep));
         }
     }
 
@@ -237,9 +234,9 @@ public partial class MainPageVM : INotifyPropertyChanged
     {
         string filterText;
 
-        if (viewFilter == null) 
+        if (viewFilter == null)
             filterText = "";
-        else 
+        else
             filterText = viewFilter.Text?.ToLowerInvariant();
         if (string.IsNullOrEmpty(filterText))
         {
@@ -297,9 +294,9 @@ public partial class MainPageVM : INotifyPropertyChanged
 
 
 
-            foreach (ApiEntry entry in readData)
+            for (int i = 0; i < readData.Count; i++)
             {
-                AddToCodeBlocks(entry, true, generationMode: CodeGenerationMode.StepByStep);
+                AddToCodeBlocks(readData[i], i, true, generationMode: CodeGenerationMode.StepByStep);
             }
         }
         catch (Exception ex)

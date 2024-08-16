@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
 using Windows.System;
@@ -46,7 +45,7 @@ public sealed partial class MainPage : Page
         mainPageVM = new MainPageVM();
         this.DataContext = mainPageVM;
 
-        InitializeBrushes(); 
+        InitializeBrushes();
 
         this.KeyDown += MainPage_KeyDown;
         this.KeyUp += MainPage_KeyUp;
@@ -83,14 +82,16 @@ public sealed partial class MainPage : Page
         }
     }
 
-    public void AddNewCodeBlock(object sender, CodeGenerationMode mode)
+    public void AddNewCodeBlock(object sender, ExpandedEntry args)
     {
-        _AddNewCodeBlock(mainPageVM.CodeBlocks.Last(), mainPageVM.CodeBlocks.Count, mode, false);
-    }
-    private void _AddNewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
-    {
-        Border newBlock = CreateViewCodeBlock(entry, entryNumber, generationMode, isEditig);
-        CodeBlocks.Children.Add(newBlock);
+        Border newBlock = CreateViewCodeBlock(
+            args.apiEntry,
+            args.index,
+            args.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
+            isEditig: false
+        );
+
+        CodeBlocks.Children.Insert(args.index, newBlock);
         ScrollToCodeBlock(newBlock);
     }
 
@@ -113,24 +114,24 @@ public sealed partial class MainPage : Page
 
         if (!entry.is_snippet)
         {
-        newCodeLines.AllowFocusOnInteraction = true;
-        newCodeLines.GotFocus += CodeBlockGotFocus;
+            newCodeLines.AllowFocusOnInteraction = true;
+            newCodeLines.GotFocus += CodeBlockGotFocus;
 
-        newCodeLines.KeyDown += (s, e) =>
-        {
-            if (e.Key == VirtualKey.Shift)
+            newCodeLines.KeyDown += (s, e) =>
             {
-                _isShiftPressed = true;
-            }
-        };
+                if (e.Key == VirtualKey.Shift)
+                {
+                    _isShiftPressed = true;
+                }
+            };
 
-        newCodeLines.KeyUp += (s, e) =>
-        {
-            if (e.Key == VirtualKey.Shift)
+            newCodeLines.KeyUp += (s, e) =>
             {
-                _isShiftPressed = false;
-            }
-        };
+                if (e.Key == VirtualKey.Shift)
+                {
+                    _isShiftPressed = false;
+                }
+            };
         }
         else
         {
@@ -148,16 +149,14 @@ public sealed partial class MainPage : Page
 
         newBlock.Child = newCodeLines;
         newBlock.Style = (Style)Resources["CodeBlockBorder"];
-        if (entryNumber == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
+        //if (entryNumber == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
         newBlock.Tag = new ExpandedEntry(entry, entryNumber, generationMode == CodeGenerationMode.StepByStep);
 
-        if (!entry.is_snippet)
-        {
         SetCodeBlockSelection(newBlock, multipleSelection: false);
-        if (!isEditig)
+
+        if (!entry.is_snippet && !isEditig)
             ShowParameters(entry);
-        }
 
         return newBlock;
     }
@@ -261,7 +260,7 @@ public sealed partial class MainPage : Page
         grid.Children.Add(block);
     }
 
-    private Border CreatePropertyVisibleName(string name, bool highlighted = false) 
+    private Border CreatePropertyVisibleName(string name, bool highlighted = false)
     {
         var propertyTextBlock = new TextBlock { Text = name, Style = (Style)Resources["ParameterName"] };
         if (highlighted) propertyTextBlock.FontFamily = (FontFamily)Resources["SourceCodePro-Medium"];
@@ -404,7 +403,7 @@ public sealed partial class MainPage : Page
             true
         );
 
-        CodeBlocks.Children[meta.index - 1] = updatedBlock;
+        CodeBlocks.Children[meta.index] = updatedBlock;
     }
 
     private async void OnChangeCollection(ApiEntry entry, PropertyInfo property, bool isResult)
@@ -418,7 +417,7 @@ public sealed partial class MainPage : Page
         if (result == ContentDialogResult.Primary)
         {
             if (!isResult)
-                CodeBlocks.Children[(_selectedBlocks.Last().Tag as ExpandedEntry).index - 1] = CreateViewCodeBlock(meta.apiEntry, meta.index, CodeGenerationMode.StepByStep, true);
+                CodeBlocks.Children[(_selectedBlocks.Last().Tag as ExpandedEntry).index] = CreateViewCodeBlock(meta.apiEntry, meta.index, CodeGenerationMode.StepByStep, true);
         }
         else if (result == ContentDialogResult.Secondary)
         {
@@ -437,7 +436,8 @@ public sealed partial class MainPage : Page
             _selectedBlocks.Clear();
 
         newBlock.Background = (Brush)Resources["SelectedBlockPrimary"];
-        if (!_selectedBlocks.Contains(newBlock)) _selectedBlocks.Add(newBlock);
+        if (!_selectedBlocks.Contains(newBlock))
+            _selectedBlocks.Add(newBlock);
 
     }
 
@@ -498,7 +498,7 @@ public sealed partial class MainPage : Page
 
         ClearShownParameters();
 
-        if (entry.arg_type != null) 
+        if (entry.arg_type != null)
         {
             InvokeButton.IsEnabled = true;
             ShowParameters(entry, ParameterTypes.Input);
@@ -524,7 +524,7 @@ public sealed partial class MainPage : Page
         await dialog.ShowAsync();
     }
 
-    private async void ShowConnectQFormDialog() 
+    private async void ShowConnectQFormDialog()
     {
         var dialog = new ConnectQFormDialog(mainPageVM);
         dialog.XamlRoot = this.XamlRoot;
@@ -638,7 +638,10 @@ public sealed partial class MainPage : Page
         if (_lastClickedMethod == null) return;
 
         if (!_lastClickedMethod.menu_only)
-            mainPageVM.AddToCodeBlocks(_lastClickedMethod);
+        {
+            mainPageVM.AddToCodeBlocks(_lastClickedMethod, mainPageVM.CodeBlocks.Count);
+            SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
+        }
     }
 
     public void OnListMethodClick(object sender, ItemClickEventArgs e)
@@ -661,7 +664,10 @@ public sealed partial class MainPage : Page
         if (_lastClickedMethod == null) return;
 
         if (!_lastClickedMethod.menu_only)
-            mainPageVM.AddToCodeBlocks(_lastClickedMethod);
+        {
+            mainPageVM.AddToCodeBlocks(_lastClickedMethod, mainPageVM.CodeBlocks.Count);
+            SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
+        }
     }
 
     private void OnTreeMethodClick(TreeView sender, TreeViewItemInvokedEventArgs args)
@@ -683,19 +689,6 @@ public sealed partial class MainPage : Page
         else
         {
             AddToWorksapceButton.IsEnabled = false;
-        }
-    }
-
-    private void ProcessMethodInvocation(ApiEntry entry)
-    {
-        if (!entry.menu_only)
-        {
-            mainPageVM.AddToCodeBlocks(entry);
-            mainPageVM.UpdateDocsVisibility(entry);
-        }
-        else
-        {
-            ShowMessageBox("To add this method use the context menu in QForm");
         }
     }
 
@@ -764,7 +757,7 @@ public sealed partial class MainPage : Page
 
     private void AddMethodToWorkspace(object sender, RoutedEventArgs e)
     {
-        mainPageVM.AddToCodeBlocks(_lastClickedMethod);
+        mainPageVM.AddToCodeBlocks(_lastClickedMethod, mainPageVM.CodeBlocks.Count);
     }
 
     private async void InvokeButtonCommand(object sender, RoutedEventArgs e)
@@ -805,46 +798,6 @@ public sealed partial class MainPage : Page
         mainPageVM.ChangeApiFunctionsVisibility(sender.SelectedIndex);
     }
 
-    private Border GetSnippetBlock(List<ViewCodeSample> codeSamples)
-    {
-        var newCodeLines = new TextBlock();
-
-        foreach (ViewCodeSample sample in codeSamples)
-        {
-            newCodeLines.Inlines.Add(new Run { Text = sample.content, Foreground = GetBrush(sample.type) });
-        }
-
-        newCodeLines.Style = (Style)Resources["CodeBlock"];
-        newCodeLines.AllowFocusOnInteraction = true;
-        //newCodeLines.GotFocus += CodeBlockGotFocus;
-
-        newCodeLines.KeyDown += (s, e) =>
-        {
-            if (e.Key == VirtualKey.Shift)
-            {
-                _isShiftPressed = true;
-            }
-        };
-
-        newCodeLines.KeyUp += (s, e) =>
-        {
-            if (e.Key == VirtualKey.Shift)
-            {
-                _isShiftPressed = false;
-            }
-        };
-
-        var newBlock = new Border();
-
-        newBlock.Child = newCodeLines;
-        newBlock.Style = (Style)Resources["CodeBlockBorder"];
-
-
-        SetCodeBlockSelection(newBlock, multipleSelection: false);
-
-        return newBlock;
-    }
-
     private void ApiWizardClickSplitButton(SplitButton sender, SplitButtonClickEventArgs args)
     {
         ApiWizardClick();
@@ -856,7 +809,7 @@ public sealed partial class MainPage : Page
     }
 
     private async void CopyQFormApiPyMenuFlyout(object sender, RoutedEventArgs e)
-        {
+    {
         string baseDir = mainPageVM.qformManager.QFormBaseDir;
         string qformApi = "API\\App\\Python\\QFormAPI.py";
         string apiFile = Path.Combine(baseDir, qformApi);
@@ -876,7 +829,7 @@ public sealed partial class MainPage : Page
 
     private async void ApiWizardClick()
     {
-        
+
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
         ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, mainPageVM, _apiSnippet);
 
@@ -886,19 +839,9 @@ public sealed partial class MainPage : Page
         if (result == ContentDialogResult.Primary)
         {
             // Now only for python. later need to add interface to api wizard content dialogs i think
-            _savedConfig = (snippetDialog as PythonApiSettingsDialog).GetConfig();
+            _apiSnippet = (snippetDialog as PythonApiSettingsDialog).GetEntry();
 
-            var codeSamples = (snippetDialog as PythonApiSettingsDialog).GenerateAPISnippet(_savedConfig.QFormInteractionType, _savedConfig.QFormReferenceType);
-            Border snippet = GetSnippetBlock(codeSamples);
-            if (_isCodeSnippetAdded)
-            {
-                CodeBlocks.Children[0] = snippet;
-            }
-            else
-            {
-                CodeBlocks.Children.Insert(0, snippet);
-                _isCodeSnippetAdded = true;
-            }
+            mainPageVM.AddToCodeBlocks(_apiSnippet, 0, originalEntry: true);
         }
         else if (result == ContentDialogResult.Secondary)
         {
@@ -927,4 +870,4 @@ public enum GripSeparatorType
     Horizontal,
     Vertical
 }
-    
+
