@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 namespace NewAppWizardComponents;
 public class ApiSettingsDialogFactory
 {
-    public static ContentDialog GetDialog(string language, SnippetConfig config)
+    public static ContentDialog GetDialog(string language, MainPageVM vm, ApiEntry entry = null)
     {
         switch (language)
         {
             case "Python":
-                return new PythonApiSettingsDialog(config);
+                return new PythonApiSettingsDialog(vm, entry);
         }
 
         

@@ -50,11 +50,11 @@
         
         <RadioButton x:Name="UseQFormAPIFromInstallationRadioButton" Content="Use QFormAPI.py from QForm installation folder using 'sys.path.append'" />
         <RadioButton x:Name="UseCopyOfQFormAPIRadioButton" Content="Use copy of QFormAPI.py from script folder"/>
-        <Button x:Name="SelectAPICopyButton" Content="Select QFormAPI.py" IsEnabled="False" Margin="20,0,0,0"/>
+        <Button x:Name="SelectAPICopyButton" Content="Select QFormAPI.py" IsEnabled="False" Margin="20,0,0,0" Click="SelectAPICopyButton_Click"/>
       </StackPanel>
 
       <!-- Блок для отображения ошибки -->
-      <TextBlock x:Name="ErrorTextBlock" Text="Please fill in all required fields." Visibility="Collapsed" Foreground="Red"/>
+      <TextBlock x:Name="ErrorTextBlock" Visibility="Collapsed" Foreground="{StaticResource CodeValue}"/>
     </StackPanel>
   </ScrollViewer>
 
