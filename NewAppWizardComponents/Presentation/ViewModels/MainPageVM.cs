@@ -126,7 +126,7 @@ public partial class MainPageVM : INotifyPropertyChanged
     }
 
     public QFormManager qformManager;
-    private ProjectManager _projectManager;
+    public ProjectManager projectManager;
 
     public event PropertyChangedEventHandler PropertyChanged;
     public event EventHandler<CodeGenerationMode> AddedNewCodeBlock;
@@ -139,7 +139,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         ReadAllMethodParameters();
         PopulateTreeViewItems();
 
-        _projectManager = new ProjectManager(Methods);
+        projectManager = new ProjectManager(Methods);
         qformManager = new QFormManager();
     }
 
@@ -284,14 +284,14 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public void SaveCodeLines(string codeLines, string progLang)
     {
-        _projectManager.SaveCode(codeLines, progLang);
+        projectManager.SaveCode(codeLines, progLang);
     }
 
     public async Task LoadApiEntriesFromScm()
     {
         try
         {
-            List<ApiEntry> readData = await _projectManager.LoadCode();
+            List<ApiEntry> readData = await projectManager.LoadCode();
 
             _ClearCodeBlocks();
 
@@ -299,7 +299,7 @@ public partial class MainPageVM : INotifyPropertyChanged
 
             foreach (ApiEntry entry in readData)
             {
-                AddToCodeBlocks(entry, loadingProject: true, generationMode: CodeGenerationMode.StepByStep);
+                AddToCodeBlocks(entry, true, generationMode: CodeGenerationMode.StepByStep);
             }
         }
         catch (Exception ex)
