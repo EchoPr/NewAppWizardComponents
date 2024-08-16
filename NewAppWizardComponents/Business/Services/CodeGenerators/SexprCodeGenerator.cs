@@ -26,7 +26,7 @@ public class SexprCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType) && property.PropertyType.Name != typeof(string).Name)
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];

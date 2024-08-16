@@ -22,4 +22,6 @@ public class ExpandedEntry
     {
         isConnectedBlockSequentialInitialized = seqInited;
     }
+
+    public string GetInfo() => $"==={apiEntry}\n{index}\n{isConnectedBlockSequentialInitialized}===";
 }
