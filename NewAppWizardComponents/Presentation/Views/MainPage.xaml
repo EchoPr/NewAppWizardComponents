@@ -76,15 +76,13 @@
         <ComboBoxItem Content="XML"/>
       </ComboBox>
 
-      <SplitButton Height="30" FontSize="12" Padding="2" Margin="4 0 0 0" Background="Transparent" Click="ApiWizardClick">
+      <SplitButton Height="30" FontSize="12" Padding="2" Margin="4 0 0 0" Background="Transparent" Click="ApiWizardClickSplitButton">
         Wizard
         <SplitButton.Flyout>
-          <Flyout Placement="Bottom">
-            <StackPanel>
-              <Button Style="{StaticResource ToolbarButton}" Content="Add API setup snipet to workspace" HorizontalAlignment="Stretch"/>
-              <Button Style="{StaticResource ToolbarButton}" Content="Copy QFormAPI.py to folder" Margin="0 8 0 0" HorizontalAlignment="Stretch"/>
-            </StackPanel>
-          </Flyout>
+          <MenuFlyout>
+            <MenuFlyoutItem Text="API Wizard" FontWeight="SemiBold" Click="ApiWizardClickMenuFlyout"/>
+            <MenuFlyoutItem Text="Copy QFormAPI.py" Click="CopyQFormApiPyMenuFlyout"/>
+          </MenuFlyout>
         </SplitButton.Flyout>
 
       </SplitButton>
