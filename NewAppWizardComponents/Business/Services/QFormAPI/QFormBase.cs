@@ -122,10 +122,11 @@ public class ApiEntry : IComparable<ApiEntry>
     public object? arg_value;
     public object? ret_value;
 
-    public ApiEntry(int svc_cmd, string EntryName, Type a, Type r, bool mnu, LStr[] G) {
+    public ApiEntry(int svc_cmd, string EntryName, Type a, Type r, bool mnu, LStr[] G, bool isSnippet = false) {
         service_cmd = svc_cmd; menu_only = mnu; _name = EntryName; arg_type = a; ret_type = r; groups = G;
         arg_value = arg_type == null ? null : Activator.CreateInstance(this.arg_type);
         ret_value = ret_type == null ? null : Activator.CreateInstance(this.ret_type);
+        is_snippet = isSnippet;
     }
     public ApiEntry(int svc_cmd, string EntryName, LStr G) { 
         service_cmd = svc_cmd; menu_only = false; _name = EntryName; arg_type = null; ret_type = null; groups = new[] { G }; 
@@ -134,7 +135,7 @@ public class ApiEntry : IComparable<ApiEntry>
     public override string ToString() { return _name + (menu_only ? "*" : ""); }
     public int CompareTo(ApiEntry other) { return Name.CompareTo(other.Name); }
 
-    public ApiEntry Clone() => new ApiEntry(service_cmd, _name, arg_type, ret_type, menu_only, groups);
+    public ApiEntry Clone() => new ApiEntry(service_cmd, _name, arg_type, ret_type, menu_only, groups, is_snippet);
 }
 public class Ret
 {

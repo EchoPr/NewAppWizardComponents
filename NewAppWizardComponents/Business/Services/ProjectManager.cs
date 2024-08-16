@@ -45,6 +45,9 @@ public class ProjectManager
         _folderPicker.SuggestedStartLocation = PickerLocationId.Desktop;
         _folderPicker.FileTypeFilter.Add("*");
 
+        apiMethods
+            .Add(new ApiEntry(0, "_pyton_settings", typeof(APytonSettings), null, false, null, true));
+
         _scmParser = new ScmParser(apiMethods);
     }
 

@@ -32,8 +32,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
                 StartFromAppWindowRadioButton.IsChecked = true;
                 UseQFormAPIFromInstallationRadioButton.IsChecked = true;
 
-                _snippetEntry = new ApiEntry(0, "_pyton_settings", typeof(APytonSettings), null, false, null);
-                _snippetEntry.is_snippet = true;
+                _snippetEntry = new ApiEntry(0, "_pyton_settings", typeof(APytonSettings), null, false, null, true);
             }
         };
 
