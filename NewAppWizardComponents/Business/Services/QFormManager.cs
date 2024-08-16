@@ -20,10 +20,18 @@ public class QFormManager
     public event EventHandler InvocationStarted;
     public event EventHandler InvocationEnded;
 
-    public QFormManager(string qformDir = "C:\\QForm\\11.0.2\\x64")
+    private string qformBaseDir = "C:\\QForm\\11.0.2";
+    public string QFormBaseDir { get => qformBaseDir; set => qformBaseDir = value; }
+
+    public QFormManager()
     {
-        _qformDir = qformDir;
-        _qform.qform_dir_set(_qformDir);
+        SetBaseDir(qformBaseDir);
+    }
+
+    public void SetBaseDir(string dir)
+    {
+        qformBaseDir = dir;
+        _qform.qform_dir_set(Path.Combine(qformBaseDir, "x64"));
     }
 
     public void attachQForm() 
