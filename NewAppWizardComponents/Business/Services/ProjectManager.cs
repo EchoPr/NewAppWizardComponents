@@ -1,13 +1,17 @@
 using System.Diagnostics;
+using System.IO.Compression;
+using System.Text;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage.Pickers;
+using Windows.Web.Syndication;
 using WinRT.Interop; 
 
 namespace NewAppWizardComponents;
-class ProjectManager
+public class ProjectManager
 {
     private FileSavePicker _savePicker;
     private FileOpenPicker _loadPicker;
+    private FolderPicker _folderPicker;
     private nint _windowHandler;
 
     private ScmParser _scmParser;
@@ -27,6 +31,7 @@ class ProjectManager
     {
         _savePicker = new FileSavePicker();
         _loadPicker = new FileOpenPicker();
+        _folderPicker = new FolderPicker(); 
         _windowHandler = WindowNative.GetWindowHandle(App.MainWindow);
 
         InitializeWithWindow.Initialize(_savePicker, _windowHandler);
@@ -35,6 +40,10 @@ class ProjectManager
         InitializeWithWindow.Initialize(_loadPicker, _windowHandler);
         _loadPicker.ViewMode = PickerViewMode.Thumbnail;
         _loadPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+
+        InitializeWithWindow.Initialize(_folderPicker, _windowHandler);
+        _folderPicker.SuggestedStartLocation = PickerLocationId.Desktop;
+        _folderPicker.FileTypeFilter.Add("*");
 
         _scmParser = new ScmParser(apiMethods);
     }
@@ -77,5 +86,25 @@ class ProjectManager
         }
 
         return readData;
+    }
+
+    public async Task<StorageFolder> SelectFolder()
+    {
+        return await _folderPicker.PickSingleFolderAsync();
+    }
+
+    public async Task<string> CopyFile(string  source, string destination)
+    { 
+        string errorMessage = string.Empty;
+        try
+        {
+            File.Copy(source, destination);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        
+        return errorMessage;
     }
 }
