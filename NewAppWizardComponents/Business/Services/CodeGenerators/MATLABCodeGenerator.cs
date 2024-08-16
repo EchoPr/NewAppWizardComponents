@@ -17,7 +17,7 @@ public class MATLABCodeGenerator : ICodeGenerator
 
         if (entry.arg_type != null)
         {
-            codeEntries.Add(new ViewCodeSample($"arg{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample($"QFormAPI.{entry.arg_type.Name[1..]}", ViewCodeSampleType.Type));
             codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
@@ -38,7 +38,7 @@ public class MATLABCodeGenerator : ICodeGenerator
                     {
                         foreach (var v in val)
                         {
-                            codeEntries.Add(new ViewCodeSample($"arg{num}.{property.Name}.", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                             codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
@@ -51,7 +51,7 @@ public class MATLABCodeGenerator : ICodeGenerator
                         for (int i = 0; i < val.Count; i++)
                         {
                             string objectName = val[i].GetType().Name[1..];
-                            codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
                             codeEntries.Add(new ViewCodeSample($"QFormAPI.{objectName}", ViewCodeSampleType.Type));
                             codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
@@ -59,7 +59,7 @@ public class MATLABCodeGenerator : ICodeGenerator
                             PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
                             foreach (PropertyInfo innerProperty in innerProperties)
                             {
-                                codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
+                                codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
                                 if (innerProperty.PropertyType.IsEnum)
@@ -68,13 +68,19 @@ public class MATLABCodeGenerator : ICodeGenerator
                                 codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
 
                             }
+
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
+                            codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
                         }
                     }
 
                 }
                 else
                 {
-                    codeEntries.Add(new ViewCodeSample($"arg{num}.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample($"arg{num + 1}.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample($"{property.Name} ", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
@@ -88,7 +94,7 @@ public class MATLABCodeGenerator : ICodeGenerator
 
         if (entry.ret_type != null)
         {
-            codeEntries.Add(new ViewCodeSample($"ret{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"ret{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
         }
 
@@ -96,7 +102,7 @@ public class MATLABCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample($"{entry.Name}", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
 
-        if (entry.arg_type != null) { codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default)); }
+        if (entry.arg_type != null) { codeEntries.Add(new ViewCodeSample($"arg{num + 1}", ViewCodeSampleType.Default)); }
 
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));

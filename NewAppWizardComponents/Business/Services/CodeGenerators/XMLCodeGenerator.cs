@@ -18,7 +18,7 @@ public class XMLCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample($"{entry.Name} ", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample("index=", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Brackets));
-        codeEntries.Add(new ViewCodeSample(num.ToString(), ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(num + 1.ToString(), ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample(">\n", ViewCodeSampleType.Brackets));
 

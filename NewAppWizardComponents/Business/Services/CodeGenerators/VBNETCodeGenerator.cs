@@ -22,11 +22,11 @@ public class VBNETCodeGenerator : ICodeGenerator
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"Dim ", ViewCodeSampleType.Keyword));
-            codeEntries.Add(new ViewCodeSample($"arg{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample($"As New ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample($"QFormAPI.{entry.arg_type.Name[1..]}\n", ViewCodeSampleType.Type));
             codeEntries.Add(new ViewCodeSample($"With ", ViewCodeSampleType.Keyword));
-            codeEntries.Add(new ViewCodeSample($"arg{num}\n", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1}\n", ViewCodeSampleType.Default));
 
             PropertyInfo[] properties = entry.arg_type.GetProperties();
 
@@ -51,7 +51,7 @@ public class VBNETCodeGenerator : ICodeGenerator
         if (entry.ret_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"Dim ", ViewCodeSampleType.Keyword));
-            codeEntries.Add(new ViewCodeSample($"ret{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"ret{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample($"As ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample($"QFormAPI.{entry.ret_type.Name[1..]} ", ViewCodeSampleType.Type));
             codeEntries.Add(new ViewCodeSample($"= ", ViewCodeSampleType.Keyword));
@@ -65,7 +65,7 @@ public class VBNETCodeGenerator : ICodeGenerator
 
         if (entry.arg_type != null)
         {
-            codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1}", ViewCodeSampleType.Default));
         }
 
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
@@ -80,7 +80,7 @@ public class VBNETCodeGenerator : ICodeGenerator
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"Dim ", ViewCodeSampleType.Keyword));
-            codeEntries.Add(new ViewCodeSample($"arg{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample($"As New ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample($"QFormAPI.{entry.arg_type.Name[1..]}\n", ViewCodeSampleType.Type));
 
@@ -100,7 +100,7 @@ public class VBNETCodeGenerator : ICodeGenerator
                     {
                         foreach (var v in val)
                         {
-                            codeEntries.Add(new ViewCodeSample($"arg{num}.{property.Name}.", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                             codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
@@ -114,14 +114,14 @@ public class VBNETCodeGenerator : ICodeGenerator
                             string objectName = val[i].GetType().Name[1..];
 
                             codeEntries.Add(new ViewCodeSample("Dim ", ViewCodeSampleType.Keyword));
-                            codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1} ", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1} ", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample($"As New ", ViewCodeSampleType.Keyword));
                             codeEntries.Add(new ViewCodeSample($"QFormAPI.{objectName}\n", ViewCodeSampleType.Type));
 
                             PropertyInfo[] innerProperties = val[i].GetType().GetProperties();
                             foreach (PropertyInfo innerProperty in innerProperties)
                             {
-                                codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
+                                codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
                                 if (innerProperty.PropertyType.IsEnum)
@@ -129,13 +129,19 @@ public class VBNETCodeGenerator : ICodeGenerator
 
                                 codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
                             }
+
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
+                            codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                            codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
                         }
                     }
 
                 }
                 else
                 {
-                    codeEntries.Add(new ViewCodeSample($"arg{num}.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample($"arg{num + 1}.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample($"{property.Name} ", ViewCodeSampleType.Default));
 
                     if (property.PropertyType.IsEnum)
@@ -150,7 +156,7 @@ public class VBNETCodeGenerator : ICodeGenerator
         if (entry.ret_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"Dim ", ViewCodeSampleType.Keyword));
-            codeEntries.Add(new ViewCodeSample($"ret{num} ", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"ret{num + 1} ", ViewCodeSampleType.Default));
             codeEntries.Add(new ViewCodeSample($"As ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample($"QFormAPI.{entry.ret_type.Name[1..]} ", ViewCodeSampleType.Type));
             codeEntries.Add(new ViewCodeSample($"= ", ViewCodeSampleType.Keyword));
@@ -164,7 +170,7 @@ public class VBNETCodeGenerator : ICodeGenerator
 
         if (entry.arg_type != null)
         {
-            codeEntries.Add(new ViewCodeSample($"arg{num}", ViewCodeSampleType.Default));
+            codeEntries.Add(new ViewCodeSample($"arg{num + 1}", ViewCodeSampleType.Default));
         }
 
         codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
