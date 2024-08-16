@@ -27,7 +27,8 @@ public class PythonCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (property.PropertyType.IsGenericType &&
+                    property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];
@@ -65,6 +66,12 @@ public class PythonCodeGenerator : ICodeGenerator
 
                                 codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
                             }
+
+                            codeEntries.Add(new ViewCodeSample($"arg{num}.{property.Name}.", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample("append", ViewCodeSampleType.Method));
+                            codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                            codeEntries.Add(new ViewCodeSample($"arg{num}_object{i + 1}", ViewCodeSampleType.Default));
+                            codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
                         }
                     }
 
