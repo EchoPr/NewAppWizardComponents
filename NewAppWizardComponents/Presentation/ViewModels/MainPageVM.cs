@@ -118,7 +118,7 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public string VisualSession
     {
-        get => _currentSession == null ? "QForm disconnected" : $"Connected to: {_currentSession}";
+        get => _currentSession == null ? "QForm not connected" : $"Connected to: {_currentSession}";
     }
 
     public QFormManager qformManager;
