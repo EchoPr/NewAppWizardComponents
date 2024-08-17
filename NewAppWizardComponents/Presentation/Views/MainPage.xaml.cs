@@ -33,7 +33,7 @@ public sealed partial class MainPage : Page
     private GripSeparatorType? usingSeparator = null;
     private Grid resizingGrid;
 
-    private bool _isShiftPressed;
+    private bool _isCtrlPressed;
 
     private bool _isCodeSnippetAdded = false;
     private ApiEntry? _apiSnippet = null;
@@ -119,17 +119,17 @@ public sealed partial class MainPage : Page
 
             newCodeLines.KeyDown += (s, e) =>
             {
-                if (e.Key == VirtualKey.Shift)
+                if (e.Key == VirtualKey.Control)
                 {
-                    _isShiftPressed = true;
+                    _isCtrlPressed = true;
                 }
             };
 
             newCodeLines.KeyUp += (s, e) =>
             {
-                if (e.Key == VirtualKey.Shift)
+                if (e.Key == VirtualKey.Control)
                 {
-                    _isShiftPressed = false;
+                    _isCtrlPressed = false;
                 }
             };
         }
@@ -451,15 +451,15 @@ public sealed partial class MainPage : Page
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
     {
-        var shiftPressed = _isShiftPressed;
+        var ctrlPressed = _isCtrlPressed;
 
         var selectedBlock = (Border)VisualTreeHelper.GetParent((TextBlock)sender);
         if (selectedBlock == null) return;
 
-        SetCodeBlockSelection(selectedBlock, shiftPressed);
-        ScrollToCodeBlock(selectedBlock);
+        SetCodeBlockSelection(selectedBlock, ctrlPressed);
+        ScrollToCodeBlock(selectedBlock); 
 
-        if (!shiftPressed)
+        if (!ctrlPressed)
         {
             var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
             ShowParameters(entry);
@@ -474,17 +474,17 @@ public sealed partial class MainPage : Page
 
     private void MainPage_KeyDown(object sender, KeyRoutedEventArgs e)
     {
-        if (e.Key == VirtualKey.Shift)
+        if (e.Key == VirtualKey.Control)
         {
-            _isShiftPressed = true;
+            _isCtrlPressed = true;
         }
     }
 
     private void MainPage_KeyUp(object sender, KeyRoutedEventArgs e)
     {
-        if (e.Key == VirtualKey.Shift)
+        if (e.Key == VirtualKey.Control)
         {
-            _isShiftPressed = false;
+            _isCtrlPressed = false;
         }
     }
 
