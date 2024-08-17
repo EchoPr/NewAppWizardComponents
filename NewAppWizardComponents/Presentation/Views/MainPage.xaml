@@ -233,7 +233,11 @@
       <ScrollViewer x:Name="CodeView" Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                     HorizontalScrollBarVisibility="Auto"
                     Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="8">
-        <StackPanel x:Name="CodeBlocks" Padding="0 10 10 10"/>
+        <StackPanel>
+          <StackPanel x:Name="CodeBlocksBefore" Margin="0 0 0 10"/>
+          <StackPanel x:Name="CodeBlocks" Padding="0 10 10 10"/>
+          <StackPanel x:Name="CodeBlocksAfter" Margin="0 10 0 0"/>
+        </StackPanel>
       </ScrollViewer>
 
       <Border Grid.Row="1" Background="#F3F3F3" Height="3" VerticalAlignment="Stretch" ManipulationMode="All"

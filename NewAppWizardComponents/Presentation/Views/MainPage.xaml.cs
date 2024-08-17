@@ -696,6 +696,28 @@ public sealed partial class MainPage : Page
     {
         if (CodeBlocks == null) return;
 
+        if (((ComboBoxItem)LanguageComboBox.SelectedItem).Content.ToString() == "XML")
+        {
+            TextBlock textBlockBefore = new TextBlock();
+            textBlockBefore.Inlines.Add(new Run { Text = "<", Foreground = GetBrush(ViewCodeSampleType.Brackets) });
+            textBlockBefore.Inlines.Add(new Run { Text = "qform_batch", Foreground = GetBrush(ViewCodeSampleType.Default) });
+            textBlockBefore.Inlines.Add(new Run { Text = ">", Foreground = GetBrush(ViewCodeSampleType.Brackets) });
+
+            CodeBlocksBefore.Children.Add(textBlockBefore);
+
+            TextBlock textBlockAfter = new TextBlock();
+            textBlockAfter.Inlines.Add(new Run { Text = "</", Foreground = GetBrush(ViewCodeSampleType.Brackets) });
+            textBlockAfter.Inlines.Add(new Run { Text = "qform_batch", Foreground = GetBrush(ViewCodeSampleType.Default) });
+            textBlockAfter.Inlines.Add(new Run { Text = ">", Foreground = GetBrush(ViewCodeSampleType.Brackets) });
+
+            CodeBlocksAfter.Children.Add(textBlockAfter);
+        }
+        else
+        {
+            CodeBlocksBefore.Children.Clear();
+            CodeBlocksAfter.Children.Clear();
+        }
+
         for (int i = 0; i < CodeBlocks.Children.Count; i++)
         {
             Border cb = CodeBlocks.Children[i] as Border;

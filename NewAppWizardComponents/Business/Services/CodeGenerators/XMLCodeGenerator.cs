@@ -23,7 +23,7 @@ public class XMLCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample(">\n", ViewCodeSampleType.Brackets));
 
         if (entry.arg_type != null)
-        { 
+        {
             PropertyInfo[] properties = entry.arg_type.GetProperties();
 
             foreach (PropertyInfo property in properties)
