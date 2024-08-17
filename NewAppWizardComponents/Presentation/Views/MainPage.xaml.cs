@@ -466,9 +466,10 @@ public sealed partial class MainPage : Page
         }
         else
         {
-            InvokeButton.IsEnabled = false;
             ClearShownParameters();
         }
+
+        InvokeButton.IsEnabled = !ctrlPressed;
 
     }
 
@@ -498,15 +499,7 @@ public sealed partial class MainPage : Page
 
         ClearShownParameters();
 
-        if (entry.arg_type != null)
-        {
-            InvokeButton.IsEnabled = true;
-            ShowParameters(entry, ParameterTypes.Input);
-        }
-        else
-        {
-            InvokeButton.IsEnabled = false;
-        }
+        if (entry.arg_type != null) ShowParameters(entry, ParameterTypes.Input);
 
         if (entry.ret_type != null) ShowParameters(entry, ParameterTypes.Output);
     }
@@ -641,6 +634,7 @@ public sealed partial class MainPage : Page
         {
             mainPageVM.AddToCodeBlocks(_lastClickedMethod, mainPageVM.CodeBlocks.Count);
             SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
+            InvokeButton.IsEnabled = true;
         }
     }
 
@@ -667,6 +661,7 @@ public sealed partial class MainPage : Page
         {
             mainPageVM.AddToCodeBlocks(_lastClickedMethod, mainPageVM.CodeBlocks.Count);
             SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
+            InvokeButton.IsEnabled = true;
         }
     }
 
