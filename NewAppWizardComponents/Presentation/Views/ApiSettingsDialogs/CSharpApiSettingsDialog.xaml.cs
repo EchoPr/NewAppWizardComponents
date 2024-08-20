@@ -1,18 +1,12 @@
-
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Windows.Storage.AccessCache;
-using Windows.Storage.Pickers;
-using WinRT.Interop;
 
 namespace NewAppWizardComponents;
-public sealed partial class PythonApiSettingsDialog : ContentDialog
+public sealed partial class CSharpApiSettingsDialog : ContentDialog
 {
     public MainPageVM mainPageVM;
     private ApiEntry _snippetEntry;
 
-    public PythonApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null)
+    public CSharpApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null)
     {
         this.InitializeComponent();
 
@@ -26,11 +20,10 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
             }
             else
             {
-                PythonFileRadioButton.IsChecked = true;
                 StartFromAppWindowRadioButton.IsChecked = true;
                 UseQFormAPIFromInstallationRadioButton.IsChecked = true;
 
-                _snippetEntry = new ApiEntry(0, "_pyton_settings", typeof(APytonSettings), null, false, null, true);
+                _snippetEntry = new ApiEntry(0, "_csharp_settings", typeof(ACSharpSettings), null, false, null, true);
             }
         };
 
@@ -39,10 +32,8 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     private void UpdateConfig()
     {
-        var snippetConfig = (_snippetEntry.arg_value as APytonSettings);
-        snippetConfig.script_type = (PythonFileRadioButton.IsChecked == true
-                                                                        ? PythonScriptType.pyfile 
-                                                                        : PythonScriptType.notebook).ToString();
+        var snippetConfig = (_snippetEntry.arg_value as ACSharpSettings);
+        
         snippetConfig.connection_type = DetermineInteractionType().ToString();
         snippetConfig.alt_connection = ConnectToExistingWindowCheckBox.IsChecked == true;
         snippetConfig.import_dir = DetermineReferenceType().ToString();
@@ -65,7 +56,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        
+
     }
 
     private void DisplayError(string error)
@@ -95,9 +86,6 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     private bool ValidateInputs()
     {
-        if (PythonFileRadioButton.IsChecked == false && NotebookRadioButton.IsChecked == false)
-            return false;
-
         if (NewQFormWindowRadioButton.IsChecked == false && StartFromAppWindowRadioButton.IsChecked == false &&
             ConnectToExistingQFormRadioButton.IsChecked == false)
             return false;
@@ -115,18 +103,6 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
         SelectAPICopyButton.IsEnabled = value;
     }
 
-    private void PythonFileRadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        SetFieldsAvailability(true);
-    }
-
-    private void NotebookRadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        SetFieldsAvailability(false);
-        StartFromAppWindowRadioButton.IsChecked = false;
-        UseCopyOfQFormAPIRadioButton.IsChecked = false;
-    }
-
     private void StartFromAppWindowRadioButton_Checked(object sender, RoutedEventArgs e)
     {
         if (ConnectToExistingWindowCheckBox != null)
@@ -139,12 +115,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     public void RestoreDialogState()
     {
-        var snippetConfig = (_snippetEntry.arg_value as APytonSettings);
-
-        ScriptTypePanel.Visibility = Visibility.Collapsed;
-
-        PythonFileRadioButton.IsChecked = snippetConfig.script_type == PythonScriptType.pyfile.ToString();
-        NotebookRadioButton.IsChecked = snippetConfig.script_type == PythonScriptType.notebook.ToString();
+        var snippetConfig = (_snippetEntry.arg_value as ACSharpSettings);
 
         NewQFormWindowRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.script_starts.ToString();
         StartFromAppWindowRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.qform_starts.ToString();
@@ -159,20 +130,27 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     private async void SelectAPICopyButton_Click(object sender, RoutedEventArgs e)
     {
-        string baseDir = mainPageVM.qformManager.QFormBaseDir;
-        string qformApi = "API\\App\\Python\\QFormAPI.py";
-        string apiFile = Path.Combine(baseDir, qformApi);
+        //string baseDir = mainPageVM.qformManager.QFormBaseDir;
+        //string qformApi = "API\\App\\Python\\QFormAPI.py";
+        //string apiFile = Path.Combine(baseDir, qformApi);
 
-        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
+        //StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
 
-        if (folder != null)
-        {
-            var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
-            if (!string.IsNullOrEmpty(task.Result))
-            {
-                Debug.WriteLine(task.Result);
-                DisplayError(task.Result);
-            }
-        }
+        //if (folder != null)
+        //{
+        //    var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
+        //    if (!string.IsNullOrEmpty(task.Result))
+        //    {
+        //        Debug.WriteLine(task.Result);
+        //        DisplayError(task.Result);
+        //    }
+        //}
+
+
+    }
+
+    private async void SelectAPIdllButton_Click(object sender, RoutedEventArgs e)
+    {
+
     }
 }

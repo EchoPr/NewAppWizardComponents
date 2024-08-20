@@ -855,8 +855,13 @@ public sealed partial class MainPage : Page
 
         if (result == ContentDialogResult.Primary)
         {
-            // Now only for python. later need to add interface to api wizard content dialogs i think
-            _apiSnippet = (snippetDialog as PythonApiSettingsDialog).GetEntry();
+            if (snippetDialog is PythonApiSettingsDialog dialogPy)
+                _apiSnippet = dialogPy.GetEntry();
+            else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
+                _apiSnippet = dialogCs.GetEntry();
+            else
+                throw new NotImplementedException();
+
 
             mainPageVM.AddToCodeBlocks(_apiSnippet, 0, originalEntry: true);
         }

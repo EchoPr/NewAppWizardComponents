@@ -13,9 +13,31 @@ public class ApiSettingsDialogFactory
         {
             case "Python":
                 return new PythonApiSettingsDialog(vm, entry);
+            case "C#":
+                return new CSharpApiSettingsDialog(vm, entry);
         }
 
         
         throw new ArgumentException($"Unsupported language: {language}");
     }
+}
+
+public enum PythonScriptType
+{
+    pyfile,
+    notebook
+}
+
+public enum APIQFormInteractionType
+{
+    script_starts,
+    qform_starts,
+    qform_starts_or_connect,
+    script_connect
+}
+
+public enum APIQFormReference
+{
+    default_folder,
+    local_folder
 }
