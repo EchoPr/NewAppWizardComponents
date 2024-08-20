@@ -28,6 +28,7 @@
   <SolidColorBrush x:Key="CodeType" Color="#216F85"/>
   <SolidColorBrush x:Key="CodeBrackets" Color="#ADB1C2"/>
   <SolidColorBrush x:Key="CodeMethod" Color="#163FE4"/>
+  <SolidColorBrush x:Key="CodeComment" Color="#5DA251"/>
 
   <SolidColorBrush x:Key="FailStatus" Color="#ff99a4"/>
 

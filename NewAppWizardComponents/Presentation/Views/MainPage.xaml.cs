@@ -2,8 +2,13 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Windows.ApplicationModel.DataTransfer;
+using Windows.Security.Cryptography.Core;
 using Windows.System;
 
 
@@ -19,6 +24,7 @@ public sealed partial class MainPage : Page
     SolidColorBrush? codeBracketsBrush;
     SolidColorBrush? codeValueBrush;
     SolidColorBrush? codeMethodBrush;
+    SolidColorBrush? codeCommentBrush;
 
     private List<Border> _selectedBlocks = new List<Border>();
 
@@ -55,8 +61,43 @@ public sealed partial class MainPage : Page
         mainPageVM.qformManager.InvokationResultsReceived += OnInvokationResultsReceived;
         mainPageVM.qformManager.InvocationStarted += (s, e) => { InvokeProgressRing.IsActive = true; };
         mainPageVM.qformManager.InvocationEnded += (s, e) => { InvokeProgressRing.IsActive = false; };
+
+#if !HAS_UNO
+        Clipboard.ContentChanged += (s, e) =>
+        {
+            try
+            {
+                string data = ClipboardHelper.GetDataFromClipboard();
+                ReadBatchEntriesFromJson(data);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+        };
+#else
+        Clipboard.ContentChanged += async (s, e) =>
+        {
+            string dataName = "QForm.CPI.PropertyDefW";
+            DataPackageView dataPackageView = Clipboard.GetContent();
+            if (dataPackageView.Contains(dataName))
+            {
+                string data = await dataPackageView.GetTextAsync(dataName);
+                ReadBatchEntriesFromJson(data);
+            }
+        };
+#endif
     }
 
+    private void ReadBatchEntriesFromJson(string data)
+    {
+        PropertyBatch pb = JsonSerializer.Deserialize(data, typeof(PropertyBatch)) as PropertyBatch;
+
+        List<ApiEntry> entries = mainPageVM.qformManager.GetPropertyEntry(pb);
+
+        foreach (ApiEntry entry in entries)
+            mainPageVM.AddToCodeBlocks(entry, mainPageVM.CodeBlocks.Count, originalEntry: true);
+    }
     private void OnInvokationResultsReceived(object? sender, EventArgs e)
     {
         ShowParameters((_selectedBlocks.Last().Tag as ExpandedEntry)?.apiEntry);
@@ -75,8 +116,9 @@ public sealed partial class MainPage : Page
         codeBracketsBrush = Resources["CodeBrackets"] as SolidColorBrush;
         codeValueBrush = Resources["CodeValue"] as SolidColorBrush;
         codeMethodBrush = Resources["CodeMethod"] as SolidColorBrush;
+        codeCommentBrush = Resources["CodeComment"] as SolidColorBrush;
 
-        if (codeTypeBrush == null || codeDefaultBrush == null || codeKeywordBrush == null || codeBracketsBrush == null || codeValueBrush == null || codeMethodBrush == null)
+        if (codeTypeBrush == null || codeDefaultBrush == null || codeKeywordBrush == null || codeBracketsBrush == null || codeValueBrush == null || codeMethodBrush == null || codeCommentBrush == null)
         {
             throw new InvalidOperationException("One or more brushes was not found!");
         }
@@ -171,6 +213,7 @@ public sealed partial class MainPage : Page
             ViewCodeSampleType.Value => codeValueBrush,
             ViewCodeSampleType.Method => codeMethodBrush,
             ViewCodeSampleType.Brackets => codeBracketsBrush,
+            ViewCodeSampleType.Comment => codeCommentBrush,
             _ => codeDefaultBrush,
         };
     }
@@ -880,6 +923,94 @@ public class CodeRet : Ret
 {
     public virtual void value_set(object o) { }
 }
+
+#if !HAS_UNO
+class ClipboardHelper
+{
+    const string FORMAT_NAME = "QForm.CPI.PropertyDefW";
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool OpenClipboard(IntPtr hWndNewOwner);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern bool CloseClipboard();
+
+    [DllImport("user32.dll")]
+    static extern IntPtr GetClipboardData(uint uFormat);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    static extern uint RegisterClipboardFormat(string lpszFormat);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern IntPtr GlobalLock(IntPtr hMem);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool GlobalUnlock(IntPtr hMem);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern uint GlobalSize(IntPtr hMem);
+
+    public static string GetDataFromClipboard()
+    {
+        // Регистрируем пользовательский формат
+        uint format = RegisterClipboardFormat(FORMAT_NAME);
+        if (format == 0)
+        {
+            throw new InvalidOperationException("Failed to register clipboard format.");
+        }
+
+        // Открываем буфер обмена
+        if (!OpenClipboard(IntPtr.Zero))
+        {
+            throw new InvalidOperationException("Failed to open clipboard.");
+        }
+
+        string result = null;
+
+        try
+        {
+            // Получаем данные с форматом "Foo"
+            IntPtr handle = GetClipboardData(format);
+            if (handle == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to get clipboard data.");
+            }
+
+            // Блокируем глобальную память, чтобы получить доступ к данным
+            IntPtr pointer = GlobalLock(handle);
+            if (pointer == IntPtr.Zero)
+            {
+                throw new InvalidOperationException("Failed to lock global memory.");
+            }
+
+            try
+            {
+                // Определяем размер данных
+                uint size = GlobalSize(handle);
+                byte[] buffer = new byte[size];
+
+                // Копируем данные из памяти в буфер
+                Marshal.Copy(pointer, buffer, 0, (int)size);
+
+                // Преобразуем данные в строку (предполагается, что это UTF-8)
+                result = Encoding.Unicode.GetString(buffer);
+            }
+            finally
+            {
+                // Разблокируем память
+                GlobalUnlock(handle);
+            }
+        }
+        finally
+        {
+            // Закрываем буфер обмена
+            CloseClipboard();
+        }
+
+        return result;
+    }
+}
+#endif
 
 public enum ParameterTypes
 {
