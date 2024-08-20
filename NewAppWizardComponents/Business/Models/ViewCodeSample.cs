@@ -24,5 +24,6 @@ public enum ViewCodeSampleType
     Keyword,
     Brackets,
     Value,
-    Method
+    Method,
+    Comment
 }

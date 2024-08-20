@@ -15,6 +15,14 @@ public class MATLABCodeGenerator : ICodeGenerator
     {
         var codeEntries = new List<ViewCodeSample>();
 
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"% {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
+
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"arg{num + 1} ", ViewCodeSampleType.Default));

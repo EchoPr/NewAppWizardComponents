@@ -19,6 +19,14 @@ public class VBACodeGenerator : ICodeGenerator
     {
         var codeEntries = new List<ViewCodeSample>();
 
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"' {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
+
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"Dim ", ViewCodeSampleType.Keyword));
@@ -82,6 +90,14 @@ public class VBACodeGenerator : ICodeGenerator
     public List<ViewCodeSample> GenerateCodeEntryStepByStep(ApiEntry entry, int num)
     {
         var codeEntries = new List<ViewCodeSample>();
+
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"' {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
 
         if (entry.arg_type != null)
         {

@@ -14,11 +14,19 @@ public class XMLCodeGenerator : ICodeGenerator
     {
         var codeEntries = new List<ViewCodeSample>();
 
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"<!-- {comment} -->\n", ViewCodeSampleType.Comment));
+            }
+        }
+
         codeEntries.Add(new ViewCodeSample("<", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample($"{entry.Name} ", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample("index=", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Brackets));
-        codeEntries.Add(new ViewCodeSample(num + 1.ToString(), ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(num + 1.ToString(), ViewCodeSampleType.Default)); 
         codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample(">\n", ViewCodeSampleType.Brackets));
 
