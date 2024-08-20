@@ -122,6 +122,8 @@ public class ApiEntry : IComparable<ApiEntry>
     public object? arg_value;
     public object? ret_value;
 
+    public List<string> comment = new List<string>();
+
     public ApiEntry(int svc_cmd, string EntryName, Type a, Type r, bool mnu, LStr[] G, bool isSnippet = false) {
         service_cmd = svc_cmd; menu_only = mnu; _name = EntryName; arg_type = a; ret_type = r; groups = G;
         arg_value = arg_type == null ? null : Activator.CreateInstance(this.arg_type);

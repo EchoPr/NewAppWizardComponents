@@ -32,7 +32,7 @@ public class VBNETCodeGenerator : ICodeGenerator
 
             foreach (PropertyInfo property in properties)
             {
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) continue;
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)) continue;
 
                 var value = property.GetValue(entry.arg_value);
 
@@ -42,7 +42,10 @@ public class VBNETCodeGenerator : ICodeGenerator
                 if (property.PropertyType.IsEnum)
                     codeEntries.Add(new ViewCodeSample($"QFormAPI.{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
+                if (property.PropertyType == typeof(string))
+                    codeEntries.Add(new ViewCodeSample($"\"{value}\"\n", ViewCodeSampleType.Comment));
+                else
+                    codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
             }
 
             codeEntries.Add(new ViewCodeSample($"End With\n", ViewCodeSampleType.Keyword));
@@ -90,7 +93,7 @@ public class VBNETCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];
@@ -103,7 +106,10 @@ public class VBNETCodeGenerator : ICodeGenerator
                             codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
-                            codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
+                            if (property.PropertyType == typeof(string))
+                                codeEntries.Add(new ViewCodeSample($"\"{v}\"", ViewCodeSampleType.Comment));
+                            else
+                                codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
                             codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
                         }
                     }
@@ -148,7 +154,11 @@ public class VBNETCodeGenerator : ICodeGenerator
                         codeEntries.Add(new ViewCodeSample($"QFormAPI.{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
                     codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
-                    codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
+
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample($"\"{value}\"\n", ViewCodeSampleType.Comment));
+                    else
+                        codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
                 }
             }
         }

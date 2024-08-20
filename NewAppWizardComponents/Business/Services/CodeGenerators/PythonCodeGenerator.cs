@@ -1,11 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml.Documents;
+using Newtonsoft.Json.Linq;
+using Windows.UI.ViewManagement;
 
 namespace NewAppWizardComponents;
 public class PythonCodeGenerator : ICodeGenerator
@@ -13,6 +11,14 @@ public class PythonCodeGenerator : ICodeGenerator
     public List<ViewCodeSample> GenerateCodeEntry(ApiEntry entry, int num, CodeGenerationMode mode = CodeGenerationMode.StepByStep)
     {
         var codeEntries = new List<ViewCodeSample>();
+
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"# {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
 
         if (entry.arg_type != null)
         {
@@ -25,11 +31,13 @@ public class PythonCodeGenerator : ICodeGenerator
 
             foreach (PropertyInfo property in properties)
             {
+                Debug.WriteLine(property.Name);
                 var value = property.GetValue(entry.arg_value);
 
                 if (property.PropertyType.IsGenericType &&
                     property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
+                    
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];
 
@@ -41,7 +49,10 @@ public class PythonCodeGenerator : ICodeGenerator
                             codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("append", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
-                            codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
+                            if (elementType == typeof(string))
+                                codeEntries.Add(new ViewCodeSample($"\"{v}\"", ViewCodeSampleType.Comment));
+                            else
+                                codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
                             codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
                         }
                     }
@@ -85,7 +96,10 @@ public class PythonCodeGenerator : ICodeGenerator
                     if (property.PropertyType.IsEnum)
                         codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                    codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample($"\"{value}\"\n", ViewCodeSampleType.Comment));
+                    else
+                        codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
                 }
             }
         }

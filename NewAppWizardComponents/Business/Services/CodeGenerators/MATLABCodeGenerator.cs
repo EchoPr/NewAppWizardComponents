@@ -28,7 +28,7 @@ public class MATLABCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];
@@ -41,7 +41,10 @@ public class MATLABCodeGenerator : ICodeGenerator
                             codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
                             codeEntries.Add(new ViewCodeSample("Add", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
-                            codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
+                            if (elementType == typeof(string))
+                                codeEntries.Add(new ViewCodeSample($"\"{v}\"", ViewCodeSampleType.Comment));
+                            else
+                                codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
                             codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                             codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
                         }
@@ -64,8 +67,12 @@ public class MATLABCodeGenerator : ICodeGenerator
 
                                 if (innerProperty.PropertyType.IsEnum)
                                     codeEntries.Add(new ViewCodeSample($"QFormAPI.{innerProperty.PropertyType.Name}.", ViewCodeSampleType.Value));
-                                
-                                codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
+
+                                if (innerProperty.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample($"\"{innerProperty.GetValue(val[i])}\"\n", ViewCodeSampleType.Comment));
+                                else
+                                    codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
+
 
                             }
 
@@ -87,7 +94,11 @@ public class MATLABCodeGenerator : ICodeGenerator
                     if (property.PropertyType.IsEnum)
                         codeEntries.Add(new ViewCodeSample($"QFormAPI.{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                    codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample($"\"{value}\"\n", ViewCodeSampleType.Comment));
+                    else
+                        codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
+
                 }
             }
         }

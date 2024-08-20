@@ -30,7 +30,7 @@ public class XMLCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];
@@ -55,7 +55,11 @@ public class XMLCodeGenerator : ICodeGenerator
                             if (elementType == typeof(int) || elementType == typeof(double) ||
                                 elementType == typeof(bool) || elementType == typeof(string))
                             {
-                                codeEntries.Add(new ViewCodeSample($"{val[i]}", ViewCodeSampleType.Value));
+                                if (property.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample($"\"{val[i]}\"", ViewCodeSampleType.Comment));
+                                else
+                                    codeEntries.Add(new ViewCodeSample($"{val[i]}", ViewCodeSampleType.Value));
+
                                 codeEntries.Add(new ViewCodeSample("</", ViewCodeSampleType.Brackets));
                                 codeEntries.Add(new ViewCodeSample($"item ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample(">\n", ViewCodeSampleType.Brackets));
@@ -93,7 +97,10 @@ public class XMLCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("\t<", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample($"{property.Name}", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample(">", ViewCodeSampleType.Brackets));
-                    codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample($"\"{value}\"", ViewCodeSampleType.Comment));
+                    else
+                        codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
                     codeEntries.Add(new ViewCodeSample("</", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample($"{property.Name}", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample(">\n", ViewCodeSampleType.Brackets));

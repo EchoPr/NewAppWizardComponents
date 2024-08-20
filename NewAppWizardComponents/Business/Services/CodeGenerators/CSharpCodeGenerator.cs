@@ -1,11 +1,7 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Xaml.Documents;
+using Windows.UI.ViewManagement;
 
 namespace NewAppWizardComponents;
 public class CSharpCodeGenerator : ICodeGenerator
@@ -19,6 +15,14 @@ public class CSharpCodeGenerator : ICodeGenerator
     {
         var codeEntries = new List<ViewCodeSample>();
 
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"// {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
+
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"{entry.arg_type.Name[1..]} ", ViewCodeSampleType.Type));
@@ -30,7 +34,8 @@ public class CSharpCodeGenerator : ICodeGenerator
 
             foreach (PropertyInfo property in properties)
             {
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)) continue;
+                if (property.PropertyType.IsGenericType &&
+                    property.PropertyType.GetGenericTypeDefinition() == typeof(List<>)) continue;
 
                 var value = property.GetValue(entry.arg_value);
 
@@ -40,7 +45,11 @@ public class CSharpCodeGenerator : ICodeGenerator
                 if (property.PropertyType.IsEnum)
                     codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
+                if (property.PropertyType == typeof(string))
+                    codeEntries.Add(new ViewCodeSample($"\"{value}\"", ViewCodeSampleType.Comment));
+                else
+                    codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
+
                 codeEntries.Add(new ViewCodeSample($",\n", ViewCodeSampleType.Default));
             }
 
@@ -76,6 +85,14 @@ public class CSharpCodeGenerator : ICodeGenerator
     {
         var codeEntries = new List<ViewCodeSample>();
 
+        if (entry.comment?.Count > 0)
+        {
+            foreach (var comment in entry.comment)
+            {
+                codeEntries.Add(new ViewCodeSample($"// {comment}\n", ViewCodeSampleType.Comment));
+            }
+        }
+
         if (entry.arg_type != null)
         {
             codeEntries.Add(new ViewCodeSample($"{entry.arg_type.Name[1..]} ", ViewCodeSampleType.Type));
@@ -91,7 +108,8 @@ public class CSharpCodeGenerator : ICodeGenerator
             {
                 var value = property.GetValue(entry.arg_value);
 
-                if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType))
+                if (property.PropertyType.IsGenericType &&
+                    property.PropertyType.GetGenericTypeDefinition() == typeof(List<>))
                 {
                     var val = value as IList;
                     var elementType = property.PropertyType.GetGenericArguments()[0];

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NewAppWizardComponents;
 
-class PropertyAcc
+public class PropertyAcc
 {
     public const int ACC_VALUE = 0;
     public const int ACC_DBX_VALUE = 1;
@@ -86,7 +86,7 @@ class PropertyAcc
 
 
 }
-class PropertyBatch
+public class PropertyBatch
 {
     public List<PropertyAcc> properties { get; set; }
 
