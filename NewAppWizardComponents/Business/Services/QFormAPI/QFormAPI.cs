@@ -20,6 +20,12 @@ public partial class QForm
     }
 
     [ApiFunction]
+    public bool _csharp_settings(ACSharpSettings arg)
+    {
+        return null != invoke(0, "_csharp_settings", arg, null);
+    }
+
+    [ApiFunction]
     public RDbTreeRet _db_tree(ADbTreeArg arg)
     {
         return (RDbTreeRet)invoke(0, "_db_tree", arg, typeof(RDbTreeRet));
@@ -36,6 +42,7 @@ public partial class QForm
     {
         return null != invoke(0, "_pyton_settings", arg, null);
     }
+
 
     [ApiFunction]
     public RFieldId active_field_get()
@@ -2491,6 +2498,16 @@ public class AFileName
 {
     [Category("Mandatory")]
     public string file { get; set; }
+}
+
+public class ACSharpSettings
+{
+    [Category("Mandatory")]
+    public string connection_type { get; set; }
+    [Category("Mandatory")]
+    public bool alt_connection { get; set; }
+    [Category("Mandatory")]
+    public string import_dir { get; set; }
 }
 
 public class ADbTreeArg
