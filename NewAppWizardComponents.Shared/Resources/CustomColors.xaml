@@ -1,0 +1,39 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <SolidColorBrush x:Key="BoxBorderPrimary" Color="#E0E0E0"/>
+  <SolidColorBrush x:Key="BoxBorderSecondary" Color="#626262"/>
+  <SolidColorBrush x:Key="ForegroundWhite" Color="#F0F0F0"/>
+  <SolidColorBrush x:Key="BackgroundPrimary" Color="#FAFAFA"/>
+  <SolidColorBrush x:Key="BackgroundSecondary" Color="#F1F1F1"/>
+  <SolidColorBrush x:Key="SolidDarkGray" Color="#414141"/>
+  <SolidColorBrush x:Key="BorderSolid" Color="#A1A1A1"/>
+  <SolidColorBrush x:Key="Transparent" Color="#0000"/>
+  <SolidColorBrush x:Key="ToolbarBackground" Color="#E7E7E7"/>
+
+  <SolidColorBrush x:Key="SelectedBlockPrimary" Color="#330078D2"/>
+  <SolidColorBrush x:Key="SelectedBlockSecondary" Color="#1A0078D2"/>
+
+  <SolidColorBrush x:Key="APILevel1" Color="#5DA251"/>
+
+  <LinearGradientBrush x:Key="BlockHeader" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#9eaecd" Offset="0.0"/>
+    <GradientStop Color="#6f82aa" Offset="1.0"/>
+  </LinearGradientBrush>
+
+  <SolidColorBrush x:Key="CodeDefault" Color="#565869"/>
+  <SolidColorBrush x:Key="CodeValue" Color="#FF5C57"/>
+  <SolidColorBrush x:Key="CodeKeyword" Color="#163FE4"/>
+  <SolidColorBrush x:Key="CodeType" Color="#216F85"/>
+  <SolidColorBrush x:Key="CodeBrackets" Color="#ADB1C2"/>
+  <SolidColorBrush x:Key="CodeMethod" Color="#163FE4"/>
+
+  <SolidColorBrush x:Key="FailStatus" Color="#ff99a4"/>
+
+  <LinearGradientBrush x:Key="ToolbarGradient" StartPoint="0,0" EndPoint="0,1">
+    <GradientStop Color="#FFFFFF" Offset="0.0"/>
+    <GradientStop Color="#DDDDDD" Offset="1.0"/>
+  </LinearGradientBrush>
+
+</ResourceDictionary>

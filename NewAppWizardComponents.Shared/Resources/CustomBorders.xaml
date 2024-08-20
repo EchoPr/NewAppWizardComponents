@@ -1,0 +1,51 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="CustomColors.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <Style TargetType="Border" x:Name="TableItemBorder">
+    <Setter Property="MinHeight" Value="30"/>
+    <Setter Property="Padding" Value="5 0 0 0"/>
+    <Setter Property="BorderThickness" Value="0 0 0 1"/>
+    <Setter Property="BorderBrush" Value="{StaticResource BorderSolid}"/>
+  </Style>
+
+  <Style TargetType="Border" x:Name="TableHeaderBorder" BasedOn="{StaticResource TableItemBorder}">
+    <Setter Property="Background" Value="{StaticResource SolidDarkGray}"/>
+  </Style>
+
+  <Style TargetType="Border" x:Name="CodeBlockBorder">
+    <Setter Property="Margin" Value="0 20 0 0"></Setter>
+  </Style>
+
+  <Style TargetType="Border" x:Name="ParameterNameBorder">
+    <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}" />
+    <Setter Property="BorderThickness" Value="0 0 0 1"/>
+  </Style>
+
+  <Style TargetType="Border" x:Name="ParametersBlockHeader">
+    <Setter Property="Background" Value="{StaticResource BlockHeader}"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+
+  <Style TargetType="Border" x:Name="CollectionElementBorder">
+    <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
+    <Setter Property="BorderThickness" Value="1 0 0 1"/>
+    <Setter Property="VerticalAlignment" Value="Stretch"/>
+    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+  </Style>
+
+  <Style TargetType="ComboBox" x:Name="LanguageSelectorComboBox">
+    <Setter Property="Height" Value="30"/>
+    <Setter Property="Padding" Value="2"/>
+    <Setter Property="FontSize" Value="12"/>
+    <Setter Property="CornerRadius" Value="4"/>
+
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+
+</ResourceDictionary>

@@ -120,7 +120,7 @@ public class PythonCodeGenerator : ICodeGenerator
 
 
 
-        if (snippetConfig.import_dir == PythonQFormReference.default_folder.ToString())
+        if (snippetConfig.import_dir == APIQFormReference.default_folder.ToString())
         {
             codeEntries.Add(new ViewCodeSample("import ", ViewCodeSampleType.Keyword));
             codeEntries.Add(new ViewCodeSample("sys\n\n", ViewCodeSampleType.Default));
@@ -147,13 +147,13 @@ public class PythonCodeGenerator : ICodeGenerator
 
         switch (snippetConfig.connection_type)
         {
-            case nameof(PythonQFormInteractionType.script_starts):
+            case nameof(APIQFormInteractionType.script_starts):
                 codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample(".qform_start", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
                 break;
-            case nameof(PythonQFormInteractionType.qform_starts):
+            case nameof(APIQFormInteractionType.qform_starts):
                 if (snippetConfig.alt_connection)
                 {
                     codeEntries.Add(new ViewCodeSample("if ", ViewCodeSampleType.Keyword));
@@ -180,7 +180,7 @@ public class PythonCodeGenerator : ICodeGenerator
                 codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
                 break;
 
-            case nameof(PythonQFormInteractionType.script_connect):
+            case nameof(APIQFormInteractionType.script_connect):
                 AddConnectionSnippet(codeEntries, isNested: false);
                 break;
         }
@@ -215,25 +215,4 @@ public class PythonCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
     }
-}
-
-
-public enum PythonScriptType
-{
-    pyfile,
-    notebook
-}
-
-public enum PythonQFormInteractionType
-{
-    script_starts,
-    qform_starts,
-    qform_starts_or_connect,
-    script_connect
-}
-
-public enum PythonQFormReference
-{
-    default_folder,
-    local_folder
 }

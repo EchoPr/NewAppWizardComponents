@@ -37,6 +37,7 @@
     <None Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
+    <None Remove="Presentation\Views\ApiSettingsDialogs\CSharpApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\PythonApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
@@ -211,6 +212,12 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\PythonApiSettingsDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\CSharpApiSettingsDialog.xaml" />
   </ItemGroup>
 
 </Project>
