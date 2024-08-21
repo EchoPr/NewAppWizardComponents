@@ -225,10 +225,13 @@ public sealed partial class MainPage : Page
 
     public void ClearCodeBlocks(object sender, EventArgs e)
     {
-        _ClearCodeBlocks();
+        _ClearViewCodeBlocks();
+
+        _selectedBlocks.Clear();
+        _languageSnippets.Clear();
     }
 
-    private void _ClearCodeBlocks()
+    private void _ClearViewCodeBlocks()
     {
         CodeBlocks.Children.Clear();
         ClearShownParameters();
@@ -783,7 +786,7 @@ public sealed partial class MainPage : Page
             mainPageVM.CodeBlocks.Insert(0, snippet);
         }
 
-        _ClearCodeBlocks();
+        _ClearViewCodeBlocks();
         var blocksCount = mainPageVM.CodeBlocks.Count;
         for (int i = 0; i < blocksCount; i++)
         {
