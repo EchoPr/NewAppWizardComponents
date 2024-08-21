@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Cryptography.Core;
 using Windows.System;
@@ -40,9 +41,13 @@ public sealed partial class MainPage : Page
     private Grid resizingGrid;
 
     private bool _isCtrlPressed;
+    private Dictionary<string, ApiEntry> _languageSnippets = new Dictionary<string, ApiEntry>();
 
-    private bool _isCodeSnippetAdded = false;
-    private ApiEntry? _apiSnippet = null;
+    private string currentSelectedLanguage = "C#";
+
+
+    // if was snippet in prev lang
+    bool snippetNotShown = false;
 
     public MainPage()
     {
@@ -131,7 +136,7 @@ public sealed partial class MainPage : Page
             args.index,
             args.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
             isEditig: false
-        );
+        ); 
 
         CodeBlocks.Children.Insert(args.index, newBlock);
         ScrollToCodeBlock(newBlock);
@@ -139,8 +144,8 @@ public sealed partial class MainPage : Page
 
     private Border CreateViewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
     {
-        string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
-        ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
+        
+        ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(currentSelectedLanguage);
         var generatedCode = entry.is_snippet
                             ? generator.GenerateApiSnippet(entry)
                             : generator.GenerateCodeEntry(entry, entryNumber, generationMode);
@@ -732,9 +737,14 @@ public sealed partial class MainPage : Page
 
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (CodeBlocks == null) return;
+        LanguageSelectionChange((e.AddedItems[0] as ComboBoxItem).Content as string);
+    }
 
-        if (((ComboBoxItem)LanguageComboBox.SelectedItem).Content.ToString() == "XML")
+    private void LanguageSelectionChange(string lang) 
+    {
+        if (CodeBlocks == null || lang == null) return;
+
+        if (lang == "XML")
         {
             TextBlock textBlockBefore = new TextBlock();
             textBlockBefore.Inlines.Add(new Run { Text = "<", Foreground = GetBrush(ViewCodeSampleType.Brackets) });
@@ -756,16 +766,29 @@ public sealed partial class MainPage : Page
             CodeBlocksAfter.Children.Clear();
         }
 
-        for (int i = 0; i < CodeBlocks.Children.Count; i++)
+
+        if (currentSelectedLanguage != null && _languageSnippets.ContainsKey(currentSelectedLanguage))
         {
-            Border cb = CodeBlocks.Children[i] as Border;
-            var meta = cb.Tag as ExpandedEntry;
-            CodeBlocks.Children[i] = CreateViewCodeBlock(
-                meta.apiEntry,
-                meta.index,
-                meta.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
-                true
-            );
+            var index = mainPageVM.CodeBlocks.IndexOf(_languageSnippets[currentSelectedLanguage]);
+            if (index != -1)
+            {
+                mainPageVM.CodeBlocks.RemoveAt(index);
+            }
+        }
+
+        currentSelectedLanguage = lang;
+        if (_languageSnippets.ContainsKey(currentSelectedLanguage))
+        {
+            var snippet = _languageSnippets[currentSelectedLanguage];
+            mainPageVM.CodeBlocks.Insert(0, snippet);
+        }
+
+        _ClearCodeBlocks();
+        var blocksCount = mainPageVM.CodeBlocks.Count;
+        for (int i = 0; i < blocksCount; i++)
+        {
+            // Don't try this at home!
+            AddNewCodeBlock(null, new ExpandedEntry(mainPageVM.CodeBlocks[i], i));
         }
     }
 
@@ -776,9 +799,9 @@ public sealed partial class MainPage : Page
 
     private void SaveProject(object sender, RoutedEventArgs e)
     {
-        string selectedLanguage = "S-expr";
+        string currentSelectedLanguage = "S-expr";
 
-        ICodeGenerator codeGenerator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
+        ICodeGenerator codeGenerator = CodeGeneratorFactory.GetGenerator(currentSelectedLanguage);
 
         List<string> generatedCodeList = new List<string>();
         foreach (Border codeBlock in CodeBlocks.Children)
@@ -889,24 +912,33 @@ public sealed partial class MainPage : Page
 
     private async void ApiWizardClick()
     {
+        ApiEntry? cureLangSnippet = _languageSnippets.TryGetValue(currentSelectedLanguage, out var value) ? value : null;
 
-        string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
-        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, mainPageVM, _apiSnippet);
+        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(
+            currentSelectedLanguage, 
+            mainPageVM,
+            cureLangSnippet
+        );
 
         snippetDialog.XamlRoot = this.XamlRoot;
         var result = await snippetDialog.ShowAsync();
 
         if (result == ContentDialogResult.Primary)
         {
+            ApiEntry snippet;
+
             if (snippetDialog is PythonApiSettingsDialog dialogPy)
-                _apiSnippet = dialogPy.GetEntry();
+                snippet = dialogPy.GetEntry();
             else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
-                _apiSnippet = dialogCs.GetEntry();
+                snippet = dialogCs.GetEntry();
             else
                 throw new NotImplementedException();
 
 
-            mainPageVM.AddToCodeBlocks(_apiSnippet, 0, originalEntry: true);
+            _languageSnippets[currentSelectedLanguage] = snippet;
+
+            LanguageSelectionChange(currentSelectedLanguage);
+            
         }
         else if (result == ContentDialogResult.Secondary)
         {

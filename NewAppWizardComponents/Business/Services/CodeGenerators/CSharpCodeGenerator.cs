@@ -45,7 +45,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                 if (property.PropertyType.IsEnum)
                     codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                if (property.PropertyType == typeof(string))
+                if (property.PropertyType == typeof(String))
                     codeEntries.Add(new ViewCodeSample($"\"{value}\"", ViewCodeSampleType.Comment));
                 else
                     codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
@@ -115,7 +115,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     var elementType = property.PropertyType.GetGenericArguments()[0];
 
                     if (elementType == typeof(int) || elementType == typeof(double) ||
-                        elementType == typeof(bool) || elementType == typeof(string))
+                        elementType == typeof(bool) || elementType == typeof(String))
                     {
                         foreach (var v in val)
                         {
@@ -192,6 +192,138 @@ public class CSharpCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default)); 
         
+        return codeEntries;
+    }
+
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry)
+    {
+        var snippetConfig = entry.arg_value as ACSharpSettings;
+
+        var codeEntries = new List<ViewCodeSample>();
+
+        codeEntries.Add(new ViewCodeSample("string ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("qform_base_dir ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("@\"C:\\QForm UK\\11.0.2\\\"", ViewCodeSampleType.Comment));
+        codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+        codeEntries.Add(new ViewCodeSample("QForm ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("qform ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QForm", ViewCodeSampleType.Type));
+        codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+        codeEntries.Add(new ViewCodeSample(";\n\n", ViewCodeSampleType.Default));
+
+
+        //if (snippetConfig.import_dir == APIQFormReference.default_folder.ToString())
+        //{
+            
+        //}
+
+        switch (snippetConfig.connection_type)
+        {
+            case nameof(APIQFormInteractionType.script_starts):
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_start", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                break;
+
+            case nameof(APIQFormInteractionType.qform_starts):
+                if (snippetConfig.alt_connection)
+                {
+                    codeEntries.Add(new ViewCodeSample("if", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample(" (", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("is_started_by_qform", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("())", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("{\n", ViewCodeSampleType.Brackets));
+
+                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("} ", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("else ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("{\n", ViewCodeSampleType.Brackets));
+
+                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("@\"\\x64\"", ViewCodeSampleType.Comment));
+                    codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("    SessionId ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_session_id ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("SessionId", ViewCodeSampleType.Type));
+                    codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("    qform_session_id.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("0", ViewCodeSampleType.Value));
+                    codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("}\n", ViewCodeSampleType.Brackets));
+
+                    break;
+                }
+
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                break;
+
+            case nameof(APIQFormInteractionType.script_connect):
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("@\"\\x64\"", ViewCodeSampleType.Comment));
+                codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("SessionId ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_session_id ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("SessionId", ViewCodeSampleType.Type));
+                codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("qform_session_id.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("session_id", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("0", ViewCodeSampleType.Value));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                break;
+        }
+
         return codeEntries;
     }
 }

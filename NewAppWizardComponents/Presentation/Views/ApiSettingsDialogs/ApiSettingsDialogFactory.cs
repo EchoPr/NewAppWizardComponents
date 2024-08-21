@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace NewAppWizardComponents;
 public class ApiSettingsDialogFactory
 {
-    public static ContentDialog GetDialog(string language, MainPageVM vm, ApiEntry entry = null)
+    public static ContentDialog GetDialog(string language, MainPageVM vm, ApiEntry? entry)
     {
         switch (language)
         {
