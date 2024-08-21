@@ -172,7 +172,13 @@ public partial class MainPageVM : INotifyPropertyChanged
         FilteredMethods = new ObservableCollection<ApiEntry>(Methods);
         PopulateTreeViewItems();
 
-        string jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets/api_new.json");
+        var pathAssetsPrefix = "";
+        //pathAssetsPrefix = "NewAppWizardComponents/";
+
+#if HAS_UNO
+        pathAssetsPrefix = "NewAppWizardComponents/";
+#endif
+        string jsonFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, pathAssetsPrefix + "Assets/api_new.json");
         var allMethods = JsonConvert.DeserializeObject<AllMethods>(File.ReadAllText(jsonFilePath));
         Docs = allMethods.Functions;
     }
