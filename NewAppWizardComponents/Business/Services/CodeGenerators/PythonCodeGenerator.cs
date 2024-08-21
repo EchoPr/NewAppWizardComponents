@@ -31,7 +31,6 @@ public class PythonCodeGenerator : ICodeGenerator
 
             foreach (PropertyInfo property in properties)
             {
-                Debug.WriteLine(property.Name);
                 var value = property.GetValue(entry.arg_value);
 
                 if (property.PropertyType.IsGenericType &&
