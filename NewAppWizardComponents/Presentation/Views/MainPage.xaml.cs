@@ -42,7 +42,16 @@ public sealed partial class MainPage : Page
     private bool _isCtrlPressed;
 
     private bool _isCodeSnippetAdded = false;
-    private ApiEntry? _apiSnippet = null;
+    private Dictionary<string, ApiEntry?> apiSnippets = new Dictionary<string, ApiEntry?>
+        {
+            { "C#", null },
+            { "Python", null },
+            { "VB.Net", null },
+            { "VBA", null },
+            { "MATLAB", null },
+            { "S-expr", null },
+            { "XML", null },
+        };
 
     public MainPage()
     {
@@ -124,16 +133,19 @@ public sealed partial class MainPage : Page
         }
     }
 
-    public void AddNewCodeBlock(object sender, ExpandedEntry args)
+    public void AddNewCodeBlock(object sender, Tuple<ExpandedEntry, bool> args)
     {
         Border newBlock = CreateViewCodeBlock(
-            args.apiEntry,
-            args.index,
-            args.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
+            args.Item1.apiEntry,
+            args.Item1.index,
+            args.Item1.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
             isEditig: false
         );
 
-        CodeBlocks.Children.Insert(args.index, newBlock);
+        if (args.Item1.apiEntry.is_snippet && args.Item2)
+            CodeBlocks.Children[args.Item1.index] = newBlock;
+        else
+            CodeBlocks.Children.Insert(args.Item1.index, newBlock);
         ScrollToCodeBlock(newBlock);
     }
 
@@ -143,7 +155,7 @@ public sealed partial class MainPage : Page
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(selectedLanguage);
         var generatedCode = entry.is_snippet
                             ? generator.GenerateApiSnippet(entry)
-                            : generator.GenerateCodeEntry(entry, entryNumber, generationMode);
+                            : generator.GenerateCodeEntry(entry, entryNumber - Convert.ToInt32(apiSnippets[selectedLanguage] != null), generationMode);
 
         var newCodeLines = new TextBlock();
 
@@ -659,7 +671,7 @@ public sealed partial class MainPage : Page
             double firstStar = (_firstMovedGrip as ColumnDefinition).ActualWidth / totalWidth;
             double secondStar = (_secondMovedGrip as ColumnDefinition).ActualWidth / totalWidth;
 
-            Debug.WriteLine($"{totalWidth} {firstStar} {secondStar} | {resizingGrid.Name}");
+            //Debug.WriteLine($"{totalWidth} {firstStar} {secondStar} | {resizingGrid.Name}");
 
             (_firstMovedGrip as ColumnDefinition).Width = new GridLength(firstStar, GridUnitType.Star);
             (_secondMovedGrip as ColumnDefinition).Width = new GridLength(secondStar, GridUnitType.Star);
@@ -889,9 +901,10 @@ public sealed partial class MainPage : Page
 
     private async void ApiWizardClick()
     {
-
         string selectedLanguage = ((ComboBoxItem)LanguageComboBox.SelectedValue).Content.ToString();
-        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, mainPageVM, _apiSnippet);
+        ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(selectedLanguage, mainPageVM, apiSnippets[selectedLanguage]);
+
+        bool selectedLanguageSnippetExisted = apiSnippets[selectedLanguage] != null;
 
         snippetDialog.XamlRoot = this.XamlRoot;
         var result = await snippetDialog.ShowAsync();
@@ -899,14 +912,20 @@ public sealed partial class MainPage : Page
         if (result == ContentDialogResult.Primary)
         {
             if (snippetDialog is PythonApiSettingsDialog dialogPy)
-                _apiSnippet = dialogPy.GetEntry();
+                apiSnippets[selectedLanguage] = dialogPy.GetEntry();
             else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
-                _apiSnippet = dialogCs.GetEntry();
+                apiSnippets[selectedLanguage] = dialogCs.GetEntry();
             else
                 throw new NotImplementedException();
 
+            Debug.WriteLine($">>> {selectedLanguageSnippetExisted}");
 
-            mainPageVM.AddToCodeBlocks(_apiSnippet, 0, originalEntry: true);
+            mainPageVM.AddToCodeBlocks(
+                apiSnippets[selectedLanguage], 
+                0, 
+                true, 
+                selectedLanguageSnippetExisted ? CodeGenerationMode.Regen : CodeGenerationMode.ObjectInit
+            );
         }
         else if (result == ContentDialogResult.Secondary)
         {

@@ -125,7 +125,7 @@ public partial class MainPageVM : INotifyPropertyChanged
     public ProjectManager projectManager;
 
     public event PropertyChangedEventHandler PropertyChanged;
-    public event EventHandler<ExpandedEntry> AddedNewCodeBlock;
+    public event EventHandler<Tuple<ExpandedEntry, bool>> AddedNewCodeBlock;
     public event EventHandler ClearedCodeBlocks;
 
     public MainPageVM()
@@ -144,8 +144,16 @@ public partial class MainPageVM : INotifyPropertyChanged
         if (entry != null)
         {
             var newEntry = originalEntry ? entry : entry.Clone();
-            _codeBlocks.Insert(index, newEntry);
-            AddedNewCodeBlock?.Invoke(this, new ExpandedEntry(newEntry, index, generationMode == CodeGenerationMode.StepByStep));
+
+            if (generationMode == CodeGenerationMode.Regen)
+                _codeBlocks[index] = newEntry;
+            else
+                _codeBlocks.Insert(index, newEntry);
+
+            AddedNewCodeBlock?.Invoke(this, new Tuple<ExpandedEntry, bool>(
+                new ExpandedEntry(newEntry, index, generationMode == CodeGenerationMode.StepByStep),
+                generationMode == CodeGenerationMode.Regen
+            ));
         }
     }
 

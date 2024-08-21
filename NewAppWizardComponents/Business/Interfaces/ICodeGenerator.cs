@@ -15,5 +15,6 @@ public interface ICodeGenerator
 public enum CodeGenerationMode
 {
     ObjectInit,
-    StepByStep
+    StepByStep,
+    Regen
 }
