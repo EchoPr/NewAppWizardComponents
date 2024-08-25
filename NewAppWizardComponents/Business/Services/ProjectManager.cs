@@ -95,19 +95,4 @@ public class ProjectManager
     {
         return await _folderPicker.PickSingleFolderAsync();
     }
-
-    public async Task<string> CopyFile(string  source, string destination)
-    { 
-        string errorMessage = string.Empty;
-        try
-        {
-            File.Copy(source, destination);
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-        
-        return errorMessage;
-    }
 }

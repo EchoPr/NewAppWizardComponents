@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Xml.Linq;
 
 namespace NewAppWizardComponents;
 public sealed partial class CSharpApiSettingsDialog : ContentDialog
@@ -128,29 +129,107 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
     public ApiEntry GetEntry() => _snippetEntry;
 
-    private async void SelectAPICopyButton_Click(object sender, RoutedEventArgs e)
+    private async void SelectAPIButton_Click(object sender, RoutedEventArgs e)
     {
-        //string baseDir = mainPageVM.qformManager.QFormBaseDir;
-        //string qformApi = "API\\App\\Python\\QFormAPI.py";
-        //string apiFile = Path.Combine(baseDir, qformApi);
+        bool isDllCopy = Convert.ToBoolean(UseQFormAPIFromInstallationRadioButton.IsChecked);
 
-        //StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
-
-        //if (folder != null)
-        //{
-        //    var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
-        //    if (!string.IsNullOrEmpty(task.Result))
-        //    {
-        //        Debug.WriteLine(task.Result);
-        //        DisplayError(task.Result);
-        //    }
-        //}
+        string baseDir = mainPageVM.qformManager.QFormBaseDir;
+        string qformApi = isDllCopy
+                            ? "x64\\QFormApiNet.dll"
+                            : "API\\App\\C#\\QForm.cs";
 
 
+        string apiFile = Path.Combine(baseDir, qformApi);
+        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
+
+        if (folder != null)
+        {
+            try
+            {
+
+                string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly)[0];
+                if (csprojFilePath == null)
+                    throw new Exception("There is no .cproj file in selectted folder");
+
+                XDocument csprojXml = XDocument.Load(csprojFilePath);
+
+                XElement root = csprojXml.Root;
+
+                if (root == null)
+                    throw new Exception("Invalid .csproj file.");
+
+                XNamespace ns = root.GetDefaultNamespace();
+
+                if (isDllCopy)
+                {
+                    string libFolder = Path.Combine(folder.Path, "lib");
+                    Directory.CreateDirectory(libFolder);
+
+                    File.Copy(apiFile, Path.Combine(libFolder, "QFormAPINet.dll"));
+
+                    XElement itemGroup = root.Element(ns + "ItemGroup");
+                    if (itemGroup == null)
+                    {
+                        itemGroup = new XElement(ns + "ItemGroup");
+                        root.Add(itemGroup);
+                    }
+
+                    XElement reference = new XElement(ns + "Reference",
+                            new XAttribute("Include", "QFormAPINet"),
+                            new XElement(ns + "HintPath", Path.Combine("lib", "QFormAPINet.dll"))
+                        );
+
+                    itemGroup.Add(reference);
+
+                    csprojXml.Save(csprojFilePath);
+                }
+                else
+                {
+
+                    if (isDotnetFramework(csprojXml))
+                    {
+                        XElement itemGroup = new XElement(
+                            ns + "ItemGroup",
+                            new XElement(ns + "Compile", new XAttribute("Include", "QFormApi.cs"))
+                        );
+                       
+                        root.Add(itemGroup);
+                        csprojXml.Save(csprojFilePath);
+                    }
+                    File.Copy(apiFile, Path.Combine(folder.Path, "QFormAPI.cs"));
+                }
+            }catch (Exception ex)
+            {
+                DisplayError(ex.Message);
+            }
+        }
     }
 
-    private async void SelectAPIdllButton_Click(object sender, RoutedEventArgs e)
+    private bool isDotnetFramework(XDocument csproj)
     {
+        var targetFrameworkElement = csproj.Descendants("TargetFramework").FirstOrDefault();
 
+        if (targetFrameworkElement != null)
+        {
+            string targetFramework = targetFrameworkElement.Value;
+
+            if (targetFramework.StartsWith("netcoreapp") || targetFramework.StartsWith("net"))
+            {
+                return false;
+            }
+            else if (targetFramework.StartsWith("net") && targetFramework.Length == 4)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (csproj.ToString().Contains("TargetFrameworkVersion"))
+            {
+                return true;
+            }
+        }
+
+        throw new Exception("Unknown csproj type");
     }
 }

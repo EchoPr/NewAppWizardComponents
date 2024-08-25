@@ -904,11 +904,13 @@ public sealed partial class MainPage : Page
 
         if (folder != null)
         {
-            var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
-            if (!string.IsNullOrEmpty(task.Result))
+            try
             {
-                Debug.WriteLine(task.Result);
-                ShowMessageBox(task.Result);
+                File.Copy(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
+            }
+            catch (Exception ex)
+            {
+                ShowMessageBox(ex.Message);
             }
         }
     }

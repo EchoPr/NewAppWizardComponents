@@ -167,11 +167,13 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
         if (folder != null)
         {
-            var task = mainPageVM.projectManager.CopyFile(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
-            if (!string.IsNullOrEmpty(task.Result))
+            try
             {
-                Debug.WriteLine(task.Result);
-                DisplayError(task.Result);
+                File.Copy(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
+            }
+            catch (Exception ex)
+            {
+                DisplayError(ex.Message);
             }
         }
     }
