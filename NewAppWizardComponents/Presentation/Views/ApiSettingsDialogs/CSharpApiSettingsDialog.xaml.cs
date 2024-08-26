@@ -162,11 +162,6 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
                 if (isDllCopy)
                 {
-                    string libFolder = Path.Combine(folder.Path, "lib");
-                    Directory.CreateDirectory(libFolder);
-
-                    File.Copy(apiFile, Path.Combine(libFolder, "QFormAPINet.dll"));
-
                     XElement itemGroup = root.Element(ns + "ItemGroup");
                     if (itemGroup == null)
                     {
@@ -176,7 +171,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
                     XElement reference = new XElement(ns + "Reference",
                             new XAttribute("Include", "QFormAPINet"),
-                            new XElement(ns + "HintPath", Path.Combine("lib", "QFormAPINet.dll"))
+                            new XElement(ns + "HintPath", apiFile)
                         );
 
                     itemGroup.Add(reference);
