@@ -39,6 +39,7 @@
     <None Remove="MessageBox.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\CSharpApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\PythonApiSettingsDialog.xaml" />
+    <None Remove="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
@@ -102,6 +103,10 @@
   
   
   <ItemGroup>
+    <Page Update="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Resources\Controls\BlockScrollViewer.xaml">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Page>
@@ -218,6 +223,12 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\CSharpApiSettingsDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml" />
   </ItemGroup>
 
 </Project>

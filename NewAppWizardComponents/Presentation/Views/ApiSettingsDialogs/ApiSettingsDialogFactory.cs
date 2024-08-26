@@ -15,6 +15,8 @@ public class ApiSettingsDialogFactory
                 return new PythonApiSettingsDialog(vm, entry);
             case "C#":
                 return new CSharpApiSettingsDialog(vm, entry);
+            case "VBA":
+                return new VBAApiSettingsDialog(vm, entry);
         }
 
         
