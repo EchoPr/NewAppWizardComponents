@@ -3,7 +3,8 @@
     "NewAppWizardComponents.Windows (Unpackaged)": {
       "commandName": "Project",
       "environmentVariables": {
-        "QFORM_DIR": "C:\\QForm\\11.2.300.4"
+        "QFORM_DIR": "C:\\QForm\\11.2.300.4",
+        "QFORM_VER": "11.2.300.4"
       }
     },
     "NewAppWizardComponents.Windows (Package)": {
