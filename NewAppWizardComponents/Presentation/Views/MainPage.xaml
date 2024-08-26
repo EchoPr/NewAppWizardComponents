@@ -79,9 +79,13 @@
       <SplitButton Height="30" FontSize="12" Padding="2" Margin="4 0 0 0" Background="Transparent" Click="ApiWizardClickSplitButton">
         Wizard
         <SplitButton.Flyout>
-          <MenuFlyout>
+          <MenuFlyout x:Name="WizardMenuFlyout">
             <MenuFlyoutItem Text="API Wizard" FontWeight="SemiBold" Click="ApiWizardClickMenuFlyout"/>
-            <MenuFlyoutItem Text="Copy QFormAPI.py" Click="CopyQFormApiPyMenuFlyout"/>
+            
+            <MenuFlyoutItem Text="Add QFormAPI.cs то project" Tag="C#"/>
+            <MenuFlyoutItem Text="Add QFormAPI refrence to project" Tag="C#"/>
+
+            <MenuFlyoutItem Text="Copy QFormAPI.py" Click="CopyQFormApiPyMenuFlyout" Visibility="Collapsed" Tag="Python" />
           </MenuFlyout>
         </SplitButton.Flyout>
 

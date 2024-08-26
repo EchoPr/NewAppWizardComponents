@@ -740,7 +740,16 @@ public sealed partial class MainPage : Page
 
     private void LanguageSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        LanguageSelectionChange((e.AddedItems[0] as ComboBoxItem).Content as string);
+        var selectedLang = (e.AddedItems[0] as ComboBoxItem).Content as string;
+        LanguageSelectionChange(selectedLang);
+
+        if (this.IsLoaded)
+        {
+            foreach (var item in WizardMenuFlyout.Items)
+            {
+                item.Visibility = (item.Tag as string) == selectedLang || item.Tag == null ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
     }
 
     private void LanguageSelectionChange(string lang) 
