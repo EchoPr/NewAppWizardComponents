@@ -41,11 +41,11 @@
 
         <RadioButton 
         x:Name="UseQFormAPIFromInstallationRadioButton" 
-        Content="Use QFormAPI.cs from QForm installation folder" 
+        Content="Use QFormAPI reference from QForm installation folder" 
         Checked="RadioButton_Checked"/>
         <Button 
         x:Name="SelectAPIdllButton" 
-        Content="Add QFormaAPI.cs to project" 
+        Content="Add QFormAPI reference to project" 
         Margin="20,0,0,0" 
         Click="SelectAPIButton_Click"/>
 
@@ -55,7 +55,7 @@
         Checked="RadioButton_Checked"/>
         <Button 
         x:Name="SelectAPICopyButton" 
-        Content="Add QFormaAPI.cs to project" 
+        Content="Add QFormAPI.cs project" 
         Margin="20,0,0,0" 
         Click="SelectAPIButton_Click"/>
       </StackPanel>
