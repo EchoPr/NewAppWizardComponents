@@ -39,10 +39,25 @@
       <StackPanel Margin="0,0,0,10">
         <TextBlock Text="QForm reference type" FontWeight="Bold"/>
 
-        <RadioButton x:Name="UseQFormAPIFromInstallationRadioButton" Content="Use QFormAPI.cs from QForm installation folder" />
-        <Button x:Name="SelectAPIdllButton" Content="Add QFormaAPI.cs to project" IsEnabled="True" Margin="20,0,0,0" Click="SelectAPIButton_Click"/>
-        <RadioButton x:Name="UseCopyOfQFormAPIRadioButton" Content="Use copy of QFormAPI.cs from script folder"/>
-        <Button x:Name="SelectAPICopyButton" Content="Add QFormaAPI.cs to project" IsEnabled="True" Margin="20,0,0,0" Click="SelectAPIButton_Click"/>
+        <RadioButton 
+        x:Name="UseQFormAPIFromInstallationRadioButton" 
+        Content="Use QFormAPI.cs from QForm installation folder" 
+        Checked="RadioButton_Checked"/>
+        <Button 
+        x:Name="SelectAPIdllButton" 
+        Content="Add QFormaAPI.cs to project" 
+        Margin="20,0,0,0" 
+        Click="SelectAPIButton_Click"/>
+
+        <RadioButton 
+        x:Name="UseCopyOfQFormAPIRadioButton" 
+        Content="Use copy of QFormAPI.cs from script folder" 
+        Checked="RadioButton_Checked"/>
+        <Button 
+        x:Name="SelectAPICopyButton" 
+        Content="Add QFormaAPI.cs to project" 
+        Margin="20,0,0,0" 
+        Click="SelectAPIButton_Click"/>
       </StackPanel>
 
       <!-- Блок для отображения ошибки -->

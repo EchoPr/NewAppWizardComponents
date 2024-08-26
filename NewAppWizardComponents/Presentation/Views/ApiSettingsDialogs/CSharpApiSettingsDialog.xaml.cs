@@ -232,4 +232,19 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         throw new Exception("Unknown csproj type");
     }
+
+    private void RadioButton_Checked(object sender, RoutedEventArgs e)
+    {
+        if (UseQFormAPIFromInstallationRadioButton.IsChecked == true)
+        {
+            SelectAPIdllButton.IsEnabled = true;
+            SelectAPICopyButton.IsEnabled = false;
+        }
+        else if (UseCopyOfQFormAPIRadioButton.IsChecked == true)
+        {
+            SelectAPIdllButton.IsEnabled = false;
+            SelectAPICopyButton.IsEnabled = true;
+        }
+    }
+
 }

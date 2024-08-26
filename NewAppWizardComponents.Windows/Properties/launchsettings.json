@@ -1,10 +1,13 @@
 {
-	"profiles": {
-		"NewAppWizardComponents.Windows (Unpackaged)": {
-			"commandName": "Project"
-		},
-		"NewAppWizardComponents.Windows (Package)": {
-			"commandName": "MsixPackage"
-		}
-	}
+  "profiles": {
+    "NewAppWizardComponents.Windows (Unpackaged)": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "QFORM_DIR": "C:\\QForm\\11.2.300.4"
+      }
+    },
+    "NewAppWizardComponents.Windows (Package)": {
+      "commandName": "MsixPackage"
+    }
+  }
 }
