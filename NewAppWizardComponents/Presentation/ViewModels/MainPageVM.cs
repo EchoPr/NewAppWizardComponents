@@ -137,6 +137,12 @@ public partial class MainPageVM : INotifyPropertyChanged
 
         projectManager = new ProjectManager(Methods);
         qformManager = new QFormManager();
+
+        var evQFormDir = Environment.GetEnvironmentVariable("QFORM_DIR");
+        if (evQFormDir != null) 
+            qformManager.SetBaseDir(evQFormDir);
+
+
     }
 
     public void AddToCodeBlocks(ApiEntry entry, int index, bool originalEntry = false, CodeGenerationMode generationMode = CodeGenerationMode.ObjectInit)
