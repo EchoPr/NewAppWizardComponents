@@ -138,7 +138,6 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
                             ? "x64\\QFormApiNet.dll"
                             : "API\\App\\C#\\QForm.cs";
 
-
         string apiFile = Path.Combine(baseDir, qformApi);
         StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
 
@@ -146,54 +145,57 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
         {
             try
             {
-
-                string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly)[0];
+                string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (csprojFilePath == null)
-                    throw new Exception("There is no .cproj file in selectted folder");
+                    throw new Exception("There is no .csproj file in the selected folder");
 
                 XDocument csprojXml = XDocument.Load(csprojFilePath);
-
                 XElement root = csprojXml.Root;
-
                 if (root == null)
                     throw new Exception("Invalid .csproj file.");
 
                 XNamespace ns = root.GetDefaultNamespace();
+                XElement itemGroup = root.Element(ns + "ItemGroup");
+                if (itemGroup == null)
+                {
+                    itemGroup = new XElement(ns + "ItemGroup");
+                    root.Add(itemGroup);
+                }
 
                 if (isDllCopy)
                 {
-                    XElement itemGroup = root.Element(ns + "ItemGroup");
-                    if (itemGroup == null)
-                    {
-                        itemGroup = new XElement(ns + "ItemGroup");
-                        root.Add(itemGroup);
-                    }
+                    // Remove existing DLL references
+                    var existingReference = itemGroup.Elements(ns + "Reference")
+                        .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormAPINet");
+                    existingReference?.Remove();
 
+                    // Add new DLL reference
                     XElement reference = new XElement(ns + "Reference",
                             new XAttribute("Include", "QFormAPINet"),
                             new XElement(ns + "HintPath", apiFile)
                         );
-
                     itemGroup.Add(reference);
-
                     csprojXml.Save(csprojFilePath);
                 }
                 else
                 {
+                    // Remove existing .cs file references
+                    var existingCompile = itemGroup.Elements(ns + "Compile")
+                        .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
+                    existingCompile?.Remove();
 
-                    if (isDotnetFramework(csprojXml))
-                    {
-                        XElement itemGroup = new XElement(
-                            ns + "ItemGroup",
-                            new XElement(ns + "Compile", new XAttribute("Include", "QFormApi.cs"))
+                    // Add new .cs file reference
+                    XElement compile = new XElement(ns + "Compile",
+                            new XAttribute("Include", "QFormApi.cs")
                         );
-                       
-                        root.Add(itemGroup);
-                        csprojXml.Save(csprojFilePath);
-                    }
-                    File.Copy(apiFile, Path.Combine(folder.Path, "QFormAPI.cs"));
+                    itemGroup.Add(compile);
+                    csprojXml.Save(csprojFilePath);
+
+                    // Copy the new .cs file to the project folder
+                    File.Copy(apiFile, Path.Combine(folder.Path, "QFormApi.cs"), true);
                 }
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 DisplayError(ex.Message);
             }
