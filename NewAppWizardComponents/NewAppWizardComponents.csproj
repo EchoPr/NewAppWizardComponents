@@ -50,6 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>    
+    <PackageReference Include="Microsoft.Office.Interop.Excel" />    
     <PackageReference Include="Newtonsoft.Json" />    
     <PackageReference Include="Uno.Toolkit.WinUI" />    
     <PackageReference Include="Uno.WinUI" />
@@ -229,6 +230,26 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <ProjectReference Include="..\NewAppWizardComponents.Shared\NewAppWizardComponents.Shared.csproj" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <Reference Include="Microsoft.Vbe.Interop">
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\Microsoft.Vbe.Interop\15.0.0.0__71e9bce111e9429c\Microsoft.Vbe.Interop.dll</HintPath>
+    </Reference>
+    <Reference Include="office">
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\office\15.0.0.0__71e9bce111e9429c\OFFICE.DLL</HintPath>
+    </Reference>
+    <Reference Include="QFormApiNet">
+      <HintPath>..\..\..\..\..\..\QForm\11.2.300.4\x64\QFormApiNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -23,12 +23,15 @@
     </ResourceDictionary>
   </ContentDialog.Resources>
 
-  
+
   <ScrollViewer>
     <Grid>
       <Grid.RowDefinitions>
         <RowDefinition Height="Auto"/>
         <RowDefinition Height="*"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="Auto"/>
       </Grid.RowDefinitions>
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="6*"/>
@@ -38,23 +41,43 @@
       <TextBlock Grid.Row="0" Grid.Column="0" Text="Select API"/>
 
       <ListBox x:Name="ApiVersions" Grid.Row="1" Grid.Column="0" 
-         ItemsSource="{Binding ComLibraries}" 
-         Background="White" BorderBrush="#E0E0E0"
-               SelectionChanged="ApiVersions_SelectionChanged"
-         BorderThickness="1" Margin="0 5 10 0"/>
+     ItemsSource="{Binding ComLibraries}" 
+     Background="White" BorderBrush="#E0E0E0"
+     SelectionChanged="ApiVersions_SelectionChanged"
+     BorderThickness="1" Margin="0 5 10 0"/>
 
       <StackPanel Grid.Row="1" Grid.Column="1">
         <Button x:Name="InstallButton" 
-          HorizontalAlignment="Stretch" 
-          Click="InstallButton_Click" 
-          Margin="0 5 0 10"/>
+      HorizontalAlignment="Stretch" 
+      Click="InstallButton_Click" 
+      Margin="0 5 0 10"/>
         <Button x:Name="UninstallButton" Content="Uninstall selected" 
-          HorizontalAlignment="Stretch" 
-          Click="UninstallButton_Click" 
-          IsEnabled="False"/>
+      HorizontalAlignment="Stretch" 
+      Click="UninstallButton_Click" 
+      IsEnabled="False"/>
       </StackPanel>
+
+      <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 10 0 0">
+        <TextBlock Text="Project Settings for Microsoft Excel"   Margin="0 0 0 5"/>
+        <CheckBox Content="Add Connection Tab" IsChecked="True" Margin="0 5 0 0"/>
+        <CheckBox Content="Add Sample Tab" IsChecked="True" Margin="0 5 0 10"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 10 0 0">
+        <TextBlock Text="Error Handling"   Margin="0 0 0 5"/>
+        <RadioButton Content="Use return values (If Then statements). Recommended" IsChecked="True" Margin="0 5 0 0"/>
+        <RadioButton Content="Use Exceptions (On Error statements)" Margin="0 5 0 10"/>
+      </StackPanel>
+
+      <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
+        <Button Content="Create new project" Margin="0 5 0 0" Click="CreateNewProject_Click"/>
+        <Button Content="Update Existing project" Margin="5 0 0 0" Click="EditExistingProject_Click"/>
+        <Button Content="Add code snippet" Margin="5 0 0 0"/>
+      </StackPanel>
+
     </Grid>
   </ScrollViewer>
 
-  
+
+
 </ContentDialog>
