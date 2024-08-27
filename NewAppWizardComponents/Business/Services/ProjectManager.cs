@@ -71,6 +71,21 @@ public class ProjectManager
         _savePicker.FileTypeChoices.Clear();
     }
 
+    public async Task<StorageFile> SaveFile(params Tuple<string, string>[] extensions)
+    {
+        foreach (var extension in extensions)
+        {
+            _savePicker.FileTypeChoices.Add(extension.Item1, [extension.Item2]);
+        }
+        
+
+        StorageFile file = await _savePicker.PickSaveFileAsync();
+
+        _savePicker.FileTypeChoices.Clear();
+
+        return file;
+    }
+
     public async Task<List<ApiEntry>> LoadCode()
     {
         _loadPicker.FileTypeFilter.Add(".scm");
@@ -88,7 +103,20 @@ public class ProjectManager
             Debug.WriteLine("Operation cancelled.");
         }
 
+        _loadPicker.FileTypeFilter.Clear();
         return readData;
+    }
+
+    public async Task<StorageFile> SelectFile(params string[] extensions)
+    {
+        foreach (var extension in extensions)
+        {
+            _loadPicker.FileTypeFilter.Add(extension);
+        }
+        var file = await _loadPicker.PickSingleFileAsync();
+
+        _loadPicker.FileTypeFilter.Clear();
+        return file;
     }
 
     public async Task<StorageFolder> SelectFolder()
