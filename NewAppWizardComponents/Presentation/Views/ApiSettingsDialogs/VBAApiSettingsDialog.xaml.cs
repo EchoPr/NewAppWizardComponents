@@ -12,6 +12,7 @@ using Microsoft.Win32;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using QFormAPI;
+using Uno.Extensions;
 
 namespace NewAppWizardComponents;
 public sealed partial class VBAApiSettingsDialog : ContentDialog
@@ -44,6 +45,18 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
     private void ContentDialog_Loaded(object sender, RoutedEventArgs e)
     {
         InstallButton.Content = $"Install QForm API {mainPageVM.qformManager.qformVersion}";
+
+        if (ApiVersions.Items.Count == 0)
+        {
+            SetAccessibilityButtons(false);
+        }
+    }
+
+    private void SetAccessibilityButtons(bool val)
+    {
+        AdditionWay.Children.ForEach(item => { if (item is CheckBox i) i.IsEnabled = val; });
+        ErrorHandling.Children.ForEach(item => { if (item is RadioButton i) i.IsEnabled = val; });
+        ProjectActions.Children.ForEach(item => { if (item is Button i) i.IsEnabled = val; });
     }
 
     private void InstallButton_Click(object sender, RoutedEventArgs e)
@@ -53,6 +66,10 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
         process.WaitForExit();
         vbaVM.ComLibraries.Clear();
         vbaVM.LoadComLibraries("QFormApiCom");
+        if (ApiVersions.Items.Count != 0)
+        {
+            SetAccessibilityButtons(true);
+        }
     }
 
     private void UninstallButton_Click(object sender, RoutedEventArgs e)
@@ -60,6 +77,12 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
         string ver = ApiVersions.SelectedValue.ToString().Split(" ")[2];
 
         vbaVM.UninstallQFormApi(ver);
+
+        if (ApiVersions.Items.Count == 0)
+        {
+            SetAccessibilityButtons(false);
+        }
+        UninstallButton.IsEnabled = false;
 
     }
 
