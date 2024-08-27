@@ -143,6 +143,10 @@ public class ExcelHelper
             Excel.Workbook workbook = excelApp.Workbooks.Add();
             LogWithTimestamp(logBuilder, "New Excel workbook created.");
 
+            // Удаление существующего модуля QFormSvc, если он есть
+            RemoveExistingModule(workbook, "QFormSvc");
+
+            // Добавление нового модуля QFormSvc
             Microsoft.Vbe.Interop.VBComponent vbaModule = workbook.VBProject.VBComponents.Add(Microsoft.Vbe.Interop.vbext_ComponentType.vbext_ct_StdModule);
             vbaModule.Name = "QFormSvc";
             LogWithTimestamp(logBuilder, "New module 'QFormSvc' added to workbook.");
@@ -151,6 +155,9 @@ public class ExcelHelper
             LogWithTimestamp(logBuilder, "VBA code added to module 'QFormSvc'.");
 
             System.Threading.Thread.Sleep(1000);
+
+            // Удаление всех существующих ссылок на QForm
+            RemoveExistingReferences(workbook);
 
             excelApp.Run("AddReference");
             LogWithTimestamp(logBuilder, "Procedure 'AddReference' executed.");
@@ -174,10 +181,9 @@ public class ExcelHelper
         SetMacrosAccessibility(false);
 
         logBuilder.AppendLine("=======================================");
-        string logFilePath = Path.Combine(logFolderPath, "log.txt");
+        string logFilePath = Path.Combine(logFolderPath, "LogAppWizard.txt");
         LogToFile(logFilePath, logBuilder.ToString());
     }
-
 
     public void EditExistingProject(string fileName)
     {
@@ -189,19 +195,11 @@ public class ExcelHelper
 
         try
         {
-            Excel.Workbook workbook = excelApp.Workbooks.Open(fileName, ReadOnly:false);
+            Excel.Workbook workbook = excelApp.Workbooks.Open(fileName, ReadOnly: false);
             LogWithTimestamp(logBuilder, $"Workbook '{fileName}' opened.");
 
-            // Проверка на наличие модуля QFormSvc и его удаление
-            foreach (Microsoft.Vbe.Interop.VBComponent vbaComponent in workbook.VBProject.VBComponents)
-            {
-                if (vbaComponent.Name == "QFormSvc")
-                {
-                    workbook.VBProject.VBComponents.Remove(vbaComponent);
-                    LogWithTimestamp(logBuilder, "Existing module 'QFormSvc' removed.");
-                    break;
-                }
-            }
+            // Удаление существующего модуля QFormSvc, если он есть
+            RemoveExistingModule(workbook, "QFormSvc");
 
             // Добавление нового модуля QFormSvc
             Microsoft.Vbe.Interop.VBComponent vbaModule = workbook.VBProject.VBComponents.Add(Microsoft.Vbe.Interop.vbext_ComponentType.vbext_ct_StdModule);
@@ -212,6 +210,9 @@ public class ExcelHelper
             LogWithTimestamp(logBuilder, "VBA code added to module 'QFormSvc'.");
 
             System.Threading.Thread.Sleep(1000);
+
+            // Удаление всех существующих ссылок на QForm
+            RemoveExistingReferences(workbook);
 
             excelApp.Run("AddReference");
             LogWithTimestamp(logBuilder, "Procedure 'AddReference' executed.");
@@ -240,8 +241,42 @@ public class ExcelHelper
         SetMacrosAccessibility(false);
 
         logBuilder.AppendLine("=======================================");
-        string logFilePath = Path.Combine(logFolderPath, "log.txt");
+        string logFilePath = Path.Combine(logFolderPath, "LogAppWizard.txt");
         LogToFile(logFilePath, logBuilder.ToString());
+    }
+
+    private void RemoveExistingModule(Excel.Workbook workbook, string moduleName)
+    {
+        foreach (Microsoft.Vbe.Interop.VBComponent vbaComponent in workbook.VBProject.VBComponents)
+        {
+            if (vbaComponent.Name == moduleName)
+            {
+                workbook.VBProject.VBComponents.Remove(vbaComponent);
+                LogWithTimestamp(new StringBuilder(), $"Existing module '{moduleName}' removed.");
+                break;
+            }
+        }
+    }
+
+    private void RemoveExistingReferences(Excel.Workbook workbook)
+    {
+        var refCollection = workbook.VBProject.References;
+        for (int i = refCollection.Count; i >= 1; i--)
+        {
+            var reference = refCollection.Item(i);
+            if (reference.Description.Contains("QForm"))
+            {
+                try
+                {
+                    refCollection.Remove(reference);
+                    LogWithTimestamp(new StringBuilder(), $"Existing reference to QForm removed.");
+                }
+                catch (COMException ex)
+                {
+                    LogWithTimestamp(new StringBuilder(), $"Error removing reference: {ex.Message}");
+                }
+            }
+        }
     }
 
 
@@ -318,15 +353,25 @@ Sub AddReference()
     Dim Ref As Object
     Set Ref = ThisWorkbook.VBProject.References
     On Error Resume Next
-    Ref.AddFromFile ""C:\QForm\QFormApiCom_11.2.300.4\x{bitDepth}\QFormAPI.tlb""
+    Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{mainPageVM.qformManager.qformVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
+    
     If Err.Number <> 0 Then
-        MsgBox ""Library not found or could not be added. Error: "" & Err.Description
+        WriteErrorToFile Err.Description
     Else
-        MsgBox ""Library added successfully.""
+        WriteErrorToFile ""Library added successfully.""
     End If
+
     On Error GoTo 0
 End Sub
+
+Sub WriteErrorToFile(msg As String)
+    Dim fileNum As Integer
+    fileNum = FreeFile
+    Open ""{Path.Combine(logFolderPath, "LogVBA.txt")}"" For Append As #fileNum
+    Print #fileNum, Now & "" - "" & msg
+    Close #fileNum
+End Sub
 ";
-    }   
+    }
 
 }
