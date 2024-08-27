@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <None Include="**\*" Exclude="obj\**;bin\**;*.csproj" />
+    <PackageReference Include="Microsoft.Office.Interop.Excel" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Uno.Toolkit.WinUI" />
     <None Update="AppHead.xaml.cs" DependentUpon="AppHead.xaml" />

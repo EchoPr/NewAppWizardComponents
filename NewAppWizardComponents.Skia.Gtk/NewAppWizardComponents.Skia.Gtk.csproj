@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Office.Interop.Excel" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Uno.Toolkit.WinUI" />
     <PackageReference Include="Uno.WinUI.Skia.Gtk" />

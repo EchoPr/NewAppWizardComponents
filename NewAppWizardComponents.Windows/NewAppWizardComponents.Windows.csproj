@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Office.Interop.Excel" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Uno.Toolkit.WinUI" />
     <PackageReference Include="Uno.WinUI" />
@@ -25,22 +26,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!--
-    If you encounter this error message:
-
-      error NETSDK1148: A referenced assembly was compiled using a newer version of Microsoft.Windows.SDK.NET.dll.
-      Please update to a newer .NET SDK in order to reference this assembly.
-
-    This means that the two packages below must be aligned with the "build" version number of
-    the "Microsoft.Windows.SDK.BuildTools" package above, and the "revision" version number
-    must be the highest found in https://www.nuget.org/packages/Microsoft.Windows.SDK.NET.Ref.
-    -->
-    <!-- <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" RuntimeFrameworkVersion="10.0.22621.28" />
-    <FrameworkReference Update="Microsoft.Windows.SDK.NET.Ref" TargetingPackVersion="10.0.22621.28" /> -->
+    <ProjectReference Include="..\NewAppWizardComponents\NewAppWizardComponents.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NewAppWizardComponents\NewAppWizardComponents.csproj" />
+    <Reference Include="Microsoft.Vbe.Interop">
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\Microsoft.Vbe.Interop\15.0.0.0__71e9bce111e9429c\Microsoft.Vbe.Interop.dll</HintPath>
+    </Reference>
+    <Reference Include="office">
+      <HintPath>..\..\..\..\..\..\Windows\assembly\GAC_MSIL\office\15.0.0.0__71e9bce111e9429c\OFFICE.DLL</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Import Project="..\NewAppWizardComponents.Shared\base.props" />
