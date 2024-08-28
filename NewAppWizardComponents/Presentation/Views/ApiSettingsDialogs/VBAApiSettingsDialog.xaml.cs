@@ -13,6 +13,7 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using QFormAPI;
 using Uno.Extensions;
+using Windows.Web.Syndication;
 
 namespace NewAppWizardComponents;
 public sealed partial class VBAApiSettingsDialog : ContentDialog
@@ -99,7 +100,9 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
         {
             FileInfo fileInfo = new FileInfo(file.Path);
             fileInfo.IsReadOnly = false;
-            _excelHelper.CreateNewProject(file.Path);
+
+            string res = _excelHelper.CreateNewProject(file.Path);
+            StatusText.Text = res;
         }
 
         //_excelHelper.CreateNewProject("NewWorkBook");
@@ -113,7 +116,8 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
 
         if (file != null)
         {
-            _excelHelper.EditExistingProject(file.Path);
+            string res = _excelHelper.EditExistingProject(file.Path);
+            StatusText.Text = res;
         }
     }
 }
@@ -122,92 +126,123 @@ public class ExcelHelper
 {
     public MainPageVM mainPageVM;
 
-    private string logFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QFormAppWizard", "Logs");
-    
+    private string resultFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QFormAppWizard", "result.txt");
+
     public ExcelHelper(MainPageVM vm)
     {
         mainPageVM = vm;
-        Directory.CreateDirectory(logFolderPath);
     }
 
-    public void CreateNewProject(string fileName)
+    public string CreateNewProject(string fileName)
     {
-        StringBuilder logBuilder = new StringBuilder();
-        logBuilder.AppendLine($"=== Project Creation Log - {DateTime.Now} ===");
+        string result = "";
+
+        if (File.Exists(fileName))
+        {
+            File.Delete(fileName);
+        }
 
         SetMacrosAccessibility(true);
-        Excel.Application excelApp = new Excel.Application();
+        Type xType = Type.GetTypeFromProgID("Excel.Application");
+        if (xType == null)
+        {
+            return "Excel could not be found.";
+        }
+
+        dynamic excelApp = null;
+        dynamic workbooks = null;
+        dynamic workbook = null;
 
         try
         {
-            Excel.Workbook workbook = excelApp.Workbooks.Add();
-            LogWithTimestamp(logBuilder, "New Excel workbook created.");
+            excelApp = Activator.CreateInstance(xType);
+            excelApp.Visible = false;
+            workbooks = excelApp.Workbooks;
+            workbook = workbooks.Add();
 
             // Удаление существующего модуля QFormSvc, если он есть
             RemoveExistingModule(workbook, "QFormSvc");
 
             // Добавление нового модуля QFormSvc
-            Microsoft.Vbe.Interop.VBComponent vbaModule = workbook.VBProject.VBComponents.Add(Microsoft.Vbe.Interop.vbext_ComponentType.vbext_ct_StdModule);
+            dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
             vbaModule.Name = "QFormSvc";
-            LogWithTimestamp(logBuilder, "New module 'QFormSvc' added to workbook.");
 
             vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86"));
-            LogWithTimestamp(logBuilder, "VBA code added to module 'QFormSvc'.");
 
             System.Threading.Thread.Sleep(1000);
 
             // Удаление всех существующих ссылок на QForm
             RemoveExistingReferences(workbook);
 
+            // Запуск процедуры и получение результата
             excelApp.Run("AddReference");
-            LogWithTimestamp(logBuilder, "Procedure 'AddReference' executed.");
 
-            workbook.SaveAs(fileName, Excel.XlFileFormat.xlOpenXMLWorkbookMacroEnabled);
-            LogWithTimestamp(logBuilder, $"Workbook saved as '{fileName}' with macro-enabled format.");
+            if (File.Exists(resultFilePath))
+            {
+                result = File.ReadAllText(resultFilePath);
+
+                File.WriteAllText(resultFilePath, string.Empty);
+            }
+
+            workbook.SaveAs(fileName, 52); // 52 for xlOpenXMLWorkbookMacroEnabled
 
             workbook.Close(true);
-            LogWithTimestamp(logBuilder, "Workbook closed.");
         }
         catch (COMException ex)
         {
-            LogWithTimestamp(logBuilder, "Error creating new Excel project: " + ex.Message);
+            return "Error creating new Excel project: " + ex.Message;
         }
         finally
         {
-            excelApp.Quit();
-            Marshal.ReleaseComObject(excelApp);
+            // Освобождаем объекты в обратном порядке
+            if (workbook != null) Marshal.ReleaseComObject(workbook);
+            if (workbooks != null) Marshal.ReleaseComObject(workbooks);
+            if (excelApp != null)
+            {
+                excelApp.Quit();
+                Marshal.ReleaseComObject(excelApp);
+            }
         }
 
         SetMacrosAccessibility(false);
-
-        logBuilder.AppendLine("=======================================");
-        string logFilePath = Path.Combine(logFolderPath, "LogAppWizard.txt");
-        LogToFile(logFilePath, logBuilder.ToString());
+        return result;
     }
 
-    public void EditExistingProject(string fileName)
+    public string EditExistingProject(string fileName)
     {
-        StringBuilder logBuilder = new StringBuilder();
-        logBuilder.AppendLine($"=== Project Editing Log - {DateTime.Now} ===");
+        string result = "";
 
         SetMacrosAccessibility(true);
-        Excel.Application excelApp = new Excel.Application();
+        Type xType = Type.GetTypeFromProgID("Excel.Application");
+        if (xType == null)
+        {
+            return "Excel could not be found";
+        }
+
+        dynamic excelApp = null;
+        dynamic workbooks = null;
+        dynamic workbook = null;
 
         try
         {
-            Excel.Workbook workbook = excelApp.Workbooks.Open(fileName, ReadOnly: false);
-            LogWithTimestamp(logBuilder, $"Workbook '{fileName}' opened.");
+            if (IsFileLocked(new FileInfo(fileName)))
+            {
+                return "The file is already opened by another process or user.";
+            }
+
+            excelApp = Activator.CreateInstance(xType);
+            excelApp.Visible = false;
+            workbooks = excelApp.Workbooks;
+            workbook = workbooks.Open(fileName, ReadOnly: false);
 
             // Удаление существующего модуля QFormSvc, если он есть
             RemoveExistingModule(workbook, "QFormSvc");
 
             // Добавление нового модуля QFormSvc
-            Microsoft.Vbe.Interop.VBComponent vbaModule = workbook.VBProject.VBComponents.Add(Microsoft.Vbe.Interop.vbext_ComponentType.vbext_ct_StdModule);
+            dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
             vbaModule.Name = "QFormSvc";
-            LogWithTimestamp(logBuilder, "New module 'QFormSvc' added to workbook.");
 
             vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86"));
-            LogWithTimestamp(logBuilder, "VBA code added to module 'QFormSvc'.");
 
             System.Threading.Thread.Sleep(1000);
 
@@ -215,50 +250,80 @@ public class ExcelHelper
             RemoveExistingReferences(workbook);
 
             excelApp.Run("AddReference");
-            LogWithTimestamp(logBuilder, "Procedure 'AddReference' executed.");
+
+            if (File.Exists(resultFilePath))
+            {
+                result = File.ReadAllText(resultFilePath);
+
+                File.WriteAllText(resultFilePath, string.Empty);
+            }
 
             workbook.Save();
-            LogWithTimestamp(logBuilder, $"Workbook '{fileName}' saved.");
 
             workbook.Close(true);
-            LogWithTimestamp(logBuilder, "Workbook closed.");
 
             // Установка файла с возможностью редактирования
             FileInfo fileInfo = new FileInfo(fileName);
             fileInfo.IsReadOnly = false;
-            LogWithTimestamp(logBuilder, $"File '{fileName}' set to be writable.");
         }
         catch (COMException ex)
         {
-            LogWithTimestamp(logBuilder, "Error editing Excel project: " + ex.Message);
+            return "Error editing Excel project: " + ex.Message;
         }
         finally
         {
-            excelApp.Quit();
-            Marshal.ReleaseComObject(excelApp);
+            // Освобождаем объекты в обратном порядке
+            if (workbook != null) Marshal.ReleaseComObject(workbook);
+            if (workbooks != null) Marshal.ReleaseComObject(workbooks);
+            if (excelApp != null)
+            {
+                excelApp.Quit();
+                Marshal.ReleaseComObject(excelApp);
+            }
         }
 
         SetMacrosAccessibility(false);
 
-        logBuilder.AppendLine("=======================================");
-        string logFilePath = Path.Combine(logFolderPath, "LogAppWizard.txt");
-        LogToFile(logFilePath, logBuilder.ToString());
+        return result;
     }
 
-    private void RemoveExistingModule(Excel.Workbook workbook, string moduleName)
+    private bool IsFileLocked(FileInfo file)
     {
-        foreach (Microsoft.Vbe.Interop.VBComponent vbaComponent in workbook.VBProject.VBComponents)
+        FileStream? stream = null;
+
+        try
+        {
+            // Открываем файл с режимом только для чтения и эксклюзивным доступом
+            stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+        }
+        catch (IOException)
+        {
+            // Если возникает ошибка ввода-вывода, значит файл заблокирован
+            return true;
+        }
+        finally
+        {
+            // Закрываем поток если файл был открыт
+            stream?.Close();
+        }
+
+        // Если исключений не было, файл не заблокирован
+        return false;
+    }
+
+    private void RemoveExistingModule(dynamic workbook, string moduleName)
+    {
+        foreach (dynamic vbaComponent in workbook.VBProject.VBComponents)
         {
             if (vbaComponent.Name == moduleName)
             {
                 workbook.VBProject.VBComponents.Remove(vbaComponent);
-                LogWithTimestamp(new StringBuilder(), $"Existing module '{moduleName}' removed.");
                 break;
             }
         }
     }
 
-    private void RemoveExistingReferences(Excel.Workbook workbook)
+    private void RemoveExistingReferences(dynamic workbook)
     {
         var refCollection = workbook.VBProject.References;
         for (int i = refCollection.Count; i >= 1; i--)
@@ -269,32 +334,14 @@ public class ExcelHelper
                 try
                 {
                     refCollection.Remove(reference);
-                    LogWithTimestamp(new StringBuilder(), $"Existing reference to QForm removed.");
                 }
                 catch (COMException ex)
                 {
-                    LogWithTimestamp(new StringBuilder(), $"Error removing reference: {ex.Message}");
+                    Debug.WriteLine(ex.Message);
                 }
             }
         }
     }
-
-
-    private void LogWithTimestamp(StringBuilder logBuilder, string message)
-    {
-        logBuilder.AppendLine($"{DateTime.Now}: {message}");
-    }
-
-
-    private void LogToFile(string logFilePath, string message)
-    {
-        using (StreamWriter sw = new StreamWriter(logFilePath, true))
-        {
-            sw.WriteLine(message);
-        }
-    }
-
-
 
 
     public void SetMacrosAccessibility(bool value)
@@ -351,25 +398,31 @@ public class ExcelHelper
         return $@"
 Sub AddReference()
     Dim Ref As Object
+    Dim filePath As String
+    filePath = Environ(""LocalAppData"") & ""\QFormAppWizard\result.txt""
+    
+    If Dir(Environ(""LocalAppData"") & ""\QFormAppWizard"", vbDirectory) = """" Then
+        MkDir Environ(""LocalAppData"") & ""\QFormAppWizard""
+    End If
+    
     Set Ref = ThisWorkbook.VBProject.References
     On Error Resume Next
-    Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{mainPageVM.qformManager.qformVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
-    
+     Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{mainPageVM.qformManager.qformVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
+
+    Dim resultText As String
     If Err.Number <> 0 Then
-        WriteErrorToFile Err.Description
+        resultText = ""Error: Library not found or could not be added.""
     Else
-        WriteErrorToFile ""Library added successfully.""
+        resultText = ""Success""
     End If
-
-    On Error GoTo 0
-End Sub
-
-Sub WriteErrorToFile(msg As String)
+    
     Dim fileNum As Integer
     fileNum = FreeFile
-    Open ""{Path.Combine(logFolderPath, "LogVBA.txt")}"" For Append As #fileNum
-    Print #fileNum, Now & "" - "" & msg
+    Open filePath For Output As #fileNum
+    Print #fileNum, resultText
     Close #fileNum
+    
+    On Error GoTo 0
 End Sub
 ";
     }
