@@ -55,8 +55,7 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
 
     private void SetAccessibilityButtons(bool val)
     {
-        AdditionWay.Children.ForEach(item => { if (item is CheckBox i) i.IsEnabled = val; });
-        ErrorHandling.Children.ForEach(item => { if (item is RadioButton i) i.IsEnabled = val; });
+        AdditionWay.Children.ForEach(item => { if (item is CheckBox i && i.Tag.ToString() != "NoEdit") i.IsEnabled = val; });
         ProjectActions.Children.ForEach(item => { if (item is Button i) i.IsEnabled = val; });
     }
 
@@ -101,13 +100,9 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
             FileInfo fileInfo = new FileInfo(file.Path);
             fileInfo.IsReadOnly = false;
 
-            string res = _excelHelper.CreateNewProject(file.Path);
+            string res = _excelHelper.CreateNewProject(file.Path, (bool)ConnectionTab.IsChecked, (bool)SampleTab.IsChecked);
             StatusText.Text = res;
         }
-
-        //_excelHelper.CreateNewProject("NewWorkBook");
-
-
     }
 
     private async void EditExistingProject_Click(object sender, RoutedEventArgs e)
@@ -120,20 +115,34 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
             StatusText.Text = res;
         }
     }
+
+    private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
+    {
+        _excelHelper.Dispose();
+    }
 }
 
-public class ExcelHelper
+public class ExcelHelper : IDisposable
 {
     public MainPageVM mainPageVM;
 
-    private string resultFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QFormAppWizard", "result.txt");
+    private string resultFilePath;
 
     public ExcelHelper(MainPageVM vm)
     {
         mainPageVM = vm;
+        resultFilePath = Path.Combine(mainPageVM.qformManager.qformTempDir, Process.GetCurrentProcess().Id.ToString() + ".txt");
     }
 
-    public string CreateNewProject(string fileName)
+    public void Dispose()
+    {
+        if (File.Exists(resultFilePath))
+        {
+            File.Delete(resultFilePath);
+        }
+    }
+
+    public string CreateNewProject(string fileName, bool addConnectionTab = false, bool addSampleTab = false)
     {
         string result = "";
 
@@ -184,6 +193,57 @@ public class ExcelHelper
                 File.WriteAllText(resultFilePath, string.Empty);
             }
 
+            if (addConnectionTab || addSampleTab)
+            {
+                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1];
+                worksheet.Name = "QForm configuration";
+
+                int startRow = 1; // Начальная строка для таблицы
+                int startCol = 1; // Начальная колонка для таблицы
+
+                Excel.Range headerTableRange = (Excel.Range)worksheet.Cells[1, 1];
+                headerTableRange.Value = "QForm Parameters";
+                headerTableRange.Font.Bold = true;
+                worksheet.Range["A1:C1"].Merge();
+                headerTableRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+                worksheet.Range["C1:D1"].Merge();
+                worksheet.Range["C2:D2"].Merge();
+                worksheet.Range["C3:D3"].Merge();
+                worksheet.Range["C4:D4"].Merge();
+                worksheet.Range["C5:D5"].Merge();
+
+                string[] tableHeaders = { "Parameter", "Value", "Description", "" };
+                for (int i = 0; i < tableHeaders.Length; i++)
+                {
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Value = tableHeaders[i];
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Borders[Excel.XlBordersIndex.xlEdgeBottom].LineStyle = Excel.XlLineStyle.xlContinuous;
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Borders[Excel.XlBordersIndex.xlEdgeBottom].Weight = Excel.XlBorderWeight.xlMedium;
+                }
+
+                string[,] tableData = {
+                { "Path to QForm", Path.Combine(mainPageVM.qformManager.QFormBaseDir, "x64"), "Required", "" },
+                { "Instance Name", "New Instance", "Optional. Used for reconnect", "" },
+                { "Disable exceptions", "1", "VBA has poor exception handling support", "" }
+            };
+
+                for (int row = 0; row < tableData.GetLength(0); row++)
+                {
+                    for (int col = 0; col < tableData.GetLength(1); col++)
+                    {
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Value = tableData[row, col];
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Borders[Excel.XlBordersIndex.xlEdgeBottom].LineStyle = Excel.XlLineStyle.xlContinuous;
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Borders[Excel.XlBordersIndex.xlEdgeBottom].Weight = Excel.XlBorderWeight.xlThin;
+                    }
+                }
+
+                if (addConnectionTab) 
+                    AddConnectionTab(workbook, worksheet);
+                if (addSampleTab)
+                    AddSampleTab(workbook, worksheet, addConnectionTab);
+
+            }
+
             workbook.SaveAs(fileName, 52); // 52 for xlOpenXMLWorkbookMacroEnabled
 
             workbook.Close(true);
@@ -194,7 +254,7 @@ public class ExcelHelper
         }
         finally
         {
-            // Освобождаем объекты в обратном порядке
+            // Освобождение объектов в обратном порядке
             if (workbook != null) Marshal.ReleaseComObject(workbook);
             if (workbooks != null) Marshal.ReleaseComObject(workbooks);
             if (excelApp != null)
@@ -208,7 +268,7 @@ public class ExcelHelper
         return result;
     }
 
-    public string EditExistingProject(string fileName)
+    public string EditExistingProject(string fileName, bool addConnectionTab = false, bool addSampleTab = false)
     {
         string result = "";
 
@@ -258,6 +318,51 @@ public class ExcelHelper
                 File.WriteAllText(resultFilePath, string.Empty);
             }
 
+            if (addConnectionTab || addSampleTab)
+            {
+                Excel.Worksheet worksheet = (Excel.Worksheet)workbook.Sheets[1];
+                worksheet.Name = "QForm configuration";
+
+                int startRow = 1; // Начальная строка для таблицы
+                int startCol = 1; // Начальная колонка для таблицы
+
+                Excel.Range headerTableRange = (Excel.Range)worksheet.Cells[1, 1];
+                headerTableRange.Value = "QForm Parameters";
+                headerTableRange.Font.Bold = true;
+                worksheet.Range["A1:C1"].Merge();
+                headerTableRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+                string[] tableHeaders = { "Parameter", "Value", "Description" };
+                for (int i = 0; i < tableHeaders.Length; i++)
+                {
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Value = tableHeaders[i];
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Borders[Excel.XlBordersIndex.xlEdgeBottom].LineStyle = Excel.XlLineStyle.xlContinuous;
+                    ((Excel.Range)worksheet.Cells[startRow + 1, startCol + i]).Borders[Excel.XlBordersIndex.xlEdgeBottom].Weight = Excel.XlBorderWeight.xlMedium;
+                }
+
+                string[,] tableData = {
+                { "Path to QForm", Path.Combine(mainPageVM.qformManager.QFormBaseDir, "x64"), "Required" },
+                { "Instance Name", "New Instance", "Optional. Used for reconnect" },
+                { "Disable exceptions", "1", "VBA has poor exception handling support" }
+            };
+
+                for (int row = 0; row < tableData.GetLength(0); row++)
+                {
+                    for (int col = 0; col < tableData.GetLength(1); col++)
+                    {
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Value = tableData[row, col];
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Borders[Excel.XlBordersIndex.xlEdgeBottom].LineStyle = Excel.XlLineStyle.xlContinuous;
+                        ((Excel.Range)worksheet.Cells[startRow + 2 + row, startCol + col]).Borders[Excel.XlBordersIndex.xlEdgeBottom].Weight = Excel.XlBorderWeight.xlThin;
+                    }
+                }
+
+                if (addConnectionTab)
+                    AddConnectionTab(workbook, worksheet);
+                if (addSampleTab)
+                    AddSampleTab(workbook, worksheet, addConnectionTab);
+
+            }
+
             workbook.Save();
 
             workbook.Close(true);
@@ -285,6 +390,145 @@ public class ExcelHelper
         SetMacrosAccessibility(false);
 
         return result;
+    }
+    public void SetMacrosAccessibility(bool value)
+    {
+        string? officeVersion = GetInstalledOfficeVersion();
+
+        if (officeVersion == null)
+            throw new Exception("MS Excel is not installed");
+
+        string registryKeyPath = $@"Software\Microsoft\Office\{officeVersion}\Excel\Security";
+
+        try
+        {
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKeyPath, true))
+            {
+                if (key != null)
+                {
+                    key.SetValue("AccessVBOM", value ? 1 : 0, RegistryValueKind.DWord);
+                }
+                else
+                {
+                    throw new Exception("Не удалось найти указанный ключ реестра.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Ошибка при попытке изменения реестра: {ex.Message}");
+        }
+    }
+
+    private void AddConnectionTab(dynamic workbook, Excel.Worksheet worksheet)
+    {
+        RemoveExistingModule(workbook, "QFormConnection");
+
+        dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
+        vbaModule.Name = "QFormConnection";
+
+        vbaModule.CodeModule.AddFromString(VBAMacroses.ConnectionTab);
+
+        string[] connectionButtonsNames = ["Start New QForm", "Close QForm", "Disconnect QForm", "Connect QForm"];
+        string[] connectionButtonsBinds = ["QFormStart", "QFormReconnect", "QFormDetach", "QFormAttach"];
+        int conButStartRow = 8;
+
+        Excel.Range headerConnectionButtonsRange = (Excel.Range)worksheet.Cells[conButStartRow, 1];
+        headerConnectionButtonsRange.Value = "QForm Connection";
+        headerConnectionButtonsRange.Font.Bold = true;
+        worksheet.Range[$"A{conButStartRow}:E{conButStartRow}"].Merge();
+        headerConnectionButtonsRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+        Excel.Range sessionIdHeader = (Excel.Range)worksheet.Cells[conButStartRow + 1, 5];
+        sessionIdHeader.Value = "Session ID";
+        sessionIdHeader.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+        Excel.Range sessionId = (Excel.Range)worksheet.Cells[conButStartRow + 2, 5];
+        sessionId.Value = "0";
+
+        for (int i = 1; i < 1 + 4; i++)
+        {
+            Excel.Range cell = (Excel.Range)worksheet.Cells[conButStartRow + 2, i];
+
+            ((Excel.Range)worksheet.Columns[i]).ColumnWidth = 40; 
+            ((Excel.Range)worksheet.Rows[conButStartRow + 2]).RowHeight = 60;     
+
+            double buttonWidth = Convert.ToInt32(cell.Width) - 20;
+            double buttonHeight = Convert.ToInt32(cell.Height) - 20; 
+
+            double leftPosition = Convert.ToInt32(cell.Left) + 10; 
+            double topPosition = Convert.ToInt32(cell.Top) + 10;  
+
+            Excel.Shape button = worksheet.Shapes.AddFormControl(
+                Excel.XlFormControl.xlButtonControl,
+                Convert.ToInt32(leftPosition),
+                Convert.ToInt32(topPosition),
+                Convert.ToInt32(buttonWidth),
+                Convert.ToInt32(buttonHeight)
+            );
+
+            button.TextFrame.Characters().Text = connectionButtonsNames[i - 1];
+            button.OnAction = connectionButtonsBinds[i - 1];
+        }
+    }
+
+    private void AddSampleTab(dynamic workbook, Excel.Worksheet worksheet, bool connectionAdded)
+    {
+        RemoveExistingModule(workbook, "QFormSamples");
+
+        dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
+        vbaModule.Name = "QFormSamples";
+
+        vbaModule.CodeModule.AddFromString(VBAMacroses.SampleTab);
+
+        string[] sampleButtonsNames = ["Test With Reconnect", "Test Without Reconnect", "Reset State By Runtime"];
+        string[] sampleButtonsBinds = ["TestWithReconnect", "TestWithoutReconnect", "ResetStateByRuntimeError"];
+        string[] sampleDescriptions = ["Description 1", "Description 2", "Description 3"];
+        int conButStartRow = connectionAdded ? 13 : 8;
+
+        Excel.Range headerConnectionButtonsRange = (Excel.Range)worksheet.Cells[conButStartRow, 1];
+        headerConnectionButtonsRange.Value = "Samples";
+        headerConnectionButtonsRange.Font.Bold = true;
+        worksheet.Range[$"A{conButStartRow}:B{conButStartRow}"].Merge();
+        headerConnectionButtonsRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+        Excel.Range sampleCommandHeader = (Excel.Range)worksheet.Cells[conButStartRow + 1, 1];
+        sampleCommandHeader.Value = "Command";
+        sampleCommandHeader.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+        Excel.Range sampleDscHeader = (Excel.Range)worksheet.Cells[conButStartRow + 1, 2];
+        sampleDscHeader.Value = "Description";
+        sampleDscHeader.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+
+
+        for (int i = 1; i < 1 + 3; i++)
+        {
+            Excel.Range cell = (Excel.Range)worksheet.Cells[conButStartRow + 1 + i, 1];
+
+            ((Excel.Range)worksheet.Columns[i]).ColumnWidth = 40;
+            ((Excel.Range)worksheet.Rows[conButStartRow + 1 + i]).RowHeight = 60;
+
+            double buttonWidth = Convert.ToInt32(cell.Width) - 20;
+            double buttonHeight = Convert.ToInt32(cell.Height) - 20;
+
+            double leftPosition = Convert.ToInt32(cell.Left) + 10;
+            double topPosition = Convert.ToInt32(cell.Top) + 10;
+
+            Excel.Shape button = worksheet.Shapes.AddFormControl(
+                Excel.XlFormControl.xlButtonControl,
+                Convert.ToInt32(leftPosition),
+                Convert.ToInt32(topPosition),
+                Convert.ToInt32(buttonWidth),
+                Convert.ToInt32(buttonHeight)
+            );
+
+            button.TextFrame.Characters().Text = sampleButtonsNames[i - 1];
+            button.OnAction = sampleButtonsBinds[i - 1];
+
+            Excel.Range sampleDsc = (Excel.Range)worksheet.Cells[conButStartRow + 1 + i, 2];
+            sampleDsc.Value = sampleDescriptions[i - 1];
+            sampleDsc.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+        }
     }
 
     private bool IsFileLocked(FileInfo file)
@@ -343,36 +587,6 @@ public class ExcelHelper
         }
     }
 
-
-    public void SetMacrosAccessibility(bool value)
-    {
-        string? officeVersion = GetInstalledOfficeVersion();
-
-        if (officeVersion == null)
-            throw new Exception("MS Excel is not installed");
-
-        string registryKeyPath = $@"Software\Microsoft\Office\{officeVersion}\Excel\Security";
-
-        try
-        {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKeyPath, true))
-            {
-                if (key != null)
-                {
-                    key.SetValue("AccessVBOM", value ? 1 : 0, RegistryValueKind.DWord);
-                }
-                else
-                {
-                    throw new Exception("Не удалось найти указанный ключ реестра.");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Ошибка при попытке изменения реестра: {ex.Message}");
-        }
-    }
-
     private string? GetInstalledOfficeVersion()
     {
         string[] officeVersions = { "16.0", "15.0", "14.0", "12.0", "11.0" };
@@ -393,25 +607,24 @@ public class ExcelHelper
 
         return null;
     }
+
     private string GetVBASnippet(string bitDepth)
     {
         return $@"
+' THIS IS GENERATED FILE. DO NOT EDIT IT!
+
 Sub AddReference()
     Dim Ref As Object
     Dim filePath As String
-    filePath = Environ(""LocalAppData"") & ""\QFormAppWizard\result.txt""
-    
-    If Dir(Environ(""LocalAppData"") & ""\QFormAppWizard"", vbDirectory) = """" Then
-        MkDir Environ(""LocalAppData"") & ""\QFormAppWizard""
-    End If
-    
+    filePath = ""{resultFilePath}""
+
     Set Ref = ThisWorkbook.VBProject.References
     On Error Resume Next
      Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{mainPageVM.qformManager.qformVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
 
     Dim resultText As String
     If Err.Number <> 0 Then
-        resultText = ""Error: Library not found or could not be added.""
+        resultText = ""Error: "" & Err.Description
     Else
         resultText = ""Success""
     End If
@@ -426,5 +639,109 @@ Sub AddReference()
 End Sub
 ";
     }
+}
 
+public static class VBAMacroses
+{
+    public static string ConnectionTab = @"
+Option Explicit
+Global qform As QFormAPI.qform
+
+Sub QFormInit()
+    Dim QFormExeDir As String
+    Dim QFormInstanceName As String
+    Dim ExceptionsEnable As Boolean
+    
+    QFormExeDir = Range(""B3"").Value
+    QFormInstanceName = Range(""B4"").Value
+    ExceptionsEnable = True
+    If Range(""B5"").Value = 1 Then
+        ExceptionsEnable = False
+    End If
+    
+    If qform Is Nothing Then
+        Dim mgr As New QFormAPI.QFormMgr
+        Set qform = mgr.instance(QFormInstanceName)
+        qform.exceptions_enable (ExceptionsEnable)
+        qform.qform_dir_set (QFormExeDir)
+    End If
+End Sub
+
+Sub QFormStart()
+    QFormInit
+    
+    If qform.exceptions_enabled Then
+        qform.qform_start
+    Else
+        If Not qform.qform_start Then
+            MsgBox qform.last_error
+        End If
+    End If
+End Sub
+
+Function QFormReconnect() As Boolean
+    QFormInit
+    QFormReconnect = True
+    If qform.exceptions_enabled Then
+        qform.qform_reconnect
+    Else
+        If Not qform.qform_reconnect Then
+            MsgBox qform.last_error
+            QFormReconnect = False
+        End If
+    End If
+End Function
+
+Sub QFormAttach()
+    QFormInit
+    
+    Dim sid As New QFormAPI.SessionId
+    sid.session_id = Range(""E10"").Value ' QForm window number
+    
+    If qform.exceptions_enabled Then
+        qform.qform_attach_to sid
+    Else
+        If Not qform.qform_attach_to(sid) Then
+            MsgBox qform.last_error
+        End If
+    End If
+
+End Sub
+
+Sub QFormDetach()
+    QFormInit
+    qform.qform_detach
+End Sub
+
+Sub QFormClose()
+    QFormInit
+    qform.qform_close
+End Sub
+";
+    public static string SampleTab = @"
+Option Explicit
+
+Sub TestWithReconnect()
+    If Not QFormReconnect Then Exit Sub
+    
+    Dim ret1 As QFormAPI.ProcessId
+    Set ret1 = qform.qform_process_id()
+
+    MsgBox ""QForm process id:"" & ret1.pid
+End Sub
+
+Sub TestWithoutReconnect()
+    Dim ret1 As QFormAPI.ProcessId
+    Set ret1 = qform.qform_process_id()
+
+    MsgBox ""QForm process id:"" & ret1.pid
+End Sub
+
+Sub ResetStateByRuntimeError()
+
+    Dim q As QFormAPI.qform
+    q.project_save ' null reference error
+End Sub
+
+";
 }

@@ -21,9 +21,11 @@ public class QFormManager
     public event EventHandler InvocationEnded;
 
     private string qformBaseDir = "C:\\QForm\\11.0.2";
-    public string qformVersion = "11.0.2";
-
     public string QFormBaseDir { get => qformBaseDir; set => qformBaseDir = value; }
+    public string qformVersion = "11.0.2";
+    public string qformTempDir;
+
+
 
     public QFormManager()
     {

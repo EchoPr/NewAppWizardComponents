@@ -146,6 +146,10 @@ public partial class MainPageVM : INotifyPropertyChanged
         if (evQFormVer != null)
             qformManager.qformVersion = evQFormVer;
 
+        var evQFormTmpDir = Environment.GetEnvironmentVariable("QFORM_TMP_DIR");
+        if (evQFormTmpDir != null)
+            qformManager.qformTempDir = evQFormTmpDir;
+
 
     }
 
