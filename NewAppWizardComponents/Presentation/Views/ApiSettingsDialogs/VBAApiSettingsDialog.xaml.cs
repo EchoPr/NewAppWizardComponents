@@ -100,7 +100,7 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
             FileInfo fileInfo = new FileInfo(file.Path);
             fileInfo.IsReadOnly = false;
 
-            string res = _excelHelper.CreateNewProject(file.Path, (bool)ConnectionTab.IsChecked, (bool)SampleTab.IsChecked);
+            string res = _excelHelper.CreateNewProject(file.Path, GetSelectedAPIDir(), (bool)ConnectionTab.IsChecked, (bool)SampleTab.IsChecked);
             StatusText.Text = res;
         }
     }
@@ -111,7 +111,7 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
 
         if (file != null)
         {
-            string res = _excelHelper.EditExistingProject(file.Path);
+            string res = _excelHelper.EditExistingProject(file.Path, GetSelectedAPIDir(), (bool)ConnectionTab.IsChecked, (bool)SampleTab.IsChecked);
             StatusText.Text = res;
         }
     }
@@ -119,6 +119,15 @@ public sealed partial class VBAApiSettingsDialog : ContentDialog
     private void ContentDialog_Closed(ContentDialog sender, ContentDialogClosedEventArgs args)
     {
         _excelHelper.Dispose();
+    }
+
+    private string GetSelectedAPIDir()
+    {
+        string? selectedApiVer = ApiVersions.SelectedValue as string;
+        if (selectedApiVer == null)
+            throw new Exception("No API Version is selected");
+
+        return selectedApiVer.Split()[2];
     }
 }
 
@@ -142,7 +151,7 @@ public class ExcelHelper : IDisposable
         }
     }
 
-    public string CreateNewProject(string fileName, bool addConnectionTab = false, bool addSampleTab = false)
+    public string CreateNewProject(string fileName, string apiVersion, bool addConnectionTab = false, bool addSampleTab = false)
     {
         string result = "";
 
@@ -176,7 +185,7 @@ public class ExcelHelper : IDisposable
             dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
             vbaModule.Name = "QFormSvc";
 
-            vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86"));
+            vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86", apiVersion));
 
             System.Threading.Thread.Sleep(1000);
 
@@ -268,7 +277,7 @@ public class ExcelHelper : IDisposable
         return result;
     }
 
-    public string EditExistingProject(string fileName, bool addConnectionTab = false, bool addSampleTab = false)
+    public string EditExistingProject(string fileName, string apiVersion, bool addConnectionTab = false, bool addSampleTab = false)
     {
         string result = "";
 
@@ -302,7 +311,7 @@ public class ExcelHelper : IDisposable
             dynamic vbaModule = workbook.VBProject.VBComponents.Add(1); // 1 for vbext_ComponentType.vbext_ct_StdModule
             vbaModule.Name = "QFormSvc";
 
-            vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86"));
+            vbaModule.CodeModule.AddFromString(GetVBASnippet(excelApp.OperatingSystem.Contains("64") ? "64" : "86", apiVersion));
 
             System.Threading.Thread.Sleep(1000);
 
@@ -608,7 +617,7 @@ public class ExcelHelper : IDisposable
         return null;
     }
 
-    private string GetVBASnippet(string bitDepth)
+    private string GetVBASnippet(string bitDepth, string apiVersion)
     {
         return $@"
 ' THIS IS GENERATED FILE. DO NOT EDIT IT!
@@ -620,7 +629,7 @@ Sub AddReference()
 
     Set Ref = ThisWorkbook.VBProject.References
     On Error Resume Next
-     Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{mainPageVM.qformManager.qformVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
+     Ref.AddFromFile ""{Path.Combine(mainPageVM.qformManager.QFormBaseDir, $"..\\QFormApiCom_{apiVersion}\\x{bitDepth}\\QFormAPI.tlb")}""
 
     Dim resultText As String
     If Err.Number <> 0 Then
