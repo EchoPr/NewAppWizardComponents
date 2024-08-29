@@ -76,8 +76,8 @@
         <ComboBoxItem Content="XML"/>
       </ComboBox>
 
-      <SplitButton Height="30" FontSize="12" Padding="2" Margin="4 0 0 0" Background="Transparent" Click="ApiWizardClickSplitButton">
-        Wizard
+      <SplitButton x:Name="WizardSplitButton" Height="30" FontSize="12" Padding="2" Margin="4 0 0 0"
+                   Background="Transparent" Click="ApiWizardClickSplitButton" Content="New C# Class">
         <SplitButton.Flyout>
           <MenuFlyout x:Name="WizardMenuFlyout">
             <MenuFlyoutItem Text="API Wizard" FontWeight="SemiBold" Click="ApiWizardClickMenuFlyout"/>

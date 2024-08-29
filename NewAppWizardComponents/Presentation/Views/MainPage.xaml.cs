@@ -45,6 +45,16 @@ public sealed partial class MainPage : Page
 
     private string currentSelectedLanguage = "C#";
 
+    private Dictionary<string, string> _wizardTitles = new()
+    {
+        { "C#", "New C# Class" },
+        { "Python", "New Python Script" },
+        { "VB.Net", "Wizard" },
+        { "VBA", "Excel Project" },
+        { "MATLAB", "Wizard" },
+        { "S-expr", "Wizard" },
+        { "XML", "Wizard" },
+    };
 
     // if was snippet in prev lang
     bool snippetNotShown = false;
@@ -749,6 +759,8 @@ public sealed partial class MainPage : Page
             {
                 item.Visibility = (item.Tag as string) == selectedLang || item.Tag == null ? Visibility.Visible : Visibility.Collapsed;
             }
+
+            WizardSplitButton.Content = _wizardTitles[selectedLang];
         }
     }
 
