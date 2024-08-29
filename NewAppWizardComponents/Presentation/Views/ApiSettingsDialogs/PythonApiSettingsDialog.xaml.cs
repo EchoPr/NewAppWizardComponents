@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Storage.AccessCache;
 using Windows.Storage.Pickers;
 using WinRT.Interop;
@@ -23,6 +24,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
                 _snippetEntry = entry;
                 RestoreDialogState();
                 this.PrimaryButtonText = "Save";
+                PrimaryButtonClick += ContentDialog_PrimaryButtonClick;
             }
             else
             {
@@ -31,6 +33,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
                 UseQFormAPIFromInstallationRadioButton.IsChecked = true;
 
                 _snippetEntry = new ApiEntry(0, "_pyton_settings", typeof(APytonSettings), null, false, null, true);
+                UpdateConfig();
             }
         };
 
@@ -61,6 +64,22 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
         this.PrimaryButtonText = "Save";
         ErrorTextBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private void AddSnippetToWorkspace(object sender, RoutedEventArgs args)
+    {
+        if (!ValidateInputs())
+        {
+            DisplayError("Please fill in all required fields");
+            return;
+        }
+
+        UpdateConfig();
+
+        this.PrimaryButtonText = "Save";
+        ErrorTextBlock.Visibility = Visibility.Collapsed;
+        
+        this.Hide();
     }
 
     private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -112,7 +131,6 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
     {
         StartFromAppWindowRadioButton.IsEnabled = value;
         UseCopyOfQFormAPIRadioButton.IsEnabled = value;
-        SelectAPICopyButton.IsEnabled = value;
     }
 
     private void PythonFileRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -176,5 +194,15 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
                 DisplayError(ex.Message);
             }
         }
+    }
+
+    private void CopyToBuffer(object sender, RoutedEventArgs e)
+    {
+        ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("Python");
+        List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry);
+
+        var dp = new DataPackage();
+        dp.SetText(generatedCode.Aggregate("", (acc, val) => acc + val.content));
+        Clipboard.SetContent(dp);
     }
 }

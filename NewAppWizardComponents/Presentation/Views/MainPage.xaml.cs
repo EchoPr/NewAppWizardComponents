@@ -951,24 +951,32 @@ public sealed partial class MainPage : Page
 
         if (result == ContentDialogResult.Primary)
         {
-            ApiEntry snippet;
-
-            if (snippetDialog is PythonApiSettingsDialog dialogPy)
-                snippet = dialogPy.GetEntry();
-            else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
-                snippet = dialogCs.GetEntry();
-            else
-                throw new NotImplementedException();
-
-
-            _languageSnippets[currentSelectedLanguage] = snippet;
-
-            LanguageSelectionChange(currentSelectedLanguage);
-            
+            ProcessOkWizardResult(snippetDialog);
         }
         else if (result == ContentDialogResult.Secondary)
         {
         }
+        else if (result == ContentDialogResult.None)
+        {
+            ProcessOkWizardResult(snippetDialog);
+        }
+    }
+
+    private void ProcessOkWizardResult(ContentDialog snippetDialog)
+    {
+        ApiEntry snippet;
+
+        if (snippetDialog is PythonApiSettingsDialog dialogPy)
+            snippet = dialogPy.GetEntry();
+        else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
+            snippet = dialogCs.GetEntry();
+        else
+            throw new NotImplementedException();
+
+
+        _languageSnippets[currentSelectedLanguage] = snippet;
+
+        LanguageSelectionChange(currentSelectedLanguage);
     }
 }
 
