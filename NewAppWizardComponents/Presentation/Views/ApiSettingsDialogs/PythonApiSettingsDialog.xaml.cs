@@ -12,8 +12,9 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 {
     public MainPageVM mainPageVM;
     private ApiEntry _snippetEntry;
+    private Dictionary<string, ApiEntry> langSnippets;
 
-    public PythonApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null)
+    public PythonApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null, Dictionary<string, ApiEntry> _languageSnippets = null)
     {
         this.InitializeComponent();
 
@@ -38,6 +39,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
         };
 
         mainPageVM = vm;
+        langSnippets = _languageSnippets;
     }
 
     private void UpdateConfig()
@@ -78,7 +80,9 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
         this.PrimaryButtonText = "Save";
         ErrorTextBlock.Visibility = Visibility.Collapsed;
-        
+
+        langSnippets["Python"] = _snippetEntry;
+
         this.Hide();
     }
 
@@ -175,34 +179,67 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
     public ApiEntry GetEntry() => _snippetEntry;
 
-    private async void SelectAPICopyButton_Click(object sender, RoutedEventArgs e)
-    {
-        string baseDir = mainPageVM.qformManager.QFormBaseDir;
-        string qformApi = "API\\App\\Python\\QFormAPI.py";
-        string apiFile = Path.Combine(baseDir, qformApi);
-
-        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
-
-        if (folder != null)
-        {
-            try
-            {
-                File.Copy(apiFile, Path.Combine(folder.Path, "QFormAPI.py"));
-            }
-            catch (Exception ex)
-            {
-                DisplayError(ex.Message);
-            }
-        }
-    }
-
     private void CopyToBuffer(object sender, RoutedEventArgs e)
     {
+        if (!ValidateInputs())
+        {
+            DisplayError("Please fill in all required fields");
+            return;
+        }
+
+        UpdateConfig();
+
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("Python");
-        List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry);
+        List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry, mainPageVM.qformManager.QFormBaseDir);
 
         var dp = new DataPackage();
         dp.SetText(generatedCode.Aggregate("", (acc, val) => acc + val.content));
         Clipboard.SetContent(dp);
+    }
+
+    private async void CreateScript(object sender, RoutedEventArgs e)
+    {
+        if (!ValidateInputs())
+        {
+            DisplayError("Please fill in all required fields");
+            return;
+        }
+
+        UpdateConfig();
+
+        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("python", ".py"));
+
+        if (file == null) return;
+
+        if (UseCopyOfQFormAPIRadioButton.IsChecked == true)
+        {
+            string baseDir = mainPageVM.qformManager.QFormBaseDir;
+            string qformApi = "API\\App\\Python\\QFormAPI.py";
+            string apiFile = Path.Combine(baseDir, qformApi);
+
+            if (file != null)
+            {
+                try
+                {
+                    File.Copy(apiFile, Path.Combine((await file.GetParentAsync()).Path, "QFormAPI.py"));
+                }
+                catch (Exception ex)
+                {
+                    DisplayError(ex.Message);
+                }
+            }
+        }
+
+
+        ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("Python");
+        List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry, mainPageVM.qformManager.QFormBaseDir);
+
+        using (StreamWriter sw = new StreamWriter(file.Path, append: false))
+        {
+            sw.WriteLine(generatedCode.Aggregate("", (acc, val) => acc + val.content));
+        }
+
+
+        ErrorTextBlock.Visibility = Visibility.Collapsed;
     }
 }

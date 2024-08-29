@@ -157,7 +157,7 @@ public sealed partial class MainPage : Page
         
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(currentSelectedLanguage);
         var generatedCode = entry.is_snippet
-                            ? generator.GenerateApiSnippet(entry)
+                            ? generator.GenerateApiSnippet(entry, mainPageVM.qformManager.QFormBaseDir)
                             : generator.GenerateCodeEntry(entry, entryNumber, generationMode);
 
         var newCodeLines = new TextBlock();
@@ -938,46 +938,37 @@ public sealed partial class MainPage : Page
 
     private async void ApiWizardClick()
     {
-        ApiEntry? cureLangSnippet = _languageSnippets.TryGetValue(currentSelectedLanguage, out var value) ? value : null;
+        ApiEntry? curLangSnippet = _languageSnippets.TryGetValue(currentSelectedLanguage, out var value) ? value : null;
 
         ContentDialog snippetDialog = ApiSettingsDialogFactory.GetDialog(
             currentSelectedLanguage, 
             mainPageVM,
-            cureLangSnippet
+            curLangSnippet,
+            _languageSnippets
         );
 
         snippetDialog.XamlRoot = this.XamlRoot;
         var result = await snippetDialog.ShowAsync();
 
-        if (result == ContentDialogResult.Primary)
-        {
-            ProcessOkWizardResult(snippetDialog);
-        }
-        else if (result == ContentDialogResult.Secondary)
-        {
-        }
-        else if (result == ContentDialogResult.None)
-        {
-            ProcessOkWizardResult(snippetDialog);
-        }
-    }
-
-    private void ProcessOkWizardResult(ContentDialog snippetDialog)
-    {
-        ApiEntry snippet;
-
-        if (snippetDialog is PythonApiSettingsDialog dialogPy)
-            snippet = dialogPy.GetEntry();
-        else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
-            snippet = dialogCs.GetEntry();
-        else
-            throw new NotImplementedException();
-
-
-        _languageSnippets[currentSelectedLanguage] = snippet;
-
         LanguageSelectionChange(currentSelectedLanguage);
     }
+
+    //private void ProcessOkWizardResult(ContentDialog snippetDialog)
+    //{
+    //    ApiEntry snippet;
+
+    //    if (snippetDialog is PythonApiSettingsDialog dialogPy)
+    //        snippet = dialogPy.GetEntry();
+    //    else if (snippetDialog is CSharpApiSettingsDialog dialogCs)
+    //        snippet = dialogCs.GetEntry();
+    //    else
+    //        throw new NotImplementedException();
+
+
+    //    _languageSnippets[currentSelectedLanguage] = snippet;
+
+        
+    //}
 }
 
 public class CodeArg

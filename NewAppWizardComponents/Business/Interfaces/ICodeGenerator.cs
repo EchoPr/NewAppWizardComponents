@@ -9,7 +9,7 @@ public interface ICodeGenerator
 {
     public List<ViewCodeSample> GenerateCodeEntry(ApiEntry entry, int entrySerialNumber, CodeGenerationMode mode);
 
-    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry) { return new List<ViewCodeSample>(); }
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry, string qformBaseDir) { return new List<ViewCodeSample>(); }
 }
 
 public enum CodeGenerationMode

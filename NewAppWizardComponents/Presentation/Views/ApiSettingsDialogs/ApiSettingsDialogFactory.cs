@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace NewAppWizardComponents;
 public class ApiSettingsDialogFactory
 {
-    public static ContentDialog GetDialog(string language, MainPageVM vm, ApiEntry? entry)
+    public static ContentDialog GetDialog(string language, MainPageVM vm, ApiEntry? entry, Dictionary<string, ApiEntry> _languageSnippets)
     {
         switch (language)
         {
             case "Python":
-                return new PythonApiSettingsDialog(vm, entry);
+                return new PythonApiSettingsDialog(vm, entry, _languageSnippets);
             case "C#":
-                return new CSharpApiSettingsDialog(vm, entry);
+                return new CSharpApiSettingsDialog(vm, entry, _languageSnippets);
             case "VBA":
                 return new VBAApiSettingsDialog(vm, entry);
         }

@@ -7,7 +7,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
     public MainPageVM mainPageVM;
     private ApiEntry _snippetEntry;
 
-    public CSharpApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null)
+    public CSharpApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null, Dictionary<string, ApiEntry> _languageSnippets = null)
     {
         this.InitializeComponent();
 
