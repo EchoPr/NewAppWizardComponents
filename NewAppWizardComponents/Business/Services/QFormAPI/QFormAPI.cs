@@ -2508,6 +2508,10 @@ public class ACSharpSettings
     public bool alt_connection { get; set; }
     [Category("Mandatory")]
     public string import_dir { get; set; }
+    [Category("Mandatory")]
+    public string class_name { get; set; }
+    [Category("Mandatory")]
+    public bool use_static { get; set; }
 }
 
 public class ADbTreeArg
