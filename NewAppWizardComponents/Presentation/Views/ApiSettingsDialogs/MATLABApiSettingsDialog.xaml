@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:NewAppWizardComponents"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Title="API Wizard for Python"
+    Title="API Wizard for MATLAB"
     Style="{ThemeResource DefaultContentDialogStyle}"
     SecondaryButtonText="Cancel"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
