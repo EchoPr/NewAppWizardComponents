@@ -162,6 +162,13 @@ public class PythonCodeGenerator : ICodeGenerator
         switch (snippetConfig.connection_type)
         {
             case nameof(APIQFormInteractionType.script_starts):
+                codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(".qform_dir_set", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("r'\\x64'", ViewCodeSampleType.Comment));
+                codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+
                 codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample(".qform_start", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
