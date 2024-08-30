@@ -2512,6 +2512,8 @@ public class ACSharpSettings
     public string class_name { get; set; }
     [Category("Mandatory")]
     public bool use_static { get; set; }
+    [Category("Mandatory")]
+    public bool use_qform_exceptions { get; set; }
 }
 
 public class ADbTreeArg
@@ -2538,6 +2540,8 @@ public class APytonSettings
     public bool alt_connection { get; set; }
     [Category("Mandatory")]
     public string import_dir { get; set; }
+    [Category("Mandatory")]
+    public bool use_qform_exceptions { get; set; }
 }
 
 public class AFieldId

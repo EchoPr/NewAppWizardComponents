@@ -30,6 +30,13 @@
       <CheckBox x:Name="UseStaticName" Content="Use static class" Margin="0 0 0 10" />
 
       <StackPanel Margin="0,0,0,10">
+        <TextBlock Text="Exception Handling" FontWeight="SemiBold"/>
+
+        <RadioButton x:Name="EHTryCatch" Content="Use try-catch" IsChecked="True"/>
+        <RadioButton x:Name="EHQFormExceptions" Content="Use QForm exceptions"/>
+      </StackPanel>
+
+      <StackPanel Margin="0,0,0,10">
         <TextBlock Text="QForm interaction type" FontWeight="SemiBold"/>
 
         <RadioButton x:Name="NewQFormWindowRadioButton" Content="Script starts new QForm window"/>

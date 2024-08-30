@@ -45,6 +45,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
         snippetConfig.import_dir = DetermineReferenceType().ToString();
         snippetConfig.class_name = string.IsNullOrEmpty(ClassNameTextBox.Text) ? "NewClass" : ClassNameTextBox.Text;
         snippetConfig.use_static = UseStaticName.IsChecked == true;
+        snippetConfig.use_qform_exceptions = EHQFormExceptions.IsChecked == true;
     }
 
     private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -151,6 +152,9 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         ClassNameTextBox.Text = snippetConfig.class_name;
         UseStaticName.IsChecked = snippetConfig.use_static;
+
+        EHTryCatch.IsChecked = snippetConfig.use_qform_exceptions == false;
+        EHQFormExceptions.IsChecked = snippetConfig.use_qform_exceptions == true;
     }
 
     public ApiEntry GetEntry() => _snippetEntry;

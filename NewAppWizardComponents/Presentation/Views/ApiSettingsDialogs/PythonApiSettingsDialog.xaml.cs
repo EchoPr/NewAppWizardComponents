@@ -51,6 +51,7 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
         snippetConfig.connection_type = DetermineInteractionType().ToString();
         snippetConfig.alt_connection = ConnectToExistingWindowCheckBox.IsChecked == true;
         snippetConfig.import_dir = DetermineReferenceType().ToString();
+        snippetConfig.use_qform_exceptions = EHQFormExceptions.IsChecked == true;
     }
 
     private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -175,6 +176,9 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
 
         UseQFormAPIFromInstallationRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.default_folder.ToString();
         UseCopyOfQFormAPIRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.local_folder.ToString();
+
+        EHTryCatch.IsChecked = snippetConfig.use_qform_exceptions == false;
+        EHQFormExceptions.IsChecked = snippetConfig.use_qform_exceptions == true;
     }
 
     public ApiEntry GetEntry() => _snippetEntry;

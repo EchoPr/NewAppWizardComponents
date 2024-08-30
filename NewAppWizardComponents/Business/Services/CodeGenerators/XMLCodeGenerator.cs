@@ -10,6 +10,11 @@ using Microsoft.UI.Xaml.Documents;
 namespace NewAppWizardComponents;
 public class XMLCodeGenerator : ICodeGenerator
 {
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry, string qformBaseDir, bool useQFormExceptions)
+    {
+        throw new NotImplementedException();
+    }
+
     public List<ViewCodeSample> GenerateCodeEntry(ApiEntry entry, int num, CodeGenerationMode mode = CodeGenerationMode.StepByStep)
     {
         var codeEntries = new List<ViewCodeSample>();

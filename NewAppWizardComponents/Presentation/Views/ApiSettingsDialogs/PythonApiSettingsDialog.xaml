@@ -24,7 +24,13 @@
 
   <ScrollViewer>
     <StackPanel>
-      <!-- Первый блок: Script type -->
+      <StackPanel Margin="0,0,0,10">
+        <TextBlock Text="Exception Handling" FontWeight="SemiBold"/>
+
+        <RadioButton x:Name="EHTryCatch" Content="Use try-catch" IsChecked="True"/>
+        <RadioButton x:Name="EHQFormExceptions" Content="Use QForm exceptions"/>
+      </StackPanel>
+
       <StackPanel x:Name="ScriptTypePanel" Margin="0,0,0,10">
         <TextBlock Text="Script type" FontWeight="Bold"/>
 
@@ -32,7 +38,6 @@
         <RadioButton x:Name="NotebookRadioButton" Content="Notebook" Checked="NotebookRadioButton_Checked"/>
       </StackPanel>
 
-      <!-- Второй блок: QForm interaction type -->
       <StackPanel Margin="0,0,0,10">
         <TextBlock Text="QForm interaction type" FontWeight="Bold"/>
         
@@ -42,7 +47,6 @@
         <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window"/>
       </StackPanel>
 
-      <!-- Третий блок: QForm reference type -->
       <StackPanel Margin="0,0,0,10">
         <TextBlock Text="QForm reference type" FontWeight="Bold"/>
         
