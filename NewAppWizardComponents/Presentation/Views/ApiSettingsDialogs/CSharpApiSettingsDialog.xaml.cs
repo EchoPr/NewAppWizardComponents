@@ -166,9 +166,6 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         string apiFile = Path.Combine(baseDir, qformApi);
 
-
-
-
         string csprojFilePath = Directory.GetFiles(path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
         if (csprojFilePath == null)
             throw new Exception("There is no .csproj file in the selected folder");
@@ -203,19 +200,19 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
         }
         else
         {
-            // Remove existing .cs file references
-            var existingCompile = itemGroup.Elements(ns + "Compile")
+            if (isDotnetFramework(csprojXml))
+            {
+                var existingCompile = itemGroup.Elements(ns + "Compile")
                 .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
-            existingCompile?.Remove();
+                existingCompile?.Remove();
 
-            // Add new .cs file reference
-            XElement compile = new XElement(ns + "Compile",
-                    new XAttribute("Include", "QFormApi.cs")
-                );
-            itemGroup.Add(compile);
-            csprojXml.Save(csprojFilePath);
+                XElement compile = new XElement(ns + "Compile",
+                        new XAttribute("Include", "QFormApi.cs")
+                    );
+                itemGroup.Add(compile);
+                csprojXml.Save(csprojFilePath);
+            }
 
-            // Copy the new .cs file to the project folder
             File.Copy(apiFile, Path.Combine(path, "QFormApi.cs"), true);
         }
 
@@ -263,21 +260,19 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         if (file == null) return;
 
-        if (UseQFormAPIFromInstallationRadioButton.IsChecked == true)
+        
+        try
         {
-            try
-            {
-                AddApiReferenceToProject((await file.GetParentAsync()).Path);
-            }
-            catch (Exception ex)
-            {
-                DisplayError(ex.Message);
+            AddApiReferenceToProject((await file.GetParentAsync()).Path);
+        }
+        catch (Exception ex)
+        {
+            DisplayError(ex.Message);
 
-                if (File.Exists(file.Path))
-                    File.Delete(file.Path);
+            if (File.Exists(file.Path))
+                File.Delete(file.Path);
 
-                return;
-            }
+            return;
         }
 
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("C#");
