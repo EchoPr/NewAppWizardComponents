@@ -43,6 +43,12 @@ public partial class QForm
         return null != invoke(0, "_pyton_settings", arg, null);
     }
 
+    [ApiFunction]
+    public bool _vbnet_settings(AVBNetSettings arg)
+    {
+        return null != invoke(0, "_vbnet_settings", arg, null);
+    }
+
 
     [ApiFunction]
     public RFieldId active_field_get()
@@ -2501,6 +2507,22 @@ public class AFileName
 }
 
 public class ACSharpSettings
+{
+    [Category("Mandatory")]
+    public string connection_type { get; set; }
+    [Category("Mandatory")]
+    public bool alt_connection { get; set; }
+    [Category("Mandatory")]
+    public string import_dir { get; set; }
+    [Category("Mandatory")]
+    public string class_name { get; set; }
+    [Category("Mandatory")]
+    public bool use_static { get; set; }
+    [Category("Mandatory")]
+    public bool use_qform_exceptions { get; set; }
+}
+
+public class AVBNetSettings
 {
     [Category("Mandatory")]
     public string connection_type { get; set; }

@@ -444,7 +444,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample(" {\n", ViewCodeSampleType.Brackets));
 
                     codeEntries.Add(new ViewCodeSample("\t\t\tqform.", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 

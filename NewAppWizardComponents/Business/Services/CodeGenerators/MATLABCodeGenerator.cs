@@ -11,6 +11,11 @@ using System.Diagnostics;
 namespace NewAppWizardComponents;
 public class MATLABCodeGenerator : ICodeGenerator
 {
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry, string qformBaseDir)
+    {
+        throw new NotImplementedException();
+    }
+
     public List<ViewCodeSample> GenerateCodeEntry(ApiEntry entry, int num, CodeGenerationMode mode = CodeGenerationMode.StepByStep)
     {
         var codeEntries = new List<ViewCodeSample>();

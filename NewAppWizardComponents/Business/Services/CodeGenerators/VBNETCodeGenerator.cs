@@ -203,4 +203,235 @@ public class VBNETCodeGenerator : ICodeGenerator
 
         return codeEntries;
     }
+
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry, string qformBaseDir)
+    {
+        var snippetConfig = entry.arg_value as AVBNetSettings;
+
+        var codeEntries = new List<ViewCodeSample>();
+
+        codeEntries.Add(new ViewCodeSample("Imports ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QFormAPI\n\n", ViewCodeSampleType.Default));
+
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("Shared ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("Class ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample($"{snippetConfig.class_name} ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Brackets));
+
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("\tShared ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("\tReadOnly ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("qform_base_dir ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("As ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("String ", ViewCodeSampleType.Type));
+        codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample($"\"{qformBaseDir}\"", ViewCodeSampleType.Comment));
+        codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
+
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("\tShared ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("\tDim ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample(" As ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("New ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QForm", ViewCodeSampleType.Type));
+        codeEntries.Add(new ViewCodeSample("()\n\n", ViewCodeSampleType.Brackets));
+
+        codeEntries.Add(new ViewCodeSample("\tPublic ", ViewCodeSampleType.Keyword));
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("Shared ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("Sub Execute()\n", ViewCodeSampleType.Keyword));
+
+        switch (snippetConfig.connection_type)
+        {
+            case nameof(APIQFormInteractionType.script_starts):
+                codeEntries.Add(new ViewCodeSample("\t\tqform.qform_dir_set(", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_base_dir", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(" + ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\"\\x64\"", ViewCodeSampleType.Comment));
+                codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+
+                if (snippetConfig.use_qform_exceptions)
+                {
+                    codeEntries.Add(new ViewCodeSample("\t\tIf Not ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("qform.qform_start", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample(" Then\n", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform.last_exception()", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\tEnd If\n", ViewCodeSampleType.Keyword));
+                }
+                else
+                {
+                    codeEntries.Add(new ViewCodeSample("\t\tTry\n", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tqform.qform_start", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("()\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("\t\tCatch ex As ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("Exception\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("ex.Message", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\tEnd Try\n", ViewCodeSampleType.Keyword));
+                }
+
+                break;
+
+            case nameof(APIQFormInteractionType.qform_starts):
+                if (snippetConfig.alt_connection)
+                {
+                    codeEntries.Add(new ViewCodeSample("\t\tIf ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("qform.is_started_by_qform", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("() ", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("Then\n", ViewCodeSampleType.Keyword));
+
+                    if (snippetConfig.use_qform_exceptions)
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\t\tIf Not ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("qform.qform_attach", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("() ", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("Then\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("qform.last_exception()", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tEnd If\n", ViewCodeSampleType.Keyword));
+                    }
+                    else
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\t\tTry\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tqform.qform_attach", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("()\n", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tCatch ex As ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("Exception\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("ex.Message", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tEnd Try\n", ViewCodeSampleType.Keyword));
+                    }
+
+                    codeEntries.Add(new ViewCodeSample("\t\tElse\n", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tqform.qform_dir_set(", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_base_dir", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(" + ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\"\\x64\"", ViewCodeSampleType.Comment));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+
+                    codeEntries.Add(new ViewCodeSample("\t\t\tDim ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(" As New ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("SessionId()\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tqform_session_id.session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(" = 0\n", ViewCodeSampleType.Default));
+
+                    if (snippetConfig.use_qform_exceptions)
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\t\tIf Not ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("qform.qform_attach_to", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample(") ", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("Then\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("qform.last_exception()", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tEnd If\n", ViewCodeSampleType.Keyword));
+                    }
+                    else
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\t\tTry\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tqform.qform_attach_to(", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tCatch ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("ex ", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("As ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("Exception\n", ViewCodeSampleType.Type));
+                        codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("ex.Message", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tEnd Try\n", ViewCodeSampleType.Keyword));
+                    }
+
+                    codeEntries.Add(new ViewCodeSample("\t\tEnd If\n", ViewCodeSampleType.Keyword));
+
+                }
+                else
+                {
+                    if (snippetConfig.use_qform_exceptions)
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\tIf Not ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("qform.qform_attach", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("() ", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("Then\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("qform.last_exception()", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\tEnd If\n", ViewCodeSampleType.Keyword));
+                    }
+                    else
+                    {
+                        codeEntries.Add(new ViewCodeSample("\t\tTry\n", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tqform.qform_attach", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample("()\n", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("\t\tCatch ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("ex ", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("As ", ViewCodeSampleType.Keyword));
+                        codeEntries.Add(new ViewCodeSample("Exception\n", ViewCodeSampleType.Type));
+                        codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("ex.Message", ViewCodeSampleType.Method));
+                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                        codeEntries.Add(new ViewCodeSample("\t\tEnd Try\n", ViewCodeSampleType.Keyword));
+                    }
+                }
+
+                break;
+
+            case nameof(APIQFormInteractionType.script_connect):
+                codeEntries.Add(new ViewCodeSample("\t\tqform.qform_dir_set(", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_base_dir", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(" + ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\"\\x64\"", ViewCodeSampleType.Comment));
+                codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("\t\tDim ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(" As New ", ViewCodeSampleType.Keyword));
+                codeEntries.Add(new ViewCodeSample("SessionId()\n", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\t\tqform_session_id.session_id", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample(" = 0\n", ViewCodeSampleType.Default));
+
+                if (snippetConfig.use_qform_exceptions)
+                {
+                    codeEntries.Add(new ViewCodeSample("\t\tIf Not ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("qform.qform_attach_to(", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(") ", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("Then\n", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform.last_exception()", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\tEnd If\n", ViewCodeSampleType.Keyword));
+                }
+                else
+                {
+                    codeEntries.Add(new ViewCodeSample("\t\tTry\n", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tqform.qform_attach_to(", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("\t\tCatch ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("ex ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("As ", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("Exception\n", ViewCodeSampleType.Type));
+                    codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine(", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("ex.Message", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t\tEnd Try\n", ViewCodeSampleType.Keyword));
+                }
+
+                break;
+        }
+
+        codeEntries.Add(new ViewCodeSample("\tEnd Sub\n", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("End Class", ViewCodeSampleType.Keyword));
+
+        return codeEntries;
+    }
+
 }
