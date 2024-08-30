@@ -25,7 +25,6 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
             else
             {
                 StartFromAppWindowRadioButton.IsChecked = true;
-                UseQFormAPIFromInstallationRadioButton.IsChecked = true;
 
                 _snippetEntry = new ApiEntry(0, "_vbnet_settings", typeof(AVBNetSettings), null, false, null, true);
                 UpdateConfig();
@@ -42,7 +41,6 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
 
         snippetConfig.connection_type = DetermineInteractionType().ToString();
         snippetConfig.alt_connection = ConnectToExistingWindowCheckBox.IsChecked == true;
-        snippetConfig.import_dir = DetermineReferenceType().ToString();
         snippetConfig.class_name = string.IsNullOrEmpty(ClassNameTextBox.Text) ? "NewClass" : ClassNameTextBox.Text;
         snippetConfig.use_static = UseStaticName.IsChecked == true;
         snippetConfig.use_qform_exceptions = EHQFormExceptions.IsChecked == true;
@@ -103,21 +101,12 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
         return APIQFormInteractionType.script_starts; // Значение по умолчанию
     }
 
-    private APIQFormReference DetermineReferenceType()
-    {
-        return UseCopyOfQFormAPIRadioButton.IsChecked == true
-            ? APIQFormReference.local_folder
-            : APIQFormReference.default_folder;
-    }
-
     private bool ValidateInputs()
     {
         if (NewQFormWindowRadioButton.IsChecked == false && StartFromAppWindowRadioButton.IsChecked == false &&
             ConnectToExistingQFormRadioButton.IsChecked == false)
             return false;
 
-        if (UseQFormAPIFromInstallationRadioButton.IsChecked == false && UseCopyOfQFormAPIRadioButton.IsChecked == false)
-            return false;
 
         return true;
     }
@@ -125,7 +114,6 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
     private void SetFieldsAvailability(bool value)
     {
         StartFromAppWindowRadioButton.IsEnabled = value;
-        UseCopyOfQFormAPIRadioButton.IsEnabled = value;
     }
 
     private void StartFromAppWindowRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -147,9 +135,6 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
         ConnectToExistingQFormRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.script_connect.ToString();
         ConnectToExistingWindowCheckBox.IsChecked = snippetConfig.alt_connection;
 
-        UseQFormAPIFromInstallationRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.default_folder.ToString();
-        UseCopyOfQFormAPIRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.local_folder.ToString();
-
         ClassNameTextBox.Text = snippetConfig.class_name;
         UseStaticName.IsChecked = snippetConfig.use_static;
 
@@ -161,23 +146,19 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
 
     private void AddApiReferenceToProject(string path)
     {
-        bool isDllCopy = Convert.ToBoolean(UseQFormAPIFromInstallationRadioButton.IsChecked);
-
         string baseDir = mainPageVM.qformManager.QFormBaseDir;
-        string qformApi = isDllCopy
-                            ? "x64\\QFormApiNet.dll"
-                            : "API\\App\\VB.Net\\QForm.cs";
+        string qformApi = "x64\\QFormApiNet.dll";
 
         string apiFile = Path.Combine(baseDir, qformApi);
 
-        string csprojFilePath = Directory.GetFiles(path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
-        if (csprojFilePath == null)
-            throw new Exception("There is no .csproj file in the selected folder");
+        string vbprojFilePath = Directory.GetFiles(path, "*.vbproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        if (vbprojFilePath == null)
+            throw new Exception("There is no .vbproj file in the selected folder");
 
-        XDocument csprojXml = XDocument.Load(csprojFilePath);
-        XElement root = csprojXml.Root;
+        XDocument vbprojXml = XDocument.Load(vbprojFilePath);
+        XElement root = vbprojXml.Root;
         if (root == null)
-            throw new Exception("Invalid .csproj file.");
+            throw new Exception("Invalid .vbproj file.");
 
         XNamespace ns = root.GetDefaultNamespace();
         XElement itemGroup = root.Element(ns + "ItemGroup");
@@ -187,44 +168,22 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
             root.Add(itemGroup);
         }
 
-        if (isDllCopy)
-        {
-            // Remove existing DLL references
-            var existingReference = itemGroup.Elements(ns + "Reference")
+        var existingReference = itemGroup.Elements(ns + "Reference")
                 .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormAPINet");
-            existingReference?.Remove();
+        existingReference?.Remove();
 
-            // Add new DLL reference
-            XElement reference = new XElement(ns + "Reference",
-                    new XAttribute("Include", "QFormAPINet"),
-                    new XElement(ns + "HintPath", apiFile)
-                );
-            itemGroup.Add(reference);
-            csprojXml.Save(csprojFilePath);
-        }
-        else
-        {
-            if (isDotnetFramework(csprojXml))
-            {
-                var existingCompile = itemGroup.Elements(ns + "Compile")
-                .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
-                existingCompile?.Remove();
-
-                XElement compile = new XElement(ns + "Compile",
-                        new XAttribute("Include", "QFormApi.cs")
-                    );
-                itemGroup.Add(compile);
-                csprojXml.Save(csprojFilePath);
-            }
-
-            File.Copy(apiFile, Path.Combine(path, "QFormApi.cs"), true);
-        }
-
+        // Add new DLL reference
+        XElement reference = new XElement(ns + "Reference",
+                new XAttribute("Include", "QFormAPINet"),
+                new XElement(ns + "HintPath", apiFile)
+            );
+        itemGroup.Add(reference);
+        vbprojXml.Save(vbprojFilePath);
     }
 
-    private bool isDotnetFramework(XDocument csproj)
+    private bool isDotnetFramework(XDocument vbproj)
     {
-        var targetFrameworkElement = csproj.Descendants("TargetFramework").FirstOrDefault();
+        var targetFrameworkElement = vbproj.Descendants("TargetFramework").FirstOrDefault();
 
         if (targetFrameworkElement != null)
         {
@@ -241,14 +200,15 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
         }
         else
         {
-            if (csproj.ToString().Contains("TargetFrameworkVersion"))
+            if (vbproj.ToString().Contains("TargetFrameworkVersion"))
             {
                 return true;
             }
         }
 
-        throw new Exception("Unknown csproj type");
+        throw new Exception("Unknown vbproj type");
     }
+
 
     private async void AddClassToProject(object sender, RoutedEventArgs e)
     {
@@ -260,7 +220,7 @@ public sealed partial class VBNETApiSettingsDialog : ContentDialog
 
         UpdateConfig();
 
-        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("VB.Net", ".cs"));
+        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("VB.Net", ".vb"));
 
         if (file == null) return;
 

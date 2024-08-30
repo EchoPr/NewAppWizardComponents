@@ -45,18 +45,6 @@
         <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window"/>
       </StackPanel>
 
-      <StackPanel Margin="0,0,0,10">
-        <TextBlock Text="QForm reference type" FontWeight="SemiBold"/>
-
-        <RadioButton 
-          x:Name="UseQFormAPIFromInstallationRadioButton" 
-          Content="Use QFormAPI reference from QForm installation folder"/>
-
-        <RadioButton 
-          x:Name="UseCopyOfQFormAPIRadioButton" 
-          Content="Use copy of QFormAPI.cs from script folder"/>
-      </StackPanel>
-
       <StackPanel Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Content="Add Class to Project" Margin="0 5 0 0"  Click="AddClassToProject"/>
         <Button Content="Add Script to Workspace" Margin="5 5 0 0" Click="AddScriptToWorkspace"/>
