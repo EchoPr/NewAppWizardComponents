@@ -162,15 +162,15 @@ public class PythonCodeGenerator : ICodeGenerator
         switch (snippetConfig.connection_type)
         {
             case nameof(APIQFormInteractionType.script_starts):
-                codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
-                codeEntries.Add(new ViewCodeSample(".qform_dir_set", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("\t\tqform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("r'\\x64'", ViewCodeSampleType.Comment));
                 codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
 
-                codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
-                codeEntries.Add(new ViewCodeSample(".qform_start", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_start", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
                 break;
@@ -178,13 +178,13 @@ public class PythonCodeGenerator : ICodeGenerator
                 if (snippetConfig.alt_connection)
                 {
                     codeEntries.Add(new ViewCodeSample("if ", ViewCodeSampleType.Keyword));
-                    codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample(".is_started_by_qform", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("is_started_by_qform", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(":\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("    qform", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample(".qform_attach", ViewCodeSampleType.Method));
+                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
 
@@ -195,8 +195,8 @@ public class PythonCodeGenerator : ICodeGenerator
                     break;
                 }
 
-                codeEntries.Add(new ViewCodeSample("qform", ViewCodeSampleType.Default));
-                codeEntries.Add(new ViewCodeSample(".qform_attach", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("\n", ViewCodeSampleType.Default));
                 break;
@@ -211,8 +211,8 @@ public class PythonCodeGenerator : ICodeGenerator
 
     private void AddConnectionSnippet(List<ViewCodeSample> codeEntries, bool isNested)
     {
-        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
-        codeEntries.Add(new ViewCodeSample(".qform_dir_set", ViewCodeSampleType.Method));
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform.", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample("r'\\x64'", ViewCodeSampleType.Comment));
@@ -223,13 +223,13 @@ public class PythonCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample("SessionId", ViewCodeSampleType.Type));
         codeEntries.Add(new ViewCodeSample("()\n", ViewCodeSampleType.Brackets));
 
-        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform_session_id", ViewCodeSampleType.Default));
-        codeEntries.Add(new ViewCodeSample(".session_id", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform_session_id.", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("session_id", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("0\n", ViewCodeSampleType.Default));
 
-        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform", ViewCodeSampleType.Default));
-        codeEntries.Add(new ViewCodeSample(".qform_attach_to", ViewCodeSampleType.Method));
+        codeEntries.Add(new ViewCodeSample($"{(isNested ? "    " : "")}qform.", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
