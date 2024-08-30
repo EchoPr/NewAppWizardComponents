@@ -38,6 +38,12 @@ public partial class QForm
     }
 
     [ApiFunction]
+    public bool _matlab_settings(AMatlabSettings arg)
+    {
+        return null != invoke(0, "_matlab_settings", arg, null);
+    }
+
+    [ApiFunction]
     public bool _pyton_settings(APytonSettings arg)
     {
         return null != invoke(0, "_pyton_settings", arg, null);
@@ -2562,6 +2568,18 @@ public class APytonSettings
     public bool alt_connection { get; set; }
     [Category("Mandatory")]
     public string import_dir { get; set; }
+    [Category("Mandatory")]
+    public bool use_qform_exceptions { get; set; }
+}
+
+public class AMatlabSettings
+{
+    [Category("Mandatory")]
+    public string script_type { get; set; }
+    [Category("Mandatory")]
+    public string connection_type { get; set; }
+    [Category("Mandatory")]
+    public bool alt_connection { get; set; }
     [Category("Mandatory")]
     public bool use_qform_exceptions { get; set; }
 }

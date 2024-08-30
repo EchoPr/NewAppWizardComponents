@@ -38,6 +38,7 @@
     <None Remove="EditCollectionDialog.xaml" />
     <None Remove="MessageBox.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\CSharpApiSettingsDialog.xaml" />
+    <None Remove="Presentation\Views\ApiSettingsDialogs\MATLABApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\PythonApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\VBNETApiSettingsDialog.xaml" />
@@ -105,6 +106,10 @@
   
   
   <ItemGroup>
+    <Page Update="Presentation\Views\ApiSettingsDialogs\MATLABApiSettingsDialog.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Presentation\Views\ApiSettingsDialogs\VBNETApiSettingsDialog.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
       <SubType>Designer</SubType>
@@ -261,6 +266,12 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\VBNETApiSettingsDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\MATLABApiSettingsDialog.xaml" />
   </ItemGroup>
 
 </Project>

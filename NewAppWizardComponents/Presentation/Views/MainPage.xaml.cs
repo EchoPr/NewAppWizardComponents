@@ -49,10 +49,10 @@ public sealed partial class MainPage : Page
     {
         { "C#", "New C# Class" },
         { "Python", "New Python Script" },
-        { "VB.Net", "Wizard" },
+        { "VB.Net", "New VB.Net Class" },
         { "VBA", "Excel Project" },
-        { "MATLAB", "Wizard" },
-        { "S-expr", "Wizard" },
+        { "MATLAB", "New MATLAB Script" },
+        { "S-expr", "New S-expr Script" },
         { "XML", "Wizard" },
     };
 

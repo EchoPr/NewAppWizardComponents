@@ -19,6 +19,8 @@ public class ApiSettingsDialogFactory
                 return new VBNETApiSettingsDialog(vm, entry, _languageSnippets);
             case "VBA":
                 return new VBAApiSettingsDialog(vm, entry);
+            case "MATLAB":
+                return new MATLABApiSettingsDialog(vm, entry, _languageSnippets);
         }
 
         
