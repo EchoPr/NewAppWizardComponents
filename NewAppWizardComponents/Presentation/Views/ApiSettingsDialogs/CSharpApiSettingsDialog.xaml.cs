@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Xml.Linq;
 
 namespace NewAppWizardComponents;
@@ -6,6 +7,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 {
     public MainPageVM mainPageVM;
     private ApiEntry _snippetEntry;
+    private Dictionary<string, ApiEntry> langSnippets;
 
     public CSharpApiSettingsDialog(MainPageVM vm, ApiEntry? entry = null, Dictionary<string, ApiEntry> _languageSnippets = null)
     {
@@ -18,6 +20,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
                 _snippetEntry = entry;
                 RestoreDialogState();
                 this.PrimaryButtonText = "Save";
+                this.PrimaryButtonClick += ContentDialog_PrimaryButtonClick;
             }
             else
             {
@@ -25,19 +28,23 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
                 UseQFormAPIFromInstallationRadioButton.IsChecked = true;
 
                 _snippetEntry = new ApiEntry(0, "_csharp_settings", typeof(ACSharpSettings), null, false, null, true);
+                UpdateConfig();
             }
         };
 
         mainPageVM = vm;
+        langSnippets = _languageSnippets;
     }
 
     private void UpdateConfig()
     {
         var snippetConfig = (_snippetEntry.arg_value as ACSharpSettings);
-        
+
         snippetConfig.connection_type = DetermineInteractionType().ToString();
         snippetConfig.alt_connection = ConnectToExistingWindowCheckBox.IsChecked == true;
         snippetConfig.import_dir = DetermineReferenceType().ToString();
+        snippetConfig.class_name = string.IsNullOrEmpty(ClassNameTextBox.Text) ? "NewClass" : ClassNameTextBox.Text;
+        snippetConfig.use_static = UseStaticName.IsChecked == true;
     }
 
     private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -53,6 +60,23 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         this.PrimaryButtonText = "Save";
         ErrorTextBlock.Visibility = Visibility.Collapsed;
+    }
+
+    private void AddScriptToWorkspace(object sender, RoutedEventArgs e)
+    {
+        if (!ValidateInputs())
+        {
+            DisplayError("Please fill in all required fields");
+            return;
+        }
+
+        UpdateConfig();
+
+        this.PrimaryButtonText = "Save";
+        ErrorTextBlock.Visibility = Visibility.Collapsed;
+
+        langSnippets["C#"] = _snippetEntry;
+        this.Hide();
     }
 
     private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -101,7 +125,6 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
     {
         StartFromAppWindowRadioButton.IsEnabled = value;
         UseCopyOfQFormAPIRadioButton.IsEnabled = value;
-        SelectAPICopyButton.IsEnabled = value;
     }
 
     private void StartFromAppWindowRadioButton_Checked(object sender, RoutedEventArgs e)
@@ -125,11 +148,14 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
 
         UseQFormAPIFromInstallationRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.default_folder.ToString();
         UseCopyOfQFormAPIRadioButton.IsChecked = snippetConfig.import_dir == APIQFormReference.local_folder.ToString();
+
+        ClassNameTextBox.Text = snippetConfig.class_name;
+        UseStaticName.IsChecked = snippetConfig.use_static;
     }
 
     public ApiEntry GetEntry() => _snippetEntry;
 
-    private async void SelectAPIButton_Click(object sender, RoutedEventArgs e)
+    private void AddApiReferenceToProject(string path)
     {
         bool isDllCopy = Convert.ToBoolean(UseQFormAPIFromInstallationRadioButton.IsChecked);
 
@@ -139,67 +165,60 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
                             : "API\\App\\C#\\QForm.cs";
 
         string apiFile = Path.Combine(baseDir, qformApi);
-        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
 
-        if (folder != null)
+
+
+
+        string csprojFilePath = Directory.GetFiles(path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        if (csprojFilePath == null)
+            throw new Exception("There is no .csproj file in the selected folder");
+
+        XDocument csprojXml = XDocument.Load(csprojFilePath);
+        XElement root = csprojXml.Root;
+        if (root == null)
+            throw new Exception("Invalid .csproj file.");
+
+        XNamespace ns = root.GetDefaultNamespace();
+        XElement itemGroup = root.Element(ns + "ItemGroup");
+        if (itemGroup == null)
         {
-            try
-            {
-                string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
-                if (csprojFilePath == null)
-                    throw new Exception("There is no .csproj file in the selected folder");
-
-                XDocument csprojXml = XDocument.Load(csprojFilePath);
-                XElement root = csprojXml.Root;
-                if (root == null)
-                    throw new Exception("Invalid .csproj file.");
-
-                XNamespace ns = root.GetDefaultNamespace();
-                XElement itemGroup = root.Element(ns + "ItemGroup");
-                if (itemGroup == null)
-                {
-                    itemGroup = new XElement(ns + "ItemGroup");
-                    root.Add(itemGroup);
-                }
-
-                if (isDllCopy)
-                {
-                    // Remove existing DLL references
-                    var existingReference = itemGroup.Elements(ns + "Reference")
-                        .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormAPINet");
-                    existingReference?.Remove();
-
-                    // Add new DLL reference
-                    XElement reference = new XElement(ns + "Reference",
-                            new XAttribute("Include", "QFormAPINet"),
-                            new XElement(ns + "HintPath", apiFile)
-                        );
-                    itemGroup.Add(reference);
-                    csprojXml.Save(csprojFilePath);
-                }
-                else
-                {
-                    // Remove existing .cs file references
-                    var existingCompile = itemGroup.Elements(ns + "Compile")
-                        .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
-                    existingCompile?.Remove();
-
-                    // Add new .cs file reference
-                    XElement compile = new XElement(ns + "Compile",
-                            new XAttribute("Include", "QFormApi.cs")
-                        );
-                    itemGroup.Add(compile);
-                    csprojXml.Save(csprojFilePath);
-
-                    // Copy the new .cs file to the project folder
-                    File.Copy(apiFile, Path.Combine(folder.Path, "QFormApi.cs"), true);
-                }
-            }
-            catch (Exception ex)
-            {
-                DisplayError(ex.Message);
-            }
+            itemGroup = new XElement(ns + "ItemGroup");
+            root.Add(itemGroup);
         }
+
+        if (isDllCopy)
+        {
+            // Remove existing DLL references
+            var existingReference = itemGroup.Elements(ns + "Reference")
+                .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormAPINet");
+            existingReference?.Remove();
+
+            // Add new DLL reference
+            XElement reference = new XElement(ns + "Reference",
+                    new XAttribute("Include", "QFormAPINet"),
+                    new XElement(ns + "HintPath", apiFile)
+                );
+            itemGroup.Add(reference);
+            csprojXml.Save(csprojFilePath);
+        }
+        else
+        {
+            // Remove existing .cs file references
+            var existingCompile = itemGroup.Elements(ns + "Compile")
+                .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
+            existingCompile?.Remove();
+
+            // Add new .cs file reference
+            XElement compile = new XElement(ns + "Compile",
+                    new XAttribute("Include", "QFormApi.cs")
+                );
+            itemGroup.Add(compile);
+            csprojXml.Save(csprojFilePath);
+
+            // Copy the new .cs file to the project folder
+            File.Copy(apiFile, Path.Combine(path, "QFormApi.cs"), true);
+        }
+
     }
 
     private bool isDotnetFramework(XDocument csproj)
@@ -230,18 +249,46 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
         throw new Exception("Unknown csproj type");
     }
 
-    private void RadioButton_Checked(object sender, RoutedEventArgs e)
+    private async void AddClassToProject(object sender, RoutedEventArgs e)
     {
+        if (!ValidateInputs())
+        {
+            DisplayError("Please fill in all required fields");
+            return;
+        }
+
+        UpdateConfig();
+
+        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("C#", ".cs"));
+
+        if (file == null) return;
+
         if (UseQFormAPIFromInstallationRadioButton.IsChecked == true)
         {
-            SelectAPIdllButton.IsEnabled = true;
-            SelectAPICopyButton.IsEnabled = false;
-        }
-        else if (UseCopyOfQFormAPIRadioButton.IsChecked == true)
-        {
-            SelectAPIdllButton.IsEnabled = false;
-            SelectAPICopyButton.IsEnabled = true;
-        }
-    }
+            try
+            {
+                AddApiReferenceToProject((await file.GetParentAsync()).Path);
+            }
+            catch (Exception ex)
+            {
+                DisplayError(ex.Message);
 
+                if (File.Exists(file.Path))
+                    File.Delete(file.Path);
+
+                return;
+            }
+        }
+
+        ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("C#");
+        List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry, mainPageVM.qformManager.QFormBaseDir);
+
+        using (StreamWriter sw = new StreamWriter(file.Path, append: false))
+        {
+            sw.WriteLine(generatedCode.Aggregate("", (acc, val) => acc + val.content));
+        }
+
+
+        ErrorTextBlock.Visibility = Visibility.Collapsed;
+    }
 }

@@ -6,9 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="API Wizard for CSharp"
     Style="{ThemeResource DefaultContentDialogStyle}"
-    PrimaryButtonText="Add Snippet to Workspace"
     SecondaryButtonText="Cancel"
-    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
 
   <ContentDialog.Resources>
@@ -25,9 +23,14 @@
 
   <ScrollViewer>
     <StackPanel>
-      <!-- Второй блок: QForm interaction type -->
+      <TextBlock Text="Class Name" FontWeight="SemiBold"/>
+      <TextBox x:Name="ClassNameTextBox" PlaceholderText="NewClass" HorizontalAlignment="Stretch"
+               Style="{StaticResource ParameterValueTextBox}" BorderThickness="1" Margin="0 0 0 10"/>
+
+      <CheckBox x:Name="UseStaticName" Content="Use static class" Margin="0 0 0 10" />
+
       <StackPanel Margin="0,0,0,10">
-        <TextBlock Text="QForm interaction type" FontWeight="Bold"/>
+        <TextBlock Text="QForm interaction type" FontWeight="SemiBold"/>
 
         <RadioButton x:Name="NewQFormWindowRadioButton" Content="Script starts new QForm window"/>
         <RadioButton x:Name="StartFromAppWindowRadioButton" Content="QForm start script from application window" Unchecked="StartFromAppWindowRadioButton_Unchecked" Checked="StartFromAppWindowRadioButton_Checked"/>
@@ -35,29 +38,21 @@
         <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window"/>
       </StackPanel>
 
-      <!-- Третий блок: QForm reference type -->
       <StackPanel Margin="0,0,0,10">
-        <TextBlock Text="QForm reference type" FontWeight="Bold"/>
+        <TextBlock Text="QForm reference type" FontWeight="SemiBold"/>
 
         <RadioButton 
-        x:Name="UseQFormAPIFromInstallationRadioButton" 
-        Content="Use QFormAPI reference from QForm installation folder" 
-        Checked="RadioButton_Checked"/>
-        <Button 
-        x:Name="SelectAPIdllButton" 
-        Content="Add QFormAPI reference to project" 
-        Margin="20,0,0,0" 
-        Click="SelectAPIButton_Click"/>
+          x:Name="UseQFormAPIFromInstallationRadioButton" 
+          Content="Use QFormAPI reference from QForm installation folder"/>
 
         <RadioButton 
-        x:Name="UseCopyOfQFormAPIRadioButton" 
-        Content="Use copy of QFormAPI.cs from script folder" 
-        Checked="RadioButton_Checked"/>
-        <Button 
-        x:Name="SelectAPICopyButton" 
-        Content="Add QFormAPI.cs project" 
-        Margin="20,0,0,0" 
-        Click="SelectAPIButton_Click"/>
+          x:Name="UseCopyOfQFormAPIRadioButton" 
+          Content="Use copy of QFormAPI.cs from script folder"/>
+      </StackPanel>
+
+      <StackPanel Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Content="Add Class to Project" Margin="0 5 0 0"  Click="AddClassToProject"/>
+        <Button Content="Add Script to Workspace" Margin="5 5 0 0" Click="AddScriptToWorkspace"/>
       </StackPanel>
 
       <!-- Блок для отображения ошибки -->

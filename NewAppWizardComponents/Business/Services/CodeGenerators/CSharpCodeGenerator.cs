@@ -195,19 +195,29 @@ public class CSharpCodeGenerator : ICodeGenerator
         return codeEntries;
     }
 
-    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry)
+    public List<ViewCodeSample> GenerateApiSnippet(ApiEntry entry, string qformBaseDir)
     {
         var snippetConfig = entry.arg_value as ACSharpSettings;
 
         var codeEntries = new List<ViewCodeSample>();
 
+        codeEntries.Add(new ViewCodeSample("using ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QFormAPI;\n\n", ViewCodeSampleType.Default));
+
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("static ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("class ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample($"{snippetConfig.class_name} ", ViewCodeSampleType.Default));
+        codeEntries.Add(new ViewCodeSample("{\n", ViewCodeSampleType.Brackets));
+
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("    static ", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("string ", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("qform_base_dir ", ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
-        codeEntries.Add(new ViewCodeSample("@\"C:\\QForm UK\\11.0.2\\\"", ViewCodeSampleType.Comment));
+        codeEntries.Add(new ViewCodeSample($"@\"{qformBaseDir}\"", ViewCodeSampleType.Comment));
         codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-        codeEntries.Add(new ViewCodeSample("QForm ", ViewCodeSampleType.Default));
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("    static ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("QForm ", ViewCodeSampleType.Type));
         codeEntries.Add(new ViewCodeSample("qform ", ViewCodeSampleType.Default));
         codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
         codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
@@ -215,16 +225,24 @@ public class CSharpCodeGenerator : ICodeGenerator
         codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
         codeEntries.Add(new ViewCodeSample(";\n\n", ViewCodeSampleType.Default));
 
-
-        //if (snippetConfig.import_dir == APIQFormReference.default_folder.ToString())
-        //{
-            
-        //}
+        codeEntries.Add(new ViewCodeSample("    public ", ViewCodeSampleType.Keyword));
+        if (snippetConfig.use_static) codeEntries.Add(new ViewCodeSample("static ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("void ", ViewCodeSampleType.Keyword));
+        codeEntries.Add(new ViewCodeSample("Execute", ViewCodeSampleType.Method));
+        codeEntries.Add(new ViewCodeSample("(){\n", ViewCodeSampleType.Brackets));
 
         switch (snippetConfig.connection_type)
         {
             case nameof(APIQFormInteractionType.script_starts):
-                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\t\tqform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
+                codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("@\"\\x64\"", ViewCodeSampleType.Comment));
+                codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
+                codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                codeEntries.Add(new ViewCodeSample("\t\tqform.", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("qform_start", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
@@ -234,23 +252,23 @@ public class CSharpCodeGenerator : ICodeGenerator
             case nameof(APIQFormInteractionType.qform_starts):
                 if (snippetConfig.alt_connection)
                 {
-                    codeEntries.Add(new ViewCodeSample("if", ViewCodeSampleType.Keyword));
+                    codeEntries.Add(new ViewCodeSample("\tif", ViewCodeSampleType.Keyword));
                     codeEntries.Add(new ViewCodeSample(" (", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("is_started_by_qform", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("())", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("{\n", ViewCodeSampleType.Brackets));
 
-                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t    qform.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("} ", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("\t} ", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("else ", ViewCodeSampleType.Keyword));
-                    codeEntries.Add(new ViewCodeSample("{\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("\t{\n", ViewCodeSampleType.Brackets));
 
-                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t    qform.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
@@ -258,7 +276,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("    SessionId ", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t    SessionId ", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("qform_session_id ", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
                     codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
@@ -266,25 +284,25 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("    qform_session_id.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t    qform_session_id.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("session_id", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
                     codeEntries.Add(new ViewCodeSample("0", ViewCodeSampleType.Value));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("    qform.", ViewCodeSampleType.Default));
+                    codeEntries.Add(new ViewCodeSample("\t    qform.", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                    codeEntries.Add(new ViewCodeSample("}\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("\t}\n", ViewCodeSampleType.Brackets));
 
                     break;
                 }
 
-                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\tqform.", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("qform_attach", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
@@ -292,7 +310,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                 break;
 
             case nameof(APIQFormInteractionType.script_connect):
-                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\tqform.", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("qform_dir_set", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("qform_base_dir + ", ViewCodeSampleType.Default));
@@ -300,7 +318,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                 codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                codeEntries.Add(new ViewCodeSample("SessionId ", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\tSessionId ", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("qform_session_id ", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
                 codeEntries.Add(new ViewCodeSample("new ", ViewCodeSampleType.Keyword));
@@ -308,13 +326,13 @@ public class CSharpCodeGenerator : ICodeGenerator
                 codeEntries.Add(new ViewCodeSample("()", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                codeEntries.Add(new ViewCodeSample("qform_session_id.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\tqform_session_id.", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("session_id", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample(" = ", ViewCodeSampleType.Keyword));
                 codeEntries.Add(new ViewCodeSample("0", ViewCodeSampleType.Value));
                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
 
-                codeEntries.Add(new ViewCodeSample("qform.", ViewCodeSampleType.Default));
+                codeEntries.Add(new ViewCodeSample("\tqform.", ViewCodeSampleType.Default));
                 codeEntries.Add(new ViewCodeSample("qform_attach_to", ViewCodeSampleType.Method));
                 codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                 codeEntries.Add(new ViewCodeSample("qform_session_id", ViewCodeSampleType.Default));
@@ -323,6 +341,9 @@ public class CSharpCodeGenerator : ICodeGenerator
 
                 break;
         }
+
+
+        codeEntries.Add(new ViewCodeSample("    }\n}\n", ViewCodeSampleType.Brackets));
 
         return codeEntries;
     }

@@ -226,6 +226,11 @@ public sealed partial class PythonApiSettingsDialog : ContentDialog
                 catch (Exception ex)
                 {
                     DisplayError(ex.Message);
+
+                    if (File.Exists(file.Path))
+                        File.Delete(file.Path);
+
+                    return;
                 }
             }
         }

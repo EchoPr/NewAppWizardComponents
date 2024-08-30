@@ -206,7 +206,6 @@ public sealed partial class MainPage : Page
 
         newBlock.Child = newCodeLines;
         newBlock.Style = (Style)Resources["CodeBlockBorder"];
-        //if (entryNumber == 1) { newBlock.Margin = new Thickness(0, 0, 0, 0); }
 
         newBlock.Tag = new ExpandedEntry(entry, entryNumber, generationMode == CodeGenerationMode.StepByStep);
 
