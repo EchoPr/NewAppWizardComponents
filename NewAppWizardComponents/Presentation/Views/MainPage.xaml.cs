@@ -697,6 +697,11 @@ public sealed partial class MainPage : Page
             SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
             InvokeButton.IsEnabled = true;
         }
+        else
+        {
+
+            ShowMessageBox("To add this method use the context menu in QForm");
+        }
     }
 
     public void OnListMethodClick(object sender, ItemClickEventArgs e)
@@ -705,13 +710,13 @@ public sealed partial class MainPage : Page
         if (e.ClickedItem is ApiEntry entry && !entry.menu_only)
         {
             AddToWorksapceButton.IsEnabled = true;
-            mainPageVM.UpdateDocsVisibility(_lastClickedMethod);
         }
         else
         {
             AddToWorksapceButton.IsEnabled = false;
-            ShowMessageBox("To add this method use the context menu in QForm");
         }
+
+        mainPageVM.UpdateDocsVisibility(_lastClickedMethod);
     }
 
     private void OnTreeMethodDoubleClick(object sender, DoubleTappedRoutedEventArgs e)
@@ -724,6 +729,11 @@ public sealed partial class MainPage : Page
             SetCodeBlockSelection(CodeBlocks.Children.Last() as Border, multipleSelection: false);
             InvokeButton.IsEnabled = true;
         }
+        else
+        {
+
+            ShowMessageBox("To add this method use the context menu in QForm");
+        }
     }
 
     private void OnTreeMethodClick(TreeView sender, TreeViewItemInvokedEventArgs args)
@@ -734,13 +744,13 @@ public sealed partial class MainPage : Page
             if (!item.ApiEntry.menu_only)
             {
                 AddToWorksapceButton.IsEnabled = true;
-                mainPageVM.UpdateDocsVisibility(item.ApiEntry);
             }
             else
             {
                 AddToWorksapceButton.IsEnabled = false;
-                ShowMessageBox("To add this method use the context menu in QForm");
             }
+
+            mainPageVM.UpdateDocsVisibility(item.ApiEntry);
         }
         else
         {

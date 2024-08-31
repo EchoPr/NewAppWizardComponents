@@ -172,7 +172,7 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public void UpdateDocsVisibility(ApiEntry entry)
     {
-        var docMethod = Docs.Find(m => m.Name == entry.Name);
+        var docMethod = Docs.Find(m => m.Name == entry.Name || m.Name + "*" == entry.Name);
         SelectedMethod = docMethod;
     }
 
@@ -297,6 +297,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
 
         item.IsVisible = isVisible;
+        item.isExpanded = isVisible;
 
         return isVisible;
     }
@@ -355,6 +356,9 @@ public class TreeViewItemModel : INotifyPropertyChanged
             }
         }
     }
+
+    private bool _isExpanded = false;
+    public bool isExpanded { get => _isExpanded; set => _isExpanded = value; }
 
     public Visibility ViewVisibility => IsVisible ? Visibility.Visible : Visibility.Collapsed;
 
