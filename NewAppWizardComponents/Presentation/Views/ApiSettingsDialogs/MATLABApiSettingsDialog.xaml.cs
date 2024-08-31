@@ -29,8 +29,6 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
             }
             else
             {
-                StartFromAppWindowRadioButton.IsChecked = true;
-
                 _snippetEntry = new ApiEntry(0, "_matlab_settings", typeof(AMatlabSettings), null, false, null, true);
                 UpdateConfig();
             }
@@ -44,7 +42,6 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
     {
         var snippetConfig = (_snippetEntry.arg_value as AMatlabSettings);
         snippetConfig.connection_type = DetermineInteractionType().ToString();
-        snippetConfig.alt_connection = ConnectToExistingWindowCheckBox.IsChecked == true;
         snippetConfig.use_qform_exceptions = EHQFormExceptions.IsChecked == true;
     }
 
@@ -98,8 +95,6 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
             return APIQFormInteractionType.script_starts;
         if (ConnectToExistingQFormRadioButton.IsChecked == true)
             return APIQFormInteractionType.script_connect;
-        if (StartFromAppWindowRadioButton.IsChecked == true)
-            return APIQFormInteractionType.qform_starts;
 
         return APIQFormInteractionType.script_starts; // Значение по умолчанию
     }
@@ -109,39 +104,11 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
     private bool ValidateInputs()
     {
 
-        if (NewQFormWindowRadioButton.IsChecked == false && StartFromAppWindowRadioButton.IsChecked == false &&
+        if (NewQFormWindowRadioButton.IsChecked == false &&
             ConnectToExistingQFormRadioButton.IsChecked == false)
             return false;
 
-        
-
         return true;
-    }
-
-    private void SetFieldsAvailability(bool value)
-    {
-        StartFromAppWindowRadioButton.IsEnabled = value;
-    }
-
-    private void MATLABFileRadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        SetFieldsAvailability(true);
-    }
-
-    private void NotebookRadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        SetFieldsAvailability(false);
-        StartFromAppWindowRadioButton.IsChecked = false;
-    }
-
-    private void StartFromAppWindowRadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        if (ConnectToExistingWindowCheckBox != null)
-            ConnectToExistingWindowCheckBox.IsEnabled = true;
-    }
-    private void StartFromAppWindowRadioButton_Unchecked(object sender, RoutedEventArgs e)
-    {
-        ConnectToExistingWindowCheckBox.IsEnabled = false;
     }
 
     public void RestoreDialogState()
@@ -149,9 +116,7 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
         var snippetConfig = (_snippetEntry.arg_value as AMatlabSettings);
 
         NewQFormWindowRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.script_starts.ToString();
-        StartFromAppWindowRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.qform_starts.ToString();
         ConnectToExistingQFormRadioButton.IsChecked = snippetConfig.connection_type == APIQFormInteractionType.script_connect.ToString();
-        ConnectToExistingWindowCheckBox.IsChecked = snippetConfig.alt_connection;
 
         EHTryCatch.IsChecked = snippetConfig.use_qform_exceptions == false;
         EHQFormExceptions.IsChecked = snippetConfig.use_qform_exceptions == true;
@@ -187,31 +152,9 @@ public sealed partial class MATLABApiSettingsDialog : ContentDialog
 
         UpdateConfig();
 
-        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("MATLAB", ".py"));
+        StorageFile file = await mainPageVM.projectManager.SaveFile(new Tuple<string, string>("MATLAB", ".m"));
 
         if (file == null) return;
-
-        string baseDir = mainPageVM.qformManager.QFormBaseDir;
-        string qformApi = "API\\App\\MATLAB\\QFormAPI.py";
-        string apiFile = Path.Combine(baseDir, qformApi);
-
-        if (file != null)
-        {
-            try
-            {
-                File.Copy(apiFile, Path.Combine((await file.GetParentAsync()).Path, "QFormAPI.py"));
-            }
-            catch (Exception ex)
-            {
-                DisplayError(ex.Message);
-
-                if (File.Exists(file.Path))
-                    File.Delete(file.Path);
-
-                return;
-            }
-        }
-
 
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator("MATLAB");
         List<ViewCodeSample> generatedCode = generator.GenerateApiSnippet(_snippetEntry, mainPageVM.qformManager.QFormBaseDir);

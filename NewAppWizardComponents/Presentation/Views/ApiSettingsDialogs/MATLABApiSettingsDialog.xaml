@@ -35,21 +35,12 @@
         <TextBlock Text="QForm interaction type" FontWeight="Bold"/>
         
         <RadioButton x:Name="NewQFormWindowRadioButton" Content="Script starts new QForm window"/>
-        <RadioButton x:Name="StartFromAppWindowRadioButton" Content="QForm start script from application window" Unchecked="StartFromAppWindowRadioButton_Unchecked" Checked="StartFromAppWindowRadioButton_Checked"/>
-        <CheckBox x:Name="ConnectToExistingWindowCheckBox" Content="or connect to existing window" Margin="20,0,0,0" IsEnabled="False" IsChecked="True"/>
-        <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window"/>
+        <RadioButton x:Name="ConnectToExistingQFormRadioButton" Content="Script connect to existing QForm window" IsChecked="True"/>
       </StackPanel>
-
-      <!--<StackPanel Margin="0,0,0,10">
-        <TextBlock Text="QForm reference type" FontWeight="Bold"/>
-        
-        <RadioButton x:Name="UseQFormAPIFromInstallationRadioButton" Content="Use QFormAPI.py from QForm installation folder using 'sys.path.append'" />
-        <RadioButton x:Name="UseCopyOfQFormAPIRadioButton" Content="Use copy of QFormAPI.py from script folder"/>
-      </StackPanel>-->
 
       <StackPanel Margin="0,0,0,10" Orientation="Horizontal" HorizontalAlignment="Right">
         <Button Content="Copy to Buffer" Margin="0 5 0 0" Click="CopyToBuffer"/>
-        <!--<Button Content="Create Script" Margin="5 5 0 0" Click="CreateScript"/>-->
+        <Button Content="Create Script" Margin="5 5 0 0" Click="CreateScript"/>
         <Button Content="Add Script to Workspace" Click="AddSnippetToWorkspace" Margin="5 5 0 0"/>
       </StackPanel>
 
