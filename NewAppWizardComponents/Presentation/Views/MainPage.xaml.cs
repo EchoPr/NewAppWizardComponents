@@ -327,7 +327,7 @@ public sealed partial class MainPage : Page
     private Border CreatePropertyVisibleName(string name, bool highlighted = false)
     {
         var propertyTextBlock = new TextBlock { Text = name, Style = (Style)Resources["ParameterName"] };
-        if (highlighted) propertyTextBlock.FontFamily = (FontFamily)Resources["SourceCodePro-Medium"];
+        if (highlighted) propertyTextBlock.FontFamily = new FontFamily("SegoeUI");
 
         var propertyBlockVisual = new Border { Style = (Style)Resources["ParameterNameBorder"] };
         propertyBlockVisual.Child = propertyTextBlock;

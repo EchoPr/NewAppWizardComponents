@@ -23,15 +23,6 @@
     <Content Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Assets\Fonts\JetBrainsMono-Bold.ttf" />
-    <None Remove="Assets\Fonts\JetBrainsMono-Italic.ttf" />
-    <None Remove="Assets\Fonts\JetBrainsMono-Medium.ttf" />
-    <None Remove="Assets\Fonts\JetBrainsMono-Regular.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Black.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Bold.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Medium.ttf" />
-    <None Remove="Assets\Fonts\Roboto-Regular.ttf" />
-    <None Remove="Assets\Fonts\RobotoMono-Regular.ttf" />
     <None Remove="Assets\Icons\connected_to_qform.svg" />
     <None Remove="Assets\Icons\QFormLogo.svg" />
     <None Remove="Assets\Icons\sort_by_alpha_20dp_131313.svg" />
@@ -64,12 +55,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Condition="$(TargetFramework.Contains('windows10'))" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Condition="$(TargetFramework.Contains('windows10'))" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\Icons\connected_to_qform.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

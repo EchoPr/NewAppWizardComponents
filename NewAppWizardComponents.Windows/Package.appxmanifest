@@ -30,9 +30,10 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="NewAppWizardComponents"
-        Description="NewAppWizardComponents">
+        DisplayName="AppWizard"
+        Description="AppWizard">
         <uap:SplashScreen />
+        <uap:DefaultTile/>
       </uap:VisualElements>
     </Application>
   </Applications>

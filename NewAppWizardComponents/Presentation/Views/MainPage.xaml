@@ -61,17 +61,17 @@
 
       <Button Click="SaveProject"
         Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE74E;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/file-save.png" Width="16" Height="16"/>
       </Button>
 
       <Button Click="SaveCodeAs"
         Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE792;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/file-save-as.png" Width="16" Height="16"/>
       </Button>
 
       <Button Click="LoadProject"
         Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/file-open.png" Width="16" Height="16"/>
       </Button>
 
       <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
@@ -79,7 +79,7 @@
       <Button Command="{Binding ClearCodeBlocksCommand}" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE75C;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/clear.png" Width="16" Height="16"/>
       </Button>
 
       <Button Click="ClearSelected" 
@@ -129,13 +129,13 @@
       <Button Click="CopyCode" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE8C8;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/object-copy.png" Width="16" Height="16"/>
       </Button>
 
       <Button Click="CopySelected" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xF413;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/report-save.png" Width="16" Height="16"/>
       </Button>
 
       <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
@@ -143,13 +143,13 @@
       <Button Click="CodeBlockUp" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE70E;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/arrow-up.png" Width="16" Height="16"/>
       </Button>
 
       <Button Click="CodeBlockDown" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE70D;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/arrow-down.png" Width="16" Height="16"/>
       </Button>
 
       <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
@@ -157,7 +157,7 @@
       <Button Click="SetStartIndex" 
         Style="{StaticResource ToolbarIconButton}"
         Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE70D;" FontSize="16" />
+        <Image Source="ms-appx:///Assets/icons/nodes.png" Width="16" Height="16"/>
       </Button>
     </StackPanel>
 
@@ -202,10 +202,11 @@
           <TreeView Grid.Row="1" ItemsSource="{Binding TreeViewItems, Mode=OneWay}"
                   AllowDrop="False" CanDrag="False" CanDragItems="False" CanReorderItems="False"
                   IsDoubleTapEnabled="True" DoubleTapped="OnTreeMethodDoubleClick"
-                  ItemInvoked="OnTreeMethodClick" Background="White" x:Name="TreeViewMethods">
+                  ItemInvoked="OnTreeMethodClick" Background="White" x:Name="TreeViewMethods"
+                    CharacterSpacing="1">
             <TreeView.ItemTemplate>
               <DataTemplate x:DataType="local:TreeViewItemModel">
-                <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
+                <TreeViewItem  ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
                   Visibility="{Binding ViewVisibility, Mode=OneWay}"/>
               </DataTemplate>
             </TreeView.ItemTemplate>
@@ -276,7 +277,7 @@
                     Background="White" BorderBrush="#E0E0E0" BorderThickness="1" Padding="8">
         <StackPanel>
           <StackPanel x:Name="CodeBlocksBefore" Margin="0 0 0 10"/>
-          <StackPanel x:Name="CodeBlocks" Padding="0 10 10 10"/>
+          <StackPanel x:Name="CodeBlocks" Padding="0 10 10 10" />
           <StackPanel x:Name="CodeBlocksAfter" Margin="0 10 0 0"/>
         </StackPanel>
       </ScrollViewer>
@@ -299,7 +300,7 @@
             <TextBlock Text="{Binding SelectedMethod.Name}" Style="{StaticResource TextHeader}" Margin="0 20 10 0"/>
             <Border Height="24" Padding="3" Background="{StaticResource APILevel1}" Margin="0 17 0 0">
               <TextBlock Text="Уровень API: доступ к исходным данным" Style="{StaticResource TextDefault}"
-               Foreground="{StaticResource ForegroundWhite}" FontFamily="{StaticResource RobotoMedium}"/>
+               Foreground="{StaticResource ForegroundWhite}"/>
             </Border>
           </StackPanel>
           <TextBlock Text="{Binding SelectedMethod.DescRu}" Style="{StaticResource TextDefault}" Margin="0 15 0 0"/>
@@ -411,7 +412,7 @@
           <Button HorizontalAlignment="Left" Click="InvokeButtonCommand" x:Name="InvokeButton"
                   Padding="2" Background="Transparent" IsEnabled="False" >
             <StackPanel Orientation="Horizontal">
-              <FontIcon Glyph="&#xE768;" Margin="0 0 4 0" FontSize="14"/>
+              <Image Source="ms-appx:///Assets/icons/solve-start.png" Width="16" Height="16"/>
               <TextBlock Text="Invoke" FontSize="14" />
             </StackPanel>
           </Button>

@@ -6,22 +6,7 @@
     <ResourceDictionary Source="CustomColors.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <FontFamily x:Key="RobotoRegular">ms-appx:///Assets/Fonts/Roboto-Regular.ttf#Roboto</FontFamily>
-  <FontFamily x:Key="RobotoBold">ms-appx:///Assets/Fonts/Roboto-Bold.ttf#Roboto</FontFamily>
-  <FontFamily x:Key="RobotoBlack">ms-appx:///Assets/Fonts/Roboto-Black.ttf#Roboto</FontFamily>
-  <FontFamily x:Key="RobotoMedium">ms-appx:///Assets/Fonts/Roboto-Medium.ttf#Roboto</FontFamily>
-  <FontFamily x:Key="RobotoMonoRegular">ms-appx:///Assets/Fonts/RobotoMono-Regular.ttf#Roboto Mono</FontFamily>
-
-  <FontFamily x:Key="JBM-Regular">ms-appx:///Assets/Fonts/JetBrainsMono-Regular.ttf#JetBrains Mono</FontFamily>
-  <FontFamily x:Key="JBM-Bold">ms-appx:///Assets/Fonts/JetBrainsMono-Bold.ttf#JetBrains Mono</FontFamily>
-  <FontFamily x:Key="JBM-Medium">ms-appx:///Assets/Fonts/JetBrainsMono-Medium.ttf#JetBrains Mono</FontFamily>
-  <FontFamily x:Key="JBM-Italic">ms-appx:///Assets/Fonts/JetBrainsMono-Italic.ttf#JetBrains Mono</FontFamily>
-
-  <FontFamily x:Key="SourceCodePro-Regular">ms-appx:///Assets/Fonts/SourceCodePro/SourceCodePro-Regular.ttf#Source Code Pro</FontFamily>
-  <FontFamily x:Key="SourceCodePro-Medium">ms-appx:///Assets/Fonts/SourceCodePro/SourceCodePro-Medium.ttf#Source Code Pro</FontFamily>
-
   <Style TargetType="TextBlock" x:Name="TextDefault">
-    <Setter Property="FontFamily" Value="{StaticResource RobotoRegular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="Foreground" Value="{StaticResource SolidDarkGray}"/>
     <Setter Property="IsTextSelectionEnabled" Value="True"/>
@@ -30,7 +15,6 @@
 
   <Style TargetType="TextBlock" x:Name="TextHeader" BasedOn="{StaticResource TextDefault}">
     <Setter Property="FontSize" Value="16"/>
-    <Setter Property="FontFamily" Value="{StaticResource RobotoBold}"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TableItemText" BasedOn="{StaticResource TextDefault}">
@@ -39,11 +23,9 @@
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TableArgName" BasedOn="{StaticResource TableItemText}">
-    <Setter Property="FontFamily" Value="{StaticResource RobotoMonoRegular}"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TableTypeName" BasedOn="{StaticResource TableItemText}">
-    <Setter Property="FontFamily" Value="{StaticResource RobotoBold}"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="TableHeaderText" BasedOn="{StaticResource TableItemText}">
@@ -51,7 +33,7 @@
   </Style>
 
   <Style TargetType="TextBlock" x:Name="CodeBlock" BasedOn="{StaticResource TextDefault}">
-    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
+    <Setter Property="FontFamily" Value="Consolas"/>
   </Style>
 
   <Style TargetType="TextBlock" x:Name="ContentBlockHeader">
@@ -63,7 +45,6 @@
   </Style>
 
   <Style TargetType="TextBlock" x:Name="ParameterName" BasedOn="{StaticResource TextDefault}">
-    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="Padding" Value="7 7 0 7"/>
     <Setter Property="Height" Value="32"/>
     <Setter Property="FontSize" Value="14"/>
@@ -76,7 +57,6 @@
     <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
     <Setter Property="BorderThickness" Value="1 0 0 1"/>
 
-    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
   </Style>
@@ -89,7 +69,6 @@
 
     <Setter Property="Padding" Value="7"/>
 
-    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
   </Style>
@@ -101,7 +80,6 @@
     <Setter Property="BorderBrush" Value="{StaticResource BoxBorderPrimary}"/>
     <Setter Property="BorderThickness" Value="1 0 0 1"/>
 
-    <Setter Property="FontFamily" Value="{StaticResource SourceCodePro-Regular}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="HorizontalAlignment" Value="Stretch"/>
 
