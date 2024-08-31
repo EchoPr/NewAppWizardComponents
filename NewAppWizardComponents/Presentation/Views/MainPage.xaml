@@ -208,7 +208,7 @@
             <TreeView.ItemTemplate>
               <DataTemplate x:DataType="local:TreeViewItemModel">
                 <TreeViewItem ItemsSource="{Binding Children, Mode=OneWay}" Content="{x:Bind Name}"
-                  Visibility="{Binding ViewVisibility, Mode=OneWay}" IsExpanded="True"/>
+                  Visibility="{Binding ViewVisibility, Mode=OneWay}" IsExpanded="{Binding isExpanded, Mode=OneWay}"/>
               </DataTemplate>
             </TreeView.ItemTemplate>
           </TreeView>

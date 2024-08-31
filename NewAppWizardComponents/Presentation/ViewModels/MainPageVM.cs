@@ -297,7 +297,8 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
 
         item.IsVisible = isVisible;
-        item.isExpanded = isVisible;
+        if (!string.IsNullOrEmpty(filterText))
+            item.isExpanded = isVisible;
 
         return isVisible;
     }
@@ -356,9 +357,13 @@ public class TreeViewItemModel : INotifyPropertyChanged
             }
         }
     }
-
-    private bool _isExpanded = false;
-    public bool isExpanded { get => _isExpanded; set => _isExpanded = value; }
+    private bool _isExpanded;
+    public bool isExpanded { get => _isExpanded; set
+        {
+            _isExpanded = value;
+            OnPropertyChanged();
+        }
+    }
 
     public Visibility ViewVisibility => IsVisible ? Visibility.Visible : Visibility.Collapsed;
 
@@ -368,6 +373,7 @@ public class TreeViewItemModel : INotifyPropertyChanged
         Children = new ObservableCollection<TreeViewItemModel>();
         ApiEntry = apiEntry;
         IsVisible = true; // Default to visible
+        isExpanded = false;
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
