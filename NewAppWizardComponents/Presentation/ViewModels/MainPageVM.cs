@@ -116,6 +116,8 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
+    public int startGenerationIndex = 0;
+
     public string VisualSession
     {
         get => _currentSession == null ? "QForm not connected" : $"Connected to: {_currentSession}";
@@ -159,7 +161,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         {
             var newEntry = originalEntry ? entry : entry.Clone();
             _codeBlocks.Insert(index, newEntry);
-            AddedNewCodeBlock?.Invoke(this, new ExpandedEntry(newEntry, index, generationMode == CodeGenerationMode.StepByStep));
+            AddedNewCodeBlock?.Invoke(this, new ExpandedEntry(newEntry, index + startGenerationIndex, generationMode == CodeGenerationMode.StepByStep));
         }
     }
 

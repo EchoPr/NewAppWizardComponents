@@ -221,7 +221,7 @@ public sealed partial class CSharpApiSettingsDialog : ContentDialog
         }
 
     }
-
+    
     private bool isDotnetFramework(XDocument csproj)
     {
         var targetFrameworkElement = csproj.Descendants("TargetFramework").FirstOrDefault();

@@ -59,8 +59,39 @@
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Orientation="Horizontal"
                 Background="{StaticResource ToolbarGradient}" Padding="4" BorderBrush="{StaticResource BoxBorderPrimary}" BorderThickness="0 1 0 1">
 
-      <TextBlock Text="Code:" Style="{StaticResource TextDefault}" FontSize="14" VerticalAlignment="Center"
-                 Margin="0 0 4 0"/>
+      <Button Click="SaveProject"
+        Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE74E;" FontSize="16" />
+      </Button>
+
+      <Button Click="SaveCodeAs"
+        Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE792;" FontSize="16" />
+      </Button>
+
+      <Button Click="LoadProject"
+        Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE8E5;" FontSize="16" />
+      </Button>
+
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Command="{Binding ClearCodeBlocksCommand}" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE75C;" FontSize="16" />
+      </Button>
+
+      <Button Click="ClearSelected" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xED62;" FontSize="16" />
+      </Button>
+
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <TextBlock Text="Language:" Style="{StaticResource TextDefault}" FontSize="14" VerticalAlignment="Center"
+                 Margin="4 0 4 0"/>
 
       <ComboBox x:Name="LanguageComboBox"
                 SelectedIndex="0"
@@ -81,48 +112,54 @@
         <SplitButton.Flyout>
           <MenuFlyout x:Name="WizardMenuFlyout">
             <MenuFlyoutItem Text="API Wizard" FontWeight="SemiBold" Click="ApiWizardClickMenuFlyout"/>
-            
-            <MenuFlyoutItem Text="Add QFormAPI.cs то project" Tag="C#"/>
-            <MenuFlyoutItem Text="Add QFormAPI refrence to project" Tag="C#"/>
+
+            <MenuFlyoutItem Text="Add QFormAPI.cs то project" Click="AddCSClassToProject" Tag="C#"/>
+            <MenuFlyoutItem Text="Add QFormAPI refrence to project" Click="AddCSApiReferenceToProject" Tag="C#"/>
 
             <MenuFlyoutItem Text="Copy QFormAPI.py" Click="CopyQFormApiPyMenuFlyout" Visibility="Collapsed" Tag="Python" />
           </MenuFlyout>
         </SplitButton.Flyout>
 
       </SplitButton>
-      
-      <Button Command="{Binding ClearCodeBlocksCommand}" 
-              Style="{StaticResource ToolbarIconButton}"
-              Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE75C;" FontSize="16" />
-      </Button>
-
-      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
-
-      <Button Click="InvokeButtonCommand"
-              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE768;" FontSize="16" />
-      </Button>
-
-      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
-
-      <Button Click="SaveProject"
-              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE74E;" FontSize="16" />
-      </Button>
-
-      <Button Click="LoadProject"
-              Style="{StaticResource ToolbarIconButton}" Margin="4 0 0 0">
-        <FontIcon Glyph="&#xE8E5;" FontSize="16" />
-      </Button>
 
       <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="20" Text="there will be a toolbar here" TextAlignment="Center" Foreground="LightGray"/>-->
 
-      
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Click="CopyCode" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE8C8;" FontSize="16" />
+      </Button>
+
+      <Button Click="CopySelected" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xF413;" FontSize="16" />
+      </Button>
+
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Click="CodeBlockUp" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE70E;" FontSize="16" />
+      </Button>
+
+      <Button Click="CodeBlockDown" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE70D;" FontSize="16" />
+      </Button>
+
+      <Border Margin="4 0 0 0" Width="1" Height="20" VerticalAlignment="Center" Background="#929292"/>
+
+      <Button Click="SetStartIndex" 
+        Style="{StaticResource ToolbarIconButton}"
+        Margin="4 0 0 0">
+        <FontIcon Glyph="&#xE70D;" FontSize="16" />
+      </Button>
     </StackPanel>
-
-
-
 
     <!--TABBAR-->
     <Grid Grid.Column="0" Grid.Row="2" Grid.RowDefinitions="Auto, *">

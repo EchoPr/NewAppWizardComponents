@@ -190,7 +190,7 @@ public class CSharpCodeGenerator : ICodeGenerator
         if (entry.arg_type != null) { codeEntries.Add(new ViewCodeSample($"arg{num + 1}", ViewCodeSampleType.Default)); }
 
         codeEntries.Add(new ViewCodeSample(")", ViewCodeSampleType.Brackets));
-        codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default)); 
+        codeEntries.Add(new ViewCodeSample(";", ViewCodeSampleType.Default)); 
         
         return codeEntries;
     }
@@ -273,7 +273,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("Exception ", ViewCodeSampleType.Type));
                     codeEntries.Add(new ViewCodeSample("ex", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("){\n", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("ex.", ViewCodeSampleType.Default));
@@ -330,7 +330,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("Exception ", ViewCodeSampleType.Type));
                         codeEntries.Add(new ViewCodeSample("ex", ViewCodeSampleType.Default));
-                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("){\n", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine", ViewCodeSampleType.Method));
                         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("ex.", ViewCodeSampleType.Default));
@@ -405,7 +405,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("Exception ", ViewCodeSampleType.Type));
                         codeEntries.Add(new ViewCodeSample("ex", ViewCodeSampleType.Default));
-                        codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                        codeEntries.Add(new ViewCodeSample("){\n", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("\t\t\t\tConsole.WriteLine", ViewCodeSampleType.Method));
                         codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                         codeEntries.Add(new ViewCodeSample("ex.", ViewCodeSampleType.Default));
@@ -453,7 +453,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("Exception ", ViewCodeSampleType.Type));
                     codeEntries.Add(new ViewCodeSample("ex", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("){\n", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("ex.", ViewCodeSampleType.Default));
@@ -524,7 +524,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("Exception ", ViewCodeSampleType.Type));
                     codeEntries.Add(new ViewCodeSample("ex", ViewCodeSampleType.Default));
-                    codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
+                    codeEntries.Add(new ViewCodeSample("){\n", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("\t\t\tConsole.WriteLine", ViewCodeSampleType.Method));
                     codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample("ex.", ViewCodeSampleType.Default));

@@ -43,6 +43,7 @@
     <None Remove="Presentation\Views\ApiSettingsDialogs\VBAApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ApiSettingsDialogs\VBNETApiSettingsDialog.xaml" />
     <None Remove="Presentation\Views\ConnectQFormDialog.xaml" />
+    <None Remove="Presentation\Views\SetStartGenerationIndexDialog.xaml" />
     <None Remove="Resources\ControlsStyling.xaml" />
     <None Remove="Resources\Controls\BlockScrollViewer.xaml" />
     <None Remove="Resources\CustomBorders.xaml" />
@@ -272,6 +273,12 @@
   
   <ItemGroup>
     <UpToDateCheckInput Remove="Presentation\Views\ApiSettingsDialogs\MATLABApiSettingsDialog.xaml" />
+  </ItemGroup>
+
+  
+  
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Presentation\Views\SetStartGenerationIndexDialog.xaml" />
   </ItemGroup>
 
 </Project>

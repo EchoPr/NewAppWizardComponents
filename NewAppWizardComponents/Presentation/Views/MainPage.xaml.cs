@@ -5,8 +5,10 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Xml.Linq;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Uno.Extensions.Specialized;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Cryptography.Core;
@@ -56,8 +58,6 @@ public sealed partial class MainPage : Page
         { "XML", "Wizard" },
     };
 
-    // if was snippet in prev lang
-    bool snippetNotShown = false;
 
     public MainPage()
     {
@@ -141,15 +141,20 @@ public sealed partial class MainPage : Page
 
     public void AddNewCodeBlock(object sender, ExpandedEntry args)
     {
-        Border newBlock = CreateViewCodeBlock(
-            args.apiEntry,
-            args.index,
-            args.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
-            isEditig: false
-        ); 
+       OnAddCodeBlock(sender, args);
+    }
 
-        CodeBlocks.Children.Insert(args.index, newBlock);
-        ScrollToCodeBlock(newBlock);
+    public void OnAddCodeBlock(object sender, ExpandedEntry args, bool needScroll = true)
+    {
+        Border newBlock = CreateViewCodeBlock(
+           args.apiEntry,
+           args.index,
+           args.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
+           isEditig: false
+       );
+
+        CodeBlocks.Children.Insert(args.index - mainPageVM.startGenerationIndex, newBlock);
+        if (needScroll) ScrollToCodeBlock(newBlock);
     }
 
     private Border CreateViewCodeBlock(ApiEntry entry, int entryNumber, CodeGenerationMode generationMode, bool isEditig)
@@ -158,7 +163,7 @@ public sealed partial class MainPage : Page
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(currentSelectedLanguage);
         var generatedCode = entry.is_snippet
                             ? generator.GenerateApiSnippet(entry, mainPageVM.qformManager.QFormBaseDir)
-                            : generator.GenerateCodeEntry(entry, entryNumber, generationMode);
+                            : generator.GenerateCodeEntry(entry, entryNumber , generationMode);
 
         var newCodeLines = new TextBlock();
 
@@ -207,9 +212,8 @@ public sealed partial class MainPage : Page
         newBlock.Child = newCodeLines;
         newBlock.Style = (Style)Resources["CodeBlockBorder"];
 
-        newBlock.Tag = new ExpandedEntry(entry, entryNumber, generationMode == CodeGenerationMode.StepByStep);
+        newBlock.Tag = new ExpandedEntry(entry, entryNumber - mainPageVM.startGenerationIndex, generationMode == CodeGenerationMode.StepByStep);
 
-        SetCodeBlockSelection(newBlock, multipleSelection: false);
 
         if (!entry.is_snippet && !isEditig)
             ShowParameters(entry);
@@ -458,7 +462,7 @@ public sealed partial class MainPage : Page
         Border updatedBlock;
         updatedBlock = CreateViewCodeBlock(
             meta.apiEntry,
-            meta.index,
+            meta.index + mainPageVM.startGenerationIndex,
             meta.isConnectedBlockSequentialInitialized ? CodeGenerationMode.StepByStep : CodeGenerationMode.ObjectInit,
             true
         );
@@ -507,6 +511,7 @@ public sealed partial class MainPage : Page
 
         double posY = block.TransformToVisual(CodeView.Content as UIElement).TransformPoint(new Windows.Foundation.Point()).Y;
         CodeView.ChangeView(null, posY, null);
+        SetCodeBlockSelection(block, false);
     }
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
@@ -763,7 +768,7 @@ public sealed partial class MainPage : Page
         }
     }
 
-    private void LanguageSelectionChange(string lang) 
+    private void LanguageSelectionChange(string lang, List<bool>? genModes = null) 
     {
         if (CodeBlocks == null || lang == null) return;
 
@@ -806,12 +811,22 @@ public sealed partial class MainPage : Page
             mainPageVM.CodeBlocks.Insert(0, snippet);
         }
 
+        if (genModes == null)
+        {
+            ClearShownParameters();
+            genModes = new List<bool>();
+            foreach (Border b in CodeBlocks.Children)
+            {
+                genModes.Add((b.Tag as ExpandedEntry).isConnectedBlockSequentialInitialized);
+            }
+        }
+
         _ClearViewCodeBlocks();
         var blocksCount = mainPageVM.CodeBlocks.Count;
         for (int i = 0; i < blocksCount; i++)
         {
             // Don't try this at home!
-            AddNewCodeBlock(null, new ExpandedEntry(mainPageVM.CodeBlocks[i], i));
+            OnAddCodeBlock(null, new ExpandedEntry(mainPageVM.CodeBlocks[i], i +  mainPageVM.startGenerationIndex, genModes[i]), false);
         }
     }
 
@@ -841,6 +856,14 @@ public sealed partial class MainPage : Page
         }
 
         SaveCode(generatedCodeList, "S-expr");
+    }
+
+    private void SaveCodeAs(object sender, RoutedEventArgs e)
+    {
+        mainPageVM.SaveCodeLines(
+            CodeBlocks.Children.Aggregate("", (acc, val) => acc + ((val as Border).Child as TextBlock).Text + "\n\n"),
+            currentSelectedLanguage
+        );
     }
 
     private void SaveCode(IEnumerable collection, string? lang = null)
@@ -966,8 +989,222 @@ public sealed partial class MainPage : Page
 
     //    _languageSnippets[currentSelectedLanguage] = snippet;
 
-        
+
     //}
+
+    private async void AddCSApiReferenceToProject(object sender, RoutedEventArgs e)
+    {
+        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
+
+        string baseDir = mainPageVM.qformManager.QFormBaseDir;
+        string qformApi = "x64\\QFormApiNet.dll";
+
+        string apiFile = Path.Combine(baseDir, qformApi);
+
+        string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        if (csprojFilePath == null)
+            throw new Exception("There is no .csproj file in the selected folder");
+
+        XDocument csprojXml = XDocument.Load(csprojFilePath);
+        XElement root = csprojXml.Root;
+        if (root == null)
+            throw new Exception("Invalid .csproj file.");
+
+        XNamespace ns = root.GetDefaultNamespace();
+        XElement itemGroup = root.Element(ns + "ItemGroup");
+        if (itemGroup == null)
+        {
+            itemGroup = new XElement(ns + "ItemGroup");
+            root.Add(itemGroup);
+        }
+
+        // Remove existing DLL references
+        var existingReference = itemGroup.Elements(ns + "Reference")
+            .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormAPINet");
+        existingReference?.Remove();
+
+        // Add new DLL reference
+        XElement reference = new XElement(ns + "Reference",
+                new XAttribute("Include", "QFormAPINet"),
+                new XElement(ns + "HintPath", apiFile)
+            );
+        itemGroup.Add(reference);
+        csprojXml.Save(csprojFilePath);
+
+    }
+
+    private bool isDotnetFramework(XDocument csproj)
+    {
+        var targetFrameworkElement = csproj.Descendants("TargetFramework").FirstOrDefault();
+
+        if (targetFrameworkElement != null)
+        {
+            string targetFramework = targetFrameworkElement.Value;
+
+            if (targetFramework.StartsWith("netcoreapp") || targetFramework.StartsWith("net"))
+            {
+                return false;
+            }
+            else if (targetFramework.StartsWith("net") && targetFramework.Length == 4)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (csproj.ToString().Contains("TargetFrameworkVersion"))
+            {
+                return true;
+            }
+        }
+
+        throw new Exception("Unknown csproj type");
+    }
+
+    private async void AddCSClassToProject(object sender, RoutedEventArgs e)
+    {
+        StorageFolder folder = await mainPageVM.projectManager.SelectFolder();
+
+        if (folder == null) return;
+
+        string baseDir = mainPageVM.qformManager.QFormBaseDir;
+        string qformApi = "API\\App\\C#\\QForm.cs";
+
+        string apiFile = Path.Combine(baseDir, qformApi);
+
+        string csprojFilePath = Directory.GetFiles(folder.Path, "*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        if (csprojFilePath != null)
+        {
+            XDocument csprojXml = XDocument.Load(csprojFilePath);
+            XElement root = csprojXml.Root;
+            if (root == null)
+                throw new Exception("Invalid .csproj file.");
+
+            XNamespace ns = root.GetDefaultNamespace();
+            XElement itemGroup = root.Element(ns + "ItemGroup");
+            if (itemGroup == null)
+            {
+                itemGroup = new XElement(ns + "ItemGroup");
+                root.Add(itemGroup);
+            }
+
+            if (isDotnetFramework(csprojXml))
+            {
+                var existingCompile = itemGroup.Elements(ns + "Compile")
+                .FirstOrDefault(e => e.Attribute("Include")?.Value == "QFormApi.cs");
+                existingCompile?.Remove();
+
+                XElement compile = new XElement(ns + "Compile",
+                        new XAttribute("Include", "QFormApi.cs")
+                    );
+                itemGroup.Add(compile);
+                csprojXml.Save(csprojFilePath);
+            }
+        }
+
+        File.Copy(apiFile, Path.Combine(folder.Path, "QFormApi.cs"), true);
+    }
+
+    private void ClearSelected(object sender, RoutedEventArgs e)
+    {
+        foreach (var block in _selectedBlocks)
+        {
+            mainPageVM.CodeBlocks.Remove((block.Tag as ExpandedEntry).apiEntry);
+        }
+
+
+        LanguageSelectionChange(currentSelectedLanguage);
+        
+        ClearShownParameters();
+        _selectedBlocks.Clear();
+    }
+    
+    private void CopyCode(object sender, RoutedEventArgs e)
+    {
+        var dp = new DataPackage();
+        dp.SetText(CodeBlocks.Children.Aggregate("", (acc, val) => acc + ((val as Border).Child as TextBlock).Text + "\n\n"));
+        Clipboard.SetContent(dp);
+    }
+
+    private void CopySelected(object sender, RoutedEventArgs e)
+    {
+        var dp = new DataPackage();
+        dp.SetText(_selectedBlocks.OrderBy(e => (e.Tag as ExpandedEntry).index).Aggregate("", (acc, val) => acc + (val.Child as TextBlock).Text + "\n\n"));
+        Clipboard.SetContent(dp);
+    }
+
+    private void CodeBlockUp(object sender, RoutedEventArgs e)
+    {
+        if (_selectedBlocks.Count == 0) return;
+
+        var entry = _selectedBlocks.Last().Tag as ExpandedEntry;
+        int index = entry.index;
+
+        if (!(entry.index == 0 || entry.index == 1 && mainPageVM.CodeBlocks.First().is_snippet))
+        {
+            ApiEntry tmp = mainPageVM.CodeBlocks[index];
+            mainPageVM.CodeBlocks[index] = mainPageVM.CodeBlocks[index - 1];
+            mainPageVM.CodeBlocks[index - 1] = tmp;
+
+            List<bool> genModes = new List<bool>();
+            foreach (Border b in CodeBlocks.Children)
+            {
+                genModes.Add((b.Tag as ExpandedEntry).isConnectedBlockSequentialInitialized);
+            }
+
+            var t = genModes[index];
+            genModes[index] = genModes[index - 1];
+            genModes[index - 1] = t;
+
+            LanguageSelectionChange(currentSelectedLanguage, genModes);
+            ScrollToCodeBlock(CodeBlocks.Children[index - 1] as Border);
+            ShowParameters(mainPageVM.CodeBlocks[index - 1]);
+
+        }
+    }
+
+    private void CodeBlockDown(object sender, RoutedEventArgs e)
+    {
+        if (_selectedBlocks.Count == 0) return;
+
+        var entry = _selectedBlocks.Last().Tag as ExpandedEntry;
+        int index = entry.index;
+
+        if (!(entry.index == CodeBlocks.Children.Count - 1 || entry.index ==  CodeBlocks.Children.Count - 2 && mainPageVM.CodeBlocks.Last().is_snippet))
+        {
+            ApiEntry tmp = mainPageVM.CodeBlocks[index];
+            mainPageVM.CodeBlocks[index] = mainPageVM.CodeBlocks[index + 1];
+            mainPageVM.CodeBlocks[index + 1] = tmp;
+
+            List<bool> genModes = new List<bool>();
+            foreach (Border b in CodeBlocks.Children)
+            {
+                genModes.Add((b.Tag as ExpandedEntry).isConnectedBlockSequentialInitialized);
+            }
+
+            var t = genModes[index];
+            genModes[index] = genModes[index + 1];
+            genModes[index + 1] = t;
+
+            LanguageSelectionChange(currentSelectedLanguage, genModes);
+            ScrollToCodeBlock(CodeBlocks.Children[index + 1] as Border);
+            ShowParameters(mainPageVM.CodeBlocks[index + 1]);
+
+        }
+    }
+
+    private async void SetStartIndex(object sender, RoutedEventArgs e)
+    {
+        var dialog = new SetStartGenerationIndexDialog(mainPageVM);
+        dialog.XamlRoot = this.XamlRoot;
+
+        var res = await dialog.ShowAsync();
+
+        if (res == ContentDialogResult.Primary)
+        {
+            LanguageSelectionChange(currentSelectedLanguage);
+        }
+    }
 }
 
 public class CodeArg

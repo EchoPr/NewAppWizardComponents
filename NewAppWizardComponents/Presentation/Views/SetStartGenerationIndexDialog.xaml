@@ -1,0 +1,32 @@
+﻿<ContentDialog
+    x:Class="NewAppWizardComponents.SetStartGenerationIndexDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NewAppWizardComponents"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Set start generation index"
+    Style="{ThemeResource DefaultContentDialogStyle}"
+    PrimaryButtonText="Ok"
+    SecondaryButtonText="Cancel"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+
+  <ContentDialog.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="../../Resources/CustomColors.xaml"/>
+        <ResourceDictionary Source="../../Resources/TextStyling.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomBorders.xaml"/>
+        <ResourceDictionary Source="../../Resources/CustomButtons.xaml"/>
+        <ResourceDictionary Source="../../Resources/Controls/BlockScrollViewer.xaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ContentDialog.Resources>
+
+
+  <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Text="Start generation index" FontWeight="SemiBold"/>
+    <TextBox x:Name="SGindex" HorizontalAlignment="Stretch" TextChanged="SGindex_TextChanged"
+         Style="{StaticResource ParameterValueTextBox}" BorderThickness="1" Margin="0 0 0 10"/>
+  </StackPanel>
+</ContentDialog>
