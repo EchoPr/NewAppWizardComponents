@@ -13,6 +13,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Security.Cryptography.Core;
 using Windows.System;
+using Windows.UI.Core;
 
 
 namespace NewAppWizardComponents;
@@ -174,36 +175,31 @@ public sealed partial class MainPage : Page
 
         newCodeLines.Style = (Style)Resources["CodeBlock"];
 
-        if (!entry.is_snippet)
-        {
-            newCodeLines.AllowFocusOnInteraction = true;
-            newCodeLines.GotFocus += CodeBlockGotFocus;
+        newCodeLines.AllowFocusOnInteraction = true;
+        newCodeLines.GotFocus += CodeBlockGotFocus;
 
-            newCodeLines.KeyDown += (s, e) =>
-            {
-                if (e.Key == VirtualKey.Control)
-                {
-                    _isCtrlPressed = true;
-                }
-            };
-
-            newCodeLines.KeyUp += (s, e) =>
-            {
-                if (e.Key == VirtualKey.Control)
-                {
-                    _isCtrlPressed = false;
-                }
-            };
-        }
-        else
+        newCodeLines.KeyDown += (s, e) =>
         {
-            if (!isEditig)
+            if (e.Key == VirtualKey.Control)
             {
-                for (int i = 0; i < CodeBlocks.Children.Count; i++)
-                {
-                    var meta = (CodeBlocks.Children[i] as Border).Tag as ExpandedEntry;
-                    (CodeBlocks.Children[i] as Border).Tag = new ExpandedEntry(meta.apiEntry, meta.index + 1, meta.isConnectedBlockSequentialInitialized);
-                }
+                _isCtrlPressed = true;
+            }
+        };
+
+        newCodeLines.KeyUp += (s, e) =>
+        {
+            if (e.Key == VirtualKey.Control)
+            {
+                _isCtrlPressed = false;
+            }
+        };
+
+        if (entry.is_snippet)
+        {
+            for (int i = 0; i < CodeBlocks.Children.Count; i++)
+            {
+                var meta = (CodeBlocks.Children[i] as Border).Tag as ExpandedEntry;
+                (CodeBlocks.Children[i] as Border).Tag = new ExpandedEntry(meta.apiEntry, meta.index + 1, meta.isConnectedBlockSequentialInitialized);
             }
         }
 
@@ -505,13 +501,13 @@ public sealed partial class MainPage : Page
 
     }
 
-    private async void ScrollToCodeBlock(Border block)
+    private async void ScrollToCodeBlock(Border block, bool fromGotFocused = false)
     {
         await Task.Delay(100);
 
         double posY = block.TransformToVisual(CodeView.Content as UIElement).TransformPoint(new Windows.Foundation.Point()).Y;
         CodeView.ChangeView(null, posY, null);
-        SetCodeBlockSelection(block, false);
+        if (!fromGotFocused) SetCodeBlockSelection(block, false);
     }
 
     private void CodeBlockGotFocus(object sender, RoutedEventArgs e)
@@ -522,11 +518,11 @@ public sealed partial class MainPage : Page
         if (selectedBlock == null) return;
 
         SetCodeBlockSelection(selectedBlock, ctrlPressed);
-        ScrollToCodeBlock(selectedBlock); 
+        ScrollToCodeBlock(selectedBlock, true); 
 
-        if (!ctrlPressed)
+        var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
+        if (!ctrlPressed && !entry.is_snippet)
         {
-            var entry = (selectedBlock.Tag as ExpandedEntry).apiEntry;
             ShowParameters(entry);
         }
         else
@@ -826,7 +822,7 @@ public sealed partial class MainPage : Page
         for (int i = 0; i < blocksCount; i++)
         {
             // Don't try this at home!
-            OnAddCodeBlock(null, new ExpandedEntry(mainPageVM.CodeBlocks[i], i +  mainPageVM.startGenerationIndex, genModes[i]), false);
+            OnAddCodeBlock(null, new ExpandedEntry(mainPageVM.CodeBlocks[i], i +  mainPageVM.startGenerationIndex, true), false);
         }
     }
 
@@ -1204,6 +1200,15 @@ public sealed partial class MainPage : Page
         {
             LanguageSelectionChange(currentSelectedLanguage);
         }
+    }
+
+    private void Border_PointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+    }
+
+    private void Border_PointerExited(object sender, PointerRoutedEventArgs e)
+    {
+
     }
 }
 

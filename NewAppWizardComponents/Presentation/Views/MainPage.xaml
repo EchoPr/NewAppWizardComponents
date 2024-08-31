@@ -95,6 +95,7 @@
 
       <ComboBox x:Name="LanguageComboBox"
                 SelectedIndex="0"
+                Padding="4"
                 SelectionChanged="LanguageSelectionChanged"
                 Style="{StaticResource LanguageSelectorComboBox}"
                 VerticalAlignment="Center">
@@ -107,7 +108,7 @@
         <ComboBoxItem Content="XML"/>
       </ComboBox>
 
-      <SplitButton x:Name="WizardSplitButton" Height="30" FontSize="12" Padding="2" Margin="4 0 0 0"
+      <SplitButton x:Name="WizardSplitButton" Height="30" FontSize="12" Padding="4" Margin="4 0 0 0"
                    Background="Transparent" Click="ApiWizardClickSplitButton" Content="New C# Class">
         <SplitButton.Flyout>
           <MenuFlyout x:Name="WizardMenuFlyout">
@@ -261,10 +262,12 @@
     </Grid>
     
     <Border Grid.Row="2" Grid.Column="1" Background="#F3F3F3" Width="3" HorizontalAlignment="Stretch" ManipulationMode="All"
-      Tag="V1"
+      Tag="V1" 
       PointerPressed="Separator_PointerPressed" 
       PointerMoved="Separator_PointerMoved" 
-      PointerReleased="Separator_PointerReleased">
+      PointerReleased="Separator_PointerReleased"
+      PointerEntered="Border_PointerEntered"
+      PointerExited="Border_PointerExited">
 
       
     </Border>
