@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -1220,6 +1221,15 @@ public sealed partial class MainPage : Page
     {
 
     }
+
+    private void CollapseAll_Click(object sender, RoutedEventArgs e)
+    {
+        mainPageVM.PopulateTreeViewItems(FilterMethodsTree.Text, false);
+
+        
+    }
+
+
 }
 
 public class CodeArg

@@ -199,12 +199,15 @@ public partial class MainPageVM : INotifyPropertyChanged
         Docs = allMethods.Functions;
     }
 
-    private void PopulateTreeViewItems()
+    public void PopulateTreeViewItems(string? filteredText = "", bool expanded = false)
     {
         var categoryDict = new Dictionary<string, TreeViewItemModel>();
 
+        filteredText = filteredText?.Trim() ?? string.Empty;
+
         foreach (var method in Methods)
         {
+            if (method.Name.StartsWith("_")) continue;
             foreach (var group in method.groups)
             {
                 if (!categoryDict.ContainsKey(group.ru))
@@ -219,15 +222,28 @@ public partial class MainPageVM : INotifyPropertyChanged
             categoryDict.Values.OrderBy(c => c.Name)
         );
 
+        var removeList = new List<TreeViewItemModel>();
         foreach (var category in TreeViewItems)
         {
             var sortedChildren = category.Children.OrderBy(c => c.Name).ToList();
             category.Children.Clear();
             foreach (var child in sortedChildren)
             {
-                category.Children.Add(child);
+                if (child.Name.ToLower().Contains(filteredText.ToLower()))
+                    category.Children.Add(child);
             }
+
+            if (category.Children.Count == 0)
+                removeList.Add(category);
         }
+
+        foreach (var category in removeList)
+        {
+            TreeViewItems.Remove(category);
+        }
+
+        foreach (var category in TreeViewItems)
+            category.isExpanded = expanded;
     }
 
     [RelayCommand]
@@ -273,7 +289,8 @@ public partial class MainPageVM : INotifyPropertyChanged
 
     public void FilterMethodsTreeTextChanged(object sender, TextChangedEventArgs e)
     {
-        FilterMethodsTree(sender as TextBox);
+        TreeViewItems.Clear();
+        PopulateTreeViewItems((sender as TextBox)?.Text, true);
     }
 
     private void FilterMethodsTree(TextBox? viewFilter)
@@ -286,7 +303,7 @@ public partial class MainPageVM : INotifyPropertyChanged
         }
     }
 
-    private bool SetVisibility(TreeViewItemModel item, string filterText)
+    public bool SetVisibility(TreeViewItemModel item, string filterText, bool collapsing = false)
     {
         bool isVisible = item.Name.ToLowerInvariant().Contains(filterText);
 
@@ -299,6 +316,8 @@ public partial class MainPageVM : INotifyPropertyChanged
         item.IsVisible = isVisible;
         if (!string.IsNullOrEmpty(filterText))
             item.isExpanded = isVisible;
+
+        if (collapsing) item.isExpanded = false;
 
         return isVisible;
     }
