@@ -46,7 +46,7 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
                 if (property.PropertyType == typeof(String))
-                    codeEntries.Add(new ViewCodeSample($"\"{value}\"", ViewCodeSampleType.Comment));
+                    codeEntries.Add(new ViewCodeSample($"@\"{value}\"", ViewCodeSampleType.Comment));
                 else
                     codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
 
@@ -145,10 +145,18 @@ public class CSharpCodeGenerator : ICodeGenerator
                                 codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
+                                if (innerProperty.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample("@\"", ViewCodeSampleType.Comment));
+
                                 if (innerProperty.PropertyType.IsEnum)
                                     codeEntries.Add(new ViewCodeSample($"{innerProperty.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                                codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}", ViewCodeSampleType.Value));
+                                codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}", innerProperty.PropertyType == typeof(string)
+                                                                                                            ? ViewCodeSampleType.Comment
+                                                                                                            : ViewCodeSampleType.Value));
+
+                                if (innerProperty.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Comment));
                                 codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
                             }
 
@@ -167,11 +175,22 @@ public class CSharpCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample($"{property.Name} ", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample("@\"", ViewCodeSampleType.Comment));
+
                     if (property.PropertyType.IsEnum)
                         codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                    codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
+                    codeEntries.Add(new ViewCodeSample($"{value}", property.PropertyType == typeof(string)
+                                                                        ? ViewCodeSampleType.Comment
+                                                                        : ViewCodeSampleType.Value));
+
+                    if (property.PropertyType == typeof(string))
+                        codeEntries.Add(new ViewCodeSample("\"", ViewCodeSampleType.Comment));
+
                     codeEntries.Add(new ViewCodeSample(";\n", ViewCodeSampleType.Default));
+
+                    
                 }
             }
         }

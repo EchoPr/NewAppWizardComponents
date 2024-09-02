@@ -50,7 +50,7 @@ public class PythonCodeGenerator : ICodeGenerator
                             codeEntries.Add(new ViewCodeSample("append", ViewCodeSampleType.Method));
                             codeEntries.Add(new ViewCodeSample("(", ViewCodeSampleType.Brackets));
                             if (elementType == typeof(string))
-                                codeEntries.Add(new ViewCodeSample($"\"{v}\"", ViewCodeSampleType.Comment));
+                                codeEntries.Add(new ViewCodeSample($"r\"{v}\"", ViewCodeSampleType.Comment));
                             else
                                 codeEntries.Add(new ViewCodeSample($"{v}", ViewCodeSampleType.Value));
                             codeEntries.Add(new ViewCodeSample(")\n", ViewCodeSampleType.Brackets));
@@ -72,10 +72,18 @@ public class PythonCodeGenerator : ICodeGenerator
                                 codeEntries.Add(new ViewCodeSample($"arg{num + 1}_object{i + 1}.{innerProperty.Name} ", ViewCodeSampleType.Default));
                                 codeEntries.Add(new ViewCodeSample("= ", ViewCodeSampleType.Keyword));
 
+                                if (innerProperty.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample("r\"", ViewCodeSampleType.Comment));
+
                                 if (innerProperty.PropertyType.IsEnum)
                                     codeEntries.Add(new ViewCodeSample($"{innerProperty.PropertyType.Name}.", ViewCodeSampleType.Value));
 
-                                codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}\n", ViewCodeSampleType.Value));
+                                codeEntries.Add(new ViewCodeSample($"{innerProperty.GetValue(val[i])}", innerProperty.PropertyType == typeof(string) 
+                                                                                                            ? ViewCodeSampleType.Comment 
+                                                                                                            : ViewCodeSampleType.Value));
+
+                                if (innerProperty.PropertyType == typeof(string))
+                                    codeEntries.Add(new ViewCodeSample("\"\n", ViewCodeSampleType.Comment));
                             }
 
                             codeEntries.Add(new ViewCodeSample($"arg{num + 1}.{property.Name}.", ViewCodeSampleType.Default));
@@ -97,7 +105,7 @@ public class PythonCodeGenerator : ICodeGenerator
                         codeEntries.Add(new ViewCodeSample($"{property.PropertyType.Name}.", ViewCodeSampleType.Value));
 
                     if (property.PropertyType == typeof(string))
-                        codeEntries.Add(new ViewCodeSample($"\"{value}\"\n", ViewCodeSampleType.Comment));
+                        codeEntries.Add(new ViewCodeSample($"r\"{value}\"\n", ViewCodeSampleType.Comment));
                     else
                         codeEntries.Add(new ViewCodeSample($"{value}\n", ViewCodeSampleType.Value));
                 }

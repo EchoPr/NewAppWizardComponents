@@ -69,7 +69,7 @@ public class XMLCodeGenerator : ICodeGenerator
                                 elementType == typeof(bool) || elementType == typeof(string))
                             {
                                 if (property.PropertyType == typeof(string))
-                                    codeEntries.Add(new ViewCodeSample($"\"{val[i]}\"", ViewCodeSampleType.Comment));
+                                    codeEntries.Add(new ViewCodeSample($"{val[i]}", ViewCodeSampleType.Comment));
                                 else
                                     codeEntries.Add(new ViewCodeSample($"{val[i]}", ViewCodeSampleType.Value));
 
@@ -110,8 +110,9 @@ public class XMLCodeGenerator : ICodeGenerator
                     codeEntries.Add(new ViewCodeSample("\t<", ViewCodeSampleType.Brackets));
                     codeEntries.Add(new ViewCodeSample($"{property.Name}", ViewCodeSampleType.Default));
                     codeEntries.Add(new ViewCodeSample(">", ViewCodeSampleType.Brackets));
+
                     if (property.PropertyType == typeof(string))
-                        codeEntries.Add(new ViewCodeSample($"\"{value}\"", ViewCodeSampleType.Comment));
+                        codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Comment));
                     else
                         codeEntries.Add(new ViewCodeSample($"{value}", ViewCodeSampleType.Value));
                     codeEntries.Add(new ViewCodeSample("</", ViewCodeSampleType.Brackets));
