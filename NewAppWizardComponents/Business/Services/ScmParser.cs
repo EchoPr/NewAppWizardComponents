@@ -75,7 +75,7 @@ public class ScmParser
         }
         catch (Exception ex)
         {
-            throw new IOException($"Failed to read file\nError : {ex.Message}");    
+            Debug.WriteLine($"Failed to read file\nError : {ex.Message}");    
         }
         return lst;
     }
