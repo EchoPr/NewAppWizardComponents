@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Xml.Linq;
 using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
+using Uno.Extensions;
 using Uno.Extensions.Specialized;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.DataTransfer;
@@ -165,7 +166,10 @@ public sealed partial class MainPage : Page
         ICodeGenerator generator = CodeGeneratorFactory.GetGenerator(currentSelectedLanguage);
         var generatedCode = entry.is_snippet
                             ? generator.GenerateApiSnippet(entry, mainPageVM.qformManager.QFormBaseDir)
-                            : generator.GenerateCodeEntry(entry, entryNumber , generationMode);
+                            : generator.GenerateCodeEntry(
+                                entry, 
+                                entryNumber - Convert.ToInt32(_languageSnippets[currentSelectedLanguage] != null), 
+                                generationMode);
 
         var newCodeLines = new TextBlock();
 
@@ -772,12 +776,19 @@ public sealed partial class MainPage : Page
             }
 
             WizardSplitButton.Content = _wizardTitles[selectedLang];
+
+            WizardSplitButton.Visibility = selectedLang == "XML" || selectedLang == "S-expr" ? Visibility.Collapsed : Visibility.Visible;
         }
+
+
     }
 
     private void LanguageSelectionChange(string lang, List<bool>? genModes = null) 
     {
         if (CodeBlocks == null || lang == null) return;
+
+        CodeBlocksBefore.Children.Clear();
+        CodeBlocksAfter.Children.Clear();
 
         if (lang == "XML")
         {
